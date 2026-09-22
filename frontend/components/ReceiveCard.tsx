@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
-import { useConnection } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { SAFE_STORAGE_KEY } from '@/lib/constants';
 import { useEffect, useState } from 'react';
 
 export default function ReceiveCard() {
-  const { address } = useConnection();
+  const { address } = useAccount();
   const [vault, setVault] = useState('');
 
   useEffect(() => {
@@ -24,3 +24,4 @@ export default function ReceiveCard() {
     </div>
   );
 }
+

@@ -1,13 +1,14 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import AppShell from '@/components/AppShell';
-import { useConnection, usePublicClient } from 'wagmi';
+import { useAccount, usePublicClient } from 'wagmi';
+import type { EIP1193Provider } from 'viem';
 import { getSafeDeploymentTransaction } from '@/lib/safe';
 import { SAFE_STORAGE_KEY } from '@/lib/constants';
 
 export default function VaultPage() {
-  const { address, connector } = useConnection();
+  const { address, connector } = useAccount();
   const publicClient = usePublicClient();
   const [vault, setVault] = useState('');
   useEffect(() => {
@@ -17,12 +18,11 @@ export default function VaultPage() {
 
   async function deploy() {
     if (!address || !connector || !publicClient) return setStatus('Connect a wallet first.');
-    setStatus('Building deployment transaction…');
+    setStatus('Building deployment transactionâ€¦');
     try {
-      const provider = await connector.getProvider();
+      const provider = await connector.getProvider() as EIP1193Provider;
       const { safeAddress, deployment } = await getSafeDeploymentTransaction(provider, address);
-      const provider = await connector.getProvider();
-      const hash = await provider.request({
+      const hash = await (provider as any).request({
         method: 'eth_sendTransaction',
         params: [{
           from: address,
@@ -56,3 +56,10 @@ export default function VaultPage() {
     </AppShell>
   );
 }
+
+
+
+
+
+
+

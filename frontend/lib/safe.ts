@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import Safe, { PredictedSafeProps } from '@safe-global/protocol-kit';
-import type { Eip1193Provider } from 'viem';
+import type { EIP1193Provider } from 'viem';
 
-export async function getPredictedSafeAddress(provider: Eip1193Provider, owner: `0x${string}`) {
+export async function getPredictedSafeAddress(provider: any, owner: `0x${string}`) {
   const predictedSafe: PredictedSafeProps = {
     safeAccountConfig: {
       owners: [owner],
@@ -23,7 +23,7 @@ export async function getPredictedSafeAddress(provider: Eip1193Provider, owner: 
   return protocolKit.getAddress();
 }
 
-export async function getSafeDeploymentTransaction(provider: Eip1193Provider, owner: `0x${string}`) {
+export async function getSafeDeploymentTransaction(provider: any, owner: `0x${string}`) {
   const predictedSafe: PredictedSafeProps = {
     safeAccountConfig: {
       owners: [owner],
@@ -45,3 +45,5 @@ export async function getSafeDeploymentTransaction(provider: Eip1193Provider, ow
 
   return { safeAddress, deployment };
 }
+
+

@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+﻿const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
@@ -25,7 +25,7 @@ export const api = {
       body: JSON.stringify({ walletAddress })
     }),
   routePayment: (body: { from: string; to: string; amount: string; token: string }) =>
-    request('/api/payments/route', {
+    request<{ to: string; data: string; value?: string }>('/api/payments/route', {
       method: 'POST',
       body: JSON.stringify(body)
     }),
@@ -41,3 +41,4 @@ export const api = {
   },
   vault: (address: string) => request(`/api/vault/${address}`)
 };
+

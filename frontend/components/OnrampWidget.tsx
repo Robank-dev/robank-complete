@@ -1,17 +1,17 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
-import { useConnection } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { api } from '@/lib/api';
 
 export default function OnrampWidget() {
-  const { address } = useConnection();
+  const { address } = useAccount();
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('');
 
   async function start() {
     if (!address) return setStatus('Connect your wallet first.');
-    setStatus('Preparing on-ramp…');
+    setStatus('Preparing on-rampâ€¦');
     try {
       const result = await api.onramp(address, amount || undefined);
       window.open(result.url, '_blank', 'noopener,noreferrer');
@@ -32,3 +32,4 @@ export default function OnrampWidget() {
     </div>
   );
 }
+
