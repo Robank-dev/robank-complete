@@ -33,6 +33,20 @@ function TokenRow({ token, owner }: { token: Token; owner: `0x${string}` }) {
     chainId: token.chainId,
     query: { enabled: Boolean(token.address) }
   });
+  const symbolRead = useReadContract({
+    address: token.address,
+    abi: ERC20_ABI,
+    functionName: 'symbol',
+    chainId: token.chainId,
+    query: { enabled: Boolean(token.address) }
+  });
+  const nameRead = useReadContract({
+    address: token.address,
+    abi: ERC20_ABI,
+    functionName: 'name',
+    chainId: token.chainId,
+    query: { enabled: Boolean(token.address) }
+  });
   const decimals = useReadContract({
     address: token.address,
     abi: ERC20_ABI,
@@ -42,6 +56,8 @@ function TokenRow({ token, owner }: { token: Token; owner: `0x${string}` }) {
   });
   const raw = native ? nativeBalance.data?.value : tokenBalance.data as bigint | undefined;
   const tokenDecimals = native ? 18 : Number(decimals.data ?? 6);
+  const displaySymbol = native ? token.symbol : String(symbolRead.data ?? (token.symbol || 'TOKEN'));
+  const displayName = native ? token.name : String(nameRead.data ?? (token.name || 'Token'));
   const amount = raw === undefined ? '—' : Number(formatUnits(raw, tokenDecimals)).toLocaleString(undefined, { maximumFractionDigits: 6 });
 
   return (
@@ -50,11 +66,11 @@ function TokenRow({ token, owner }: { token: Token; owner: `0x${string}` }) {
         <img src={token.image} alt="" className="h-full w-full rounded-full object-cover" />
       </div>
       <div className="asset-name">
-        <b>{token.symbol}</b>
-        <span><img src={chainImage} alt="" className="asset-chain-icon" />{token.name} · {token.chain}</span>
+        <b>{displaySymbol}</b>
+        <span><img src={chainImage} alt="" className="asset-chain-icon" />{displayName} · {token.chain}</span>
       </div>
       <div className="asset-value">
-        <b>{amount} {token.symbol}</b>
+        <b>{amount} {displaySymbol}</b>
         <span>{token.address ? 'ERC-20' : 'Native asset'}</span>
       </div>
     </div>
@@ -65,7 +81,7 @@ export default function AssetList() {
   const { address } = useAccount();
   const [custom, setCustom] = useState<Token[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ chainId: String(BASE_MAINNET_CHAIN_ID), address: '', symbol: '', name: '' });
+  const [form, setForm] = useState({ chainId: String(BASE_MAINNET_CHAIN_ID), address: '' });
 
   useEffect(() => {
     if (!address) return;
@@ -81,22 +97,23 @@ export default function AssetList() {
   const visibleTokens = tokens.filter((token) => token.chainId === BASE_MAINNET_CHAIN_ID || token.chainId === ROBINHOOD_CHAIN_ID);
 
   const addToken = () => {
-    if (!address || !isAddress(form.address) || !form.symbol.trim() || !form.name.trim()) return;
+    if (!address || !isAddress(form.address)) return;
     const chainId = Number(form.chainId);
     if (![BASE_MAINNET_CHAIN_ID, ROBINHOOD_CHAIN_ID].includes(chainId)) return;
     const token: Token = {
       id: `${chainId}-${form.address.toLowerCase()}`,
       chainId,
       chain: chainId === BASE_MAINNET_CHAIN_ID ? 'Base' : 'Robinhood Chain',
-      symbol: form.symbol.trim().toUpperCase(),
-      name: form.name.trim(),
+      symbol: '',
+      name: '',
       address: form.address as `0x${string}`,
-      image: '/robank-mark.png', chainImage: chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg'
+      image: chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg',
+      chainImage: chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg'
     };
     const next = [...custom.filter((item) => item.id !== token.id), token];
     setCustom(next);
     localStorage.setItem(`robank.tokens.${address.toLowerCase()}`, JSON.stringify(next));
-    setForm({ chainId: String(BASE_MAINNET_CHAIN_ID), address: '', symbol: '', name: '' });
+    setForm({ chainId: String(BASE_MAINNET_CHAIN_ID), address: '' });
     setOpen(false);
   };
 
@@ -107,19 +124,24 @@ export default function AssetList() {
       <div className="asset-list">
         {visibleTokens.map((token) => <TokenRow key={token.id} token={token} owner={address} />)}
       </div>
-      <button type="button" onClick={() => setOpen((value) => !value)} className="mt-4 text-xs text-white/55 hover:text-white">
+      <button type="button" onClick={() => setOpen((value) => !value)} className="asset-add-trigger">
         {open ? 'Cancel' : '+ Add token'}
       </button>
       {open && (
-        <div className="mt-4 grid gap-2 rounded-2xl border border-ro-line bg-black/20 p-4 sm:grid-cols-2">
-          <select value={form.chainId} onChange={(e) => setForm({ ...form, chainId: e.target.value })} className="rounded-xl border border-ro-line bg-black px-3 py-2 text-xs text-white">
-            <option value={BASE_MAINNET_CHAIN_ID}>Base</option>
-            <option value={ROBINHOOD_CHAIN_ID}>Robinhood Chain</option>
-          </select>
-          <input value={form.symbol} onChange={(e) => setForm({ ...form, symbol: e.target.value })} placeholder="Ticker (e.g. WETH)" className="rounded-xl border border-ro-line bg-black px-3 py-2 text-xs text-white placeholder:text-white/25" />
-          <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Token name" className="rounded-xl border border-ro-line bg-black px-3 py-2 text-xs text-white placeholder:text-white/25" />
-          <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="0x token contract" className="rounded-xl border border-ro-line bg-black px-3 py-2 text-xs text-white placeholder:text-white/25 sm:col-span-2" />
-          <button type="button" onClick={addToken} className="rounded-xl bg-white px-3 py-2 text-xs font-semibold text-black sm:col-span-2">Add token</button>
+        <div className="asset-add-form">
+          <div className="asset-add-field">
+            <label>NETWORK</label>
+            <select value={form.chainId} onChange={(e) => setForm({ ...form, chainId: e.target.value })}>
+              <option value={BASE_MAINNET_CHAIN_ID}>Base</option>
+              <option value={ROBINHOOD_CHAIN_ID}>Robinhood Chain</option>
+            </select>
+          </div>
+          <div className="asset-add-field">
+            <label>CONTRACT ADDRESS</label>
+            <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="0x…" />
+          </div>
+          <button type="button" onClick={addToken} className="asset-add-submit">Add token</button>
+          <p className="asset-add-hint">Token name, ticker and balance are read from the contract automatically.</p>
         </div>
       )}
     </div>

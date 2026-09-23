@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
-import WalletConnect from './WalletConnect';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 
 const groups = [
   { label: 'ROBANK', links: [['/dashboard', 'Overview', 'grid'], ['/agent', 'AI Agent', 'spark']] },
@@ -35,8 +34,11 @@ function Icon({ name }: { name: string }) {
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { ready, authenticated, user } = usePrivy();
+  const { ready, authenticated, user, logout } = usePrivy();
+  const { wallets } = useWallets();
   const [displayName, setDisplayName] = useState('');
+  const [accountOpen, setAccountOpen] = useState(false);
+  const wallet = wallets.find((item) => item.walletClientType === 'privy');
 
   useEffect(() => {
     const key = user?.id ? `robank.profile.${user.id}` : '';
@@ -58,9 +60,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="ro-app-shell">
       <header className="ro-app-topbar">
-        <Link href="/" className="ro-app-brand"><span className="ro-app-mark"><img src="/robank-mark.png" alt="" /></span><span>ROBANK</span></Link>
-        <div className="ro-app-search"><span>Search assets, markets, or actions</span><kbd>⌘ K</kbd></div>
-        <div className="ro-app-account"><span className="ro-online" /><span className="ro-display-name">{name}</span><WalletConnect /></div>
+        <div className="ro-system-brand"><span className="ro-system-orbit"><i /><b /><em /></span><span><b>ROBANK SYSTEM</b><small>CAPITAL OPERATING LAYER</small></span></div>
+        <div className="ro-system-marquee" aria-label="ROBANK network status">
+          <div><span>LIVE MAINNET</span><i /> BASE <i /> ROBINHOOD CHAIN <i /> AI AGENT <i /> CAPITAL RAILS <i /> LIVE MAINNET <i /> BASE <i /> ROBINHOOD CHAIN</div>
+        </div>
+        <div className="ro-system-status"><span className="ro-online" /> SYSTEM ONLINE</div>
       </header>
       <div className="ro-app-body">
         <aside className="ro-app-sidebar">
@@ -68,7 +72,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <div className="ro-nav-label">{group.label}</div>
             {group.links.map(([href, label, icon]) => <Link key={href} href={href} className={pathname === href ? 'active' : ''}><Icon name={icon} /><span>{label}</span></Link>)}
           </div>)}
-          <div className="ro-sidebar-footer"><div><span className="ro-live-dot" /> MAINNET</div><span>Base · Robinhood Chain</span></div>
+          <div className="ro-sidebar-account">
+            <button type="button" className="ro-sidebar-account-trigger" onClick={() => setAccountOpen((value) => !value)}>
+              <span className="ro-account-avatar"><span className="ro-live-dot" /></span>
+              <span className="ro-account-copy"><b>{name}</b><small>{user?.email?.address ?? 'ROBANK user'}</small></span>
+              <span className="ro-account-chevron">{accountOpen ? '⌃' : '⌄'}</span>
+            </button>
+            {accountOpen && <div className="ro-sidebar-account-menu">
+              <div><span>WALLET</span><b>{wallet?.address ? wallet.address.slice(0, 6) + '…' + wallet.address.slice(-4) : 'Preparing…'}</b></div>
+              <button type="button" onClick={() => logout()}>Sign out <span>→</span></button>
+            </div>}
+          </div>
         </aside>
         <main className="ro-app-main">{children}</main>
       </div>
