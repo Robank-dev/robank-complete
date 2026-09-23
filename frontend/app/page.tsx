@@ -27,7 +27,7 @@ export default function Home() {
     <main className="site-shell">
       <nav className="top-nav">
         <Link href="/" className="brand"><span className="brand-mark"><img src="/robank-mark.png" alt="" /></span><span>ROBANK</span></Link>
-        <div className={`nav-links ${menu ? "open" : ""}`}><a href="#product">Product</a><a href="#install">Skill</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a><a href="#agent">Agent</a></div>
+        <div className={`nav-links ${menu ? "open" : ""}`}><a href="#product">Product</a><a href="/cli">CLI Install</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a><a href="#agent">Agent</a></div>
         <div className="nav-actions"><Link href="/login" className="button button-small">App</Link></div>
         <button className="menu-button" onClick={() => setMenu(v => !v)} aria-label={menu ? "Close menu" : "Open menu"}>{menu ? "×" : "☰"}</button>
       </nav>
@@ -208,61 +208,7 @@ export default function Home() {
         </div>
       </section>
 
-            <section id="install" className="section install-section">
-        <div className="install-header">
-          <div>
-            <div className="section-kicker">ROBANK AGENT SKILL</div>
-            <h2>Install the Skill.<br /><em>Give your agent ROBANK context.</em></h2>
-            <p>Install the ROBANK Skill to give compatible agents the current operating rules and references for account state, assets, payments, borrowing, cards, company, jobs, networks, security, x402, APIs and CLI workflows.</p>
-          </div>
-          <a className="install-github-link" href="https://github.com/Robank-dev/robank-skill" target="_blank" rel="noreferrer">VIEW ON GITHUB <span>→</span></a>
-        </div>
-
-        <div className="install-terminal">
-          <div className="install-terminal-head">
-            <div className="install-dots"><i /><i /><i /></div>
-            <span>~ shell</span>
-            <button type="button" onClick={() => navigator.clipboard?.writeText('npx skills add Robank-dev/robank-skill')}>COPY</button>
-          </div>
-          <div className="install-command"><b>$</b><span>npx skills add</span><strong>Robank-dev/robank-skill</strong></div>
-          <div className="install-terminal-foot">
-            <span>ROBANK SKILL</span>
-            <span>AGENT-FIRST FINANCIAL CONTEXT</span>
-            <span>WINDOWS / LINUX / MACOS</span>
-          </div>
-        </div>
-
-        <div className="install-grid">
-          <article className="install-card">
-            <span className="install-card-kicker">01 / AGENT</span>
-            <h3>Built for financial agents.</h3>
-            <p>Structured context for account state, assets, payments, borrowing, company, jobs, policies, networks, security and execution concepts.</p>
-            <a href="/docs#agent">READ AGENT DOCS <span>→</span></a>
-          </article>
-
-          <article className="install-card">
-            <span className="install-card-kicker">02 / SKILL</span>
-            <h3>One install. One reference layer.</h3>
-            <p>The package includes the ROBANK Skill together with reference material covering the system's core financial concepts.</p>
-            <a href="https://github.com/Robank-dev/robank-skill" target="_blank" rel="noreferrer">VIEW REPOSITORY <span>→</span></a>
-          </article>
-
-          <article className="install-card">
-            <span className="install-card-kicker">03 / CAPABILITIES</span>
-            <h3>Payments, assets, jobs &amp; more.</h3>
-            <p>Explore the current ROBANK model across payments, assets, borrowing, cards, company, jobs, markets, news, RWA, networks, security, APIs and machine payments.</p>
-            <a href="/docs">EXPLORE DOCS <span>→</span></a>
-          </article>
-
-          <article className="install-card">
-            <span className="install-card-kicker">04 / DEVELOPERS</span>
-            <h3>App, Skill, CLI &amp; API.</h3>
-            <p>The same operating model is designed to work across the web app, ROBANK Skill, terminal and API instead of locking the agent to one interface.</p>
-            <a href="/docs#developer">DEVELOPER DOCS <span>→</span></a>
-          </article>
-        </div>
-      </section>
-      <section className="ticker"><div className="ticker-track"><div className="ticker-set"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div><div className="ticker-set" aria-hidden="true"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div></div></section>
+            <section className="ticker"><div className="ticker-track"><div className="ticker-set"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div><div className="ticker-set" aria-hidden="true"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div></div></section>
 
       <section id="product" className="section product-section">
         <div className="section-intro"><div className="section-kicker">THE PRODUCT</div><h2>Financial context,<br /><em>ready to act.</em></h2><p>ROBANK brings account state, assets, payments and financial workflows into one interface — then exposes the same operating model to agents.</p></div>

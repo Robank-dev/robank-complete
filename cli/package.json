@@ -9,7 +9,7 @@
   "files": [
     "bin",
     "src",
-    "README.md"
+    "skill"
   ],
   "scripts": {
     "start": "node ./bin/robank.js",
