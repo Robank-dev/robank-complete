@@ -225,15 +225,37 @@ function Visual({ kind }: { kind: string }) {
   }
 
   if (kind === 'receive') {
+    const qrOn = (r: number, c: number) => {
+      const finder = (x: number, y: number) =>
+        ((r >= y && r < y + 7 && c >= x && c < x + 7) &&
+          (r === y || r === y + 6 || c === x || c === x + 6 ||
+            (r >= y + 2 && r <= y + 4 && c >= x + 2 && c <= x + 4)));
+      if (finder(0, 0) || finder(14, 0) || finder(0, 14)) return true;
+      return ((r * 13 + c * 7 + r * c) % 11) < 4;
+    };
     return (
       <div className="hw-visual">
         <div className="hw-receive">
-          <div className="hw-row hw-muted"><span>RECEIVE</span><span>USDC</span></div>
-          <div className="hw-qr">
-            {Array.from({length: 49}).map((_, i) => <i key={i} className={(i * 17 + 3) % 7 < 3 ? 'on' : ''} />)}
+          <div className="hw-row hw-muted"><span>PAYMENT REQUEST</span><span>USDC</span></div>
+          <div className="hw-receive-main">
+            <div className="hw-qr-wrap">
+              <div className="hw-qr">
+                {Array.from({length: 441}).map((_, i) => {
+                  const r = Math.floor(i / 21); const c = i % 21;
+                  return <i key={i} className={qrOn(r, c) ? 'on' : ''} />;
+                })}
+              </div>
+              <span className="hw-scan-label">SCAN TO PAY</span>
+            </div>
+            <div className="hw-receive-detail">
+              <small>RECEIVE ADDRESS</small>
+              <strong>0x7A91...F21C</strong>
+              <span>Robinhood Chain · USDC</span>
+              <div className="hw-receive-amount"><small>REQUESTED</small><b>250.00 USDC</b></div>
+            </div>
           </div>
-          <div className="hw-address">0x7A91...F21C <b>Copy</b></div>
-          <div className="hw-incoming"><span>Incoming payment</span><strong>+250.00 USDC</strong></div>
+          <div className="hw-address"><span>0x7A91...F21C</span><b>Copy address</b></div>
+          <div className="hw-incoming"><span>Payment request ready</span><strong>+250.00 USDC</strong></div>
         </div>
       </div>
     );
@@ -509,7 +531,7 @@ export default function HowItWorksPage() {
         .hw-message{margin:28px 0 15px;font-size:20px;letter-spacing:-.025em}.hw-message strong{font-weight:600}
         .hw-preview{display:grid;gap:0;border:1px solid rgba(255,255,255,.07);border-radius:11px;overflow:hidden}.hw-preview span{display:flex;justify-content:space-between;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.055);color:#666d76;font-size:10px}.hw-preview span:last-child{border-bottom:0}.hw-preview b{color:#c7cbd1;font-weight:450}
         .hw-success{margin-top:15px;color:#d0d4d9;font:10px ui-monospace}
-        .hw-qr{width:170px;height:170px;margin:32px auto 20px;display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:8px;background:#f2f3f4}.hw-qr i{background:#fff}.hw-qr i.on{background:#101214}.hw-address{display:flex;justify-content:space-between;padding:12px 14px;border:1px solid rgba(255,255,255,.08);border-radius:9px;font:10px ui-monospace;color:#737983}.hw-address b{color:#d1d4d8;font-weight:400}
+        .hw-receive-main{display:grid;grid-template-columns:230px 1fr;align-items:center;gap:38px;margin:30px 0 24px}.hw-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:11px}.hw-qr{width:188px;height:188px;display:grid;grid-template-columns:repeat(21,1fr);grid-template-rows:repeat(21,1fr);gap:0;padding:10px;background:#f2f3f4;border-radius:5px;box-shadow:0 18px 45px rgba(0,0,0,.28)}.hw-qr i{background:#f2f3f4}.hw-qr i.on{background:#101214}.hw-scan-label{font:8px ui-monospace;letter-spacing:.18em;color:#666c75}.hw-receive-detail{display:flex;flex-direction:column;gap:8px}.hw-receive-detail>small,.hw-receive-amount small{font:8px ui-monospace;letter-spacing:.14em;color:#626871}.hw-receive-detail>strong{font:26px ui-monospace;letter-spacing:-.04em;color:#eef0f2}.hw-receive-detail>span{font-size:11px;color:#747a83}.hw-receive-amount{margin-top:18px;padding:15px 16px;border:1px solid rgba(255,255,255,.08);border-radius:11px;display:flex;flex-direction:column;gap:7px;background:rgba(255,255,255,.018)}.hw-receive-amount b{font-size:22px;font-weight:500;letter-spacing:-.03em}.hw-address{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid rgba(255,255,255,.08);border-radius:9px;font:10px ui-monospace;color:#737983}.hw-address b{color:#d1d4d8;font-weight:400}.hw-address span{overflow:hidden;text-overflow:ellipsis}.hw-incoming{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding:14px 15px;border:1px solid rgba(255,255,255,.06);border-radius:10px;color:#747a83;font-size:10px}.hw-incoming strong{color:#e1e4e7;font:500 12px ui-monospace}
         .hw-token-box{margin-top:15px;border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:17px;display:flex;justify-content:space-between;align-items:center}.hw-token-box span{color:#686e77;font:9px ui-monospace}.hw-token-box strong{font-size:22px;letter-spacing:-.03em}.hw-swap-icon{text-align:center;font-size:23px;color:#858b94;margin:-3px 0}
         .hw-agent-head{display:flex;align-items:center;gap:10px}.hw-avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#f0f1f2;color:#08090b;font-weight:700}.hw-agent-head div{display:flex;flex-direction:column;gap:3px}.hw-agent-head small{color:#6a7078;font-size:9px}.hw-agent-head .hw-online{margin-left:auto}
         .hw-command,.hw-agent-reply{margin-top:26px;padding:15px 16px;border:1px solid rgba(255,255,255,.08);border-radius:11px;font-size:12px}.hw-agent-reply{margin-top:8px;color:#858b94;line-height:1.7}
@@ -524,7 +546,7 @@ export default function HowItWorksPage() {
         .hw-end{border-top:1px solid rgba(255,255,255,.08);padding:34px 5vw 70px;display:flex;justify-content:space-between;color:#656b74;font:10px ui-monospace;letter-spacing:.08em}.hw-end b{color:#b6bbc2;font-weight:400}
         @keyframes hwFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes hwPulse{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}@keyframes hwCardFloat{0%,100%{transform:rotateX(12deg) rotateY(-16deg) rotateZ(4deg) translateY(0)}50%{transform:rotateX(12deg) rotateY(-16deg) rotateZ(4deg) translateY(-8px)}}@keyframes hwTravel{0%{transform:translateX(-8px);opacity:0}25%{opacity:1}75%{opacity:1}100%{transform:translateX(8px);opacity:0}}
         @media(max-width:1000px){.hw-step{grid-template-columns:1fr;gap:35px;min-height:0;padding:70px 0}.hw-copy{padding-right:40px}.hw-stage{padding-left:0}.hw-progress-line{left:24px}.hw-nav-links{display:none}.hw-header{padding-top:95px}.hw-header h1{font-size:60px}}
-        @media(max-width:600px){.hw-header h1{font-size:48px}.hw-step h2{font-size:40px}.hw-step-button{padding-left:36px}.hw-visual{min-height:350px}.hw-window-body{padding:30px}.hw-card{width:82%}.hw-flow{grid-template-columns:1fr;gap:10px}.hw-flow-arrow{transform:rotate(90deg);justify-self:center}.hw-a2a{grid-template-columns:1fr}.hw-route{display:none}.hw-a2a-footer{grid-column:1}.hw-rwa-holdings{grid-template-columns:1fr}.hw-end{flex-direction:column;gap:12px}}
+        @media(max-width:600px){.hw-header h1{font-size:48px}.hw-step h2{font-size:40px}.hw-step-button{padding-left:36px}.hw-visual{min-height:350px}.hw-window-body{padding:30px}.hw-card{width:82%}.hw-flow{grid-template-columns:1fr;gap:10px}.hw-flow-arrow{transform:rotate(90deg);justify-self:center}.hw-a2a{grid-template-columns:1fr}.hw-route{display:none}.hw-a2a-footer{grid-column:1}.hw-rwa-holdings{grid-template-columns:1fr}.hw-receive-main{grid-template-columns:1fr;gap:24px}.hw-qr{width:156px;height:156px}.hw-receive-detail{align-items:center;text-align:center}.hw-receive-amount{width:100%;text-align:left}.hw-end{flex-direction:column;gap:12px}}
       `}</style>
     </main>
   );
