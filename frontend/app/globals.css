@@ -8369,6 +8369,52 @@
 @keyframes surfaceOrbitC{to{transform:translate(-50%,-50%) rotateX(14deg) rotateY(427deg)}}
 @media(prefers-reduced-motion:reduce){.workspace-visual,.agent-visual-card,.surfaces-visual,.workspace-panel,.workspace-chart i,.workspace-orbit,.agent-orbit,.surface-ring{animation:none!important}}
 
+/* AGENT SECTION V8 — full-bleed simulations, no nested stage cards */
+.agent-simulation-grid{
+  max-width:1380px!important;
+  gap:70px!important;
+  margin:0 auto!important;
+}
+.agent-simulation-grid .cli-stage,
+.agent-simulation-grid .ai-stage{
+  height:610px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  overflow:visible!important;
+}
+.agent-simulation-grid .cli-stage:before,
+.agent-simulation-grid .ai-stage:before{
+  width:520px!important;
+  height:360px!important;
+  opacity:.55!important;
+}
+.agent-simulation-grid .cli-window{
+  width:96%!important;
+  max-width:650px!important;
+  height:505px!important;
+  border-radius:18px!important;
+  transform:translate(-50%,-50%) rotateY(6deg) rotateX(3deg) translateZ(80px)!important;
+}
+.agent-simulation-grid .cli-body{
+  height:395px!important;
+  padding:25px 24px!important;
+  font-size:10px!important;
+}
+.agent-simulation-grid .cli-header{height:48px!important;padding:0 17px!important}
+.agent-simulation-grid .cli-footer{height:38px!important}
+.agent-simulation-grid .ai-window{
+  width:96%!important;
+  max-width:650px!important;
+  height:505px!important;
+  border-radius:18px!important;
+  transform:translate(-50%,-50%) rotateY(-6deg) rotateX(3deg) translateZ(80px)!important;
+}
+.agent-simulation-grid .ai-feed{height:395px!important;padding:24px!important}
+.agent-simulation-grid .ai-window-header{height:60px!important;padding:0 22px!important}
+.agent-simulation-grid .ai-input{height:48px!important;margin:0 22px 20px!important}
+.agent-simulation-grid .cli-orbit,.agent-simulation-grid .ai-orbit{opacity:.75}
+
 /* PRODUCT VISUALS V7 — cleaner fintech cards + real ROBANK mark */
 .product-section .feature-card{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.008));}
 .workspace-panel-head{display:flex;justify-content:space-between;align-items:center;color:#7c838c;font:7px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em}.workspace-panel-head em{font-style:normal;color:#5d646d}.workspace-back strong{margin-top:14px;font:500 17px ui-monospace,SFMono-Regular,Menlo,monospace;color:#f4f5f7}.workspace-mini-bars{display:flex;align-items:flex-end;gap:5px;height:25px;margin-top:10px}.workspace-mini-bars i{display:block;width:25px;border-radius:3px 3px 1px 1px;background:linear-gradient(to top,rgba(255,255,255,.08),rgba(255,255,255,.58));animation:bars 2.8s ease-in-out infinite}.workspace-mini-bars i:nth-child(1){height:10px}.workspace-mini-bars i:nth-child(2){height:17px;animation-delay:-.5s}.workspace-mini-bars i:nth-child(3){height:13px;animation-delay:-1s}.workspace-mini-bars i:nth-child(4){height:22px;animation-delay:-1.5s}
@@ -8382,3 +8428,57 @@
 .feature-card:hover .workspace-main,.feature-card:hover .terminal-card,.feature-card:hover .surface-core{border-color:rgba(255,255,255,.28);box-shadow:0 34px 80px rgba(0,0,0,.72),0 0 60px rgba(255,255,255,.09),inset 0 1px rgba(255,255,255,.12)}
 @media(max-width:900px){.terminal-card{width:285px}.workspace-side{right:8px}.surface-core img{width:50px;height:50px}}
 @media(max-width:560px){.terminal-card{width:270px;transform:translateX(-50%) scale(.92) rotateX(5deg) rotateY(-5deg)}.workspace-side{display:none}}
+
+/* PRODUCT VISUALS V8 — sharper, larger showcase frames */
+.product-section .feature-image-wrap{
+  height:300px!important;
+  min-height:300px!important;
+  max-height:300px!important;
+  background:
+    radial-gradient(circle at 50% 45%,rgba(255,255,255,.07),transparent 52%),
+    linear-gradient(145deg,#090b0d,#040506)!important;
+}
+.product-section .workspace-visual,
+.product-section .agent-visual-card,
+.product-section .surfaces-visual{
+  transform:scale(1.12)!important;
+}
+.product-section .workspace-main{width:255px;height:162px}
+.product-section .workspace-back{width:218px;height:122px}
+.product-section .workspace-side{width:160px;height:76px}
+.product-section .terminal-card{width:330px;height:188px}
+.product-section .terminal-card-body{padding:13px 15px}
+.product-section .terminal-line{font-size:8px}
+.product-section .terminal-result{font-size:7.5px;margin-top:9px}
+.product-section .terminal-action{font-size:7px}
+.product-section .surface-core{width:96px;height:96px}
+.product-section .surface-core img{width:60px;height:60px}
+.product-section .surface-pill{right:18px;top:27px}
+@media(max-width:900px){
+  .product-section .feature-image-wrap{height:320px!important;min-height:320px!important;max-height:320px!important}
+  .product-section .workspace-visual,.product-section .agent-visual-card,.product-section .surfaces-visual{transform:scale(1.04)!important}
+}
+@media(max-width:560px){
+  .product-section .feature-image-wrap{height:280px!important;min-height:280px!important;max-height:280px!important}
+  .product-section .workspace-visual,.product-section .agent-visual-card,.product-section .surfaces-visual{transform:scale(.88)!important}
+}
+
+/* FINAL AGENT SHOWCASE — remove the two outer visual boxes */
+.agent-simulation-grid .cli-stage,
+.agent-simulation-grid .ai-stage{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.agent-simulation-grid .cli-window,
+.agent-simulation-grid .ai-window{
+  box-shadow:0 55px 120px rgba(0,0,0,.78),0 0 70px rgba(255,255,255,.035),inset 0 1px rgba(255,255,255,.09)!important;
+}
+@media(max-width:900px){
+  .agent-simulation-grid{gap:30px!important}
+  .agent-simulation-grid .cli-stage,.agent-simulation-grid .ai-stage{height:570px!important}
+}
+@media(max-width:600px){
+  .agent-simulation-grid .cli-stage,.agent-simulation-grid .ai-stage{height:480px!important}
+  .agent-simulation-grid .cli-window,.agent-simulation-grid .ai-window{width:98%!important}
+}

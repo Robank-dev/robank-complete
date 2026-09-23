@@ -255,10 +255,10 @@ export default function Home() {
 
         <div className="agent-intro">
           <div className="section-kicker">ROBANK AI</div>
-          <h2>Tell ROBANK what you need.<br /><em>Then let it work.</em></h2>
+          <h2>Give ROBANK the intent.<br /><em>Let it handle the work.</em></h2>
           <p>
-            Use ROBANK naturally from the app or from your terminal.
-            Ask for a payment, run an action, install a skill, or manage your wallet.
+            Work with assets, payments and financial operations from the App or CLI.
+            Ask for an action, prepare a tokenized-asset workflow, or manage your account — with the same operating context.
           </p>
         </div>
 
@@ -290,81 +290,66 @@ export default function Home() {
 
                 <div className="terminal-command">
                   <span className="terminal-prompt">ubuntu@robank:~$</span>
-                  <strong>robank send --to alice.robinhood --amount 20 --token USDC</strong>
+                  <strong>robank assets prepare --symbol xAAPL --amount 1000</strong>
                   <i className="terminal-cursor" />
                 </div>
 
                 <div className="terminal-output terminal-output-1">
-                  <span className="terminal-arrow">?</span>
-                  <span>loading wallet...</span>
+                  <span className="terminal-arrow">›</span>
+                  <span>resolving tokenized asset...</span>
                 </div>
 
                 <div className="terminal-output terminal-output-2">
-                  <span className="terminal-success">?</span>
-                  <span>wallet connected</span>
+                  <span className="terminal-success">✓</span>
+                  <span>asset found: <b>xAAPL</b></span>
                 </div>
 
                 <div className="terminal-output terminal-output-3">
-                  <span className="terminal-success">?</span>
-                  <span>balance: <b>12,840.52 USDC</b></span>
+                  <span className="terminal-success">✓</span>
+                  <span>market context <b>loaded</b></span>
                 </div>
 
                 <div className="terminal-output terminal-output-4">
-                  <span className="terminal-arrow">?</span>
-                  <span>resolving recipient...</span>
-                </div>
-
-                <div className="terminal-output terminal-output-5">
-                  <span className="terminal-success">?</span>
-                  <span>recipient: <b>alice.robinhood</b></span>
-                </div>
-
-                <div className="terminal-output terminal-output-6">
-                  <span className="terminal-arrow">?</span>
-                  <span>building transaction...</span>
+                  <span className="terminal-arrow">›</span>
+                  <span>preparing allocation...</span>
                 </div>
 
                 <div className="terminal-detail terminal-detail-1">
-                  <span>network</span>
-                  <b>Robinhood Chain</b>
+                  <span>asset</span>
+                  <b>xAAPL · tokenized stock</b>
                 </div>
 
                 <div className="terminal-detail terminal-detail-2">
                   <span>amount</span>
-                  <b>20 USDC</b>
+                  <b>$1,000 USDG</b>
                 </div>
 
                 <div className="terminal-detail terminal-detail-3">
-                  <span>recipient</span>
-                  <b>alice.robinhood</b>
+                  <span>network</span>
+                  <b>Robinhood Chain</b>
                 </div>
 
-                <div className="terminal-output terminal-output-7">
-                  <span className="terminal-arrow">?</span>
-                  <span>signing transaction...</span>
+                <div className="terminal-output terminal-output-5">
+                  <span className="terminal-success">✓</span>
+                  <span>policy check <b>passed</b></span>
                 </div>
 
-                <div className="terminal-output terminal-output-8">
-                  <span className="terminal-arrow">?</span>
-                  <span>broadcasting...</span>
+                <div className="terminal-output terminal-output-6">
+                  <span className="terminal-arrow">›</span>
+                  <span>transaction <b>prepared</b></span>
                 </div>
 
                 <div className="terminal-success-box">
                   <div>
-                    <span>?</span>
-                    <strong>transaction confirmed</strong>
+                    <span>✓</span>
+                    <strong>READY FOR REVIEW</strong>
                   </div>
-                  <small>status: success</small>
-                </div>
-
-                <div className="terminal-hash">
-                  <span>tx:</span>
-                  <b>0x7f91c8...a821</b>
+                  <small>xAAPL allocation · $1,000 · Robinhood Chain</small>
                 </div>
 
                 <div className="terminal-next">
                   <span className="terminal-prompt">ubuntu@robank:~$</span>
-                  <strong>robank skills</strong>
+                  <strong>robank status</strong>
                   <i className="terminal-cursor" />
                 </div>
 
@@ -399,7 +384,7 @@ export default function Home() {
 
                 <div className="ai-step ai-user-step">
                   <small>YOU</small>
-                  <div>Send $20 to Alice</div>
+                  <div>Prepare a $1,000 xAAPL allocation</div>
                 </div>
 
                 <div className="ai-step ai-thinking-step">
@@ -410,21 +395,26 @@ export default function Home() {
 
                 <div className="ai-step ai-response-step">
                   <small>ROBANK AI</small>
-                  <strong>Got it. I'll prepare the payment.</strong>
-                  <p>Checking recipient and available balance.</p>
+                  <strong>Got it. I'll prepare the allocation.</strong>
+                  <p>Checking asset context, available balance and execution rules.</p>
                 </div>
 
                 <div className="ai-step ai-transaction-step">
                   <div className="ai-tx-head">
-                    <span>PAYMENT READY</span>
-                    <b>USDC</b>
+                    <span>ASSET ACTION READY</span>
+                    <b>xAAPL</b>
                   </div>
 
-                  <div className="ai-tx-amount">$20.00</div>
+                  <div className="ai-tx-amount">$1,000</div>
 
                   <div className="ai-tx-row">
-                    <span>To</span>
-                    <b>Alice</b>
+                    <span>Asset</span>
+                    <b>xAAPL</b>
+                  </div>
+
+                  <div className="ai-tx-row">
+                    <span>Funding</span>
+                    <b>USDG</b>
                   </div>
 
                   <div className="ai-tx-row">
@@ -432,14 +422,14 @@ export default function Home() {
                     <b>Robinhood Chain</b>
                   </div>
 
-                  <button>Confirm &amp; send <span>?</span></button>
+                  <button>Review action <span>→</span></button>
                 </div>
 
                 <div className="ai-step ai-success-step">
                   <span>?</span>
                   <div>
-                    <strong>Payment complete</strong>
-                    <small>$20.00 USDC sent to Alice</small>
+                    <strong>Action prepared</strong>
+                    <small>xAAPL · $1,000 USDG · ready for review</small>
                   </div>
                 </div>
 
