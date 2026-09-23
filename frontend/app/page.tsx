@@ -27,9 +27,9 @@ export default function Home() {
     <main className="site-shell">
       <nav className="top-nav">
         <Link href="/" className="brand"><span className="brand-mark"><img src="/robank-mark.png" alt="" /></span><span>ROBANK</span></Link>
-        <div className={`nav-links ${menu ? "open" : ""}`}><a href="https://x.com/robank_co" target="_blank" rel="noreferrer">X</a><a href="#install">Install Skill</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a><a href="#agent">AI</a></div>
+        <div className={`nav-links ${menu ? "open" : ""}`}><a href="#product">Product</a><a href="#install">Skill</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a><a href="#agent">Agent</a></div>
         <div className="nav-actions"><Link href="/login" className="button button-small">App</Link></div>
-        <button className="menu-button" onClick={() => setMenu(v => !v)} aria-label="Open menu">â˜°</button>
+        <button className="menu-button" onClick={() => setMenu(v => !v)} aria-label={menu ? "Close menu" : "Open menu"}>{menu ? "×" : "☰"}</button>
       </nav>
 
       <section className="hero-section">
@@ -42,16 +42,16 @@ export default function Home() {
         <div className="hero-copy">
           <div className="eyebrow hero-reveal">
             <span className="pulse-dot" />
-            A new way to move money
+            THE FINANCIAL OPERATING LAYER FOR AGENTS
           </div>
 
-          <h1 className="hero-title hero-reveal">Turn your agent<br /><span className="hero-word-wrap"><span className="outline-word">into a</span> financial operator.</span></h1>
+          <h1 className="hero-title hero-reveal">Give your agent<br /><span className="hero-word-wrap"><span className="outline-word">financial</span> capability.</span></h1>
 
-          <p className="hero-lead hero-reveal">Connect your agent to wallets, cards, payments and on-chain actions — then let it move, pay, and get things done wherever it runs.</p>
+          <p className="hero-lead hero-reveal">ROBANK connects your account, assets, payments, cards and financial workflows — giving agents the context and rails to act within your rules.</p>
 
           <div className="hero-actions hero-reveal">
-            <Link href="/dashboard" className="button hero-main-button">
-              Open ROBANK <span>→</span>
+            <Link href="/login" className="button hero-main-button">
+              Enter ROBANK <span>→</span>
             </Link>
           </div>
         </div>
