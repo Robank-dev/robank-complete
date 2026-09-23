@@ -9124,3 +9124,85 @@
 .card-empty-activity{margin-top:20px;padding:42px 0;border-top:1px solid rgba(255,255,255,.06);color:#626a74;font-size:11px}
 @media(max-width:900px){.money-mode-grid{grid-template-columns:1fr 1fr}.card-hero-grid,.card-lower-grid{grid-template-columns:1fr}.card-page-head{align-items:flex-start;flex-direction:column}.ro-virtual-card{margin-top:32px}}
 @media(max-width:560px){.money-mode-grid{grid-template-columns:1fr}.money-workspace{padding:16px}.card-showcase,.card-status-panel,.card-info-panel,.card-activity-panel{padding:18px}.ro-card-number{font-size:11px}.ro-app-topbar{height:84px!important}.ro-system-brand-logo img{width:30px!important;height:30px!important}.ro-system-brand-logo span{font-size:14px!important}}
+/* V10 — final app header */
+.ro-app-topbar{height:118px!important;grid-template-columns:220px minmax(0,1fr)!important;gap:24px!important;padding:12px 30px!important}
+.ro-system-brand-logo{display:flex!important;align-items:center!important;gap:13px!important;min-width:0}
+.ro-system-brand-logo:before{display:none!important}
+.ro-system-brand-logo img{width:48px!important;height:48px!important;object-fit:contain!important;border-radius:50%!important;background:#050607!important}
+.ro-system-brand-logo span{font:700 18px ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.2em!important;color:#f4f5f7!important}
+.ro-banner-carousel{height:94px!important;border-radius:16px!important;border:1px solid rgba(255,255,255,.12)!important;background:#050607!important;box-shadow:0 22px 70px rgba(0,0,0,.3)!important}
+.ro-banner-image{object-fit:cover!important;object-position:center!important}
+.ro-banner-arrow{width:34px!important;height:34px!important;margin-top:-17px!important;font-size:23px!important;background:rgba(3,4,5,.72)!important}
+.ro-banner-dots{right:16px!important;bottom:11px!important}
+.ro-banner-dots button{width:22px!important;height:3px!important}
+@media(max-width:760px){
+ .ro-app-topbar{height:86px!important;grid-template-columns:1fr!important;padding:7px 14px!important}
+ .ro-system-brand-logo{display:flex!important;position:absolute;left:16px;z-index:5}
+ .ro-system-brand-logo img{width:38px!important;height:38px!important}
+ .ro-system-brand-logo span{font-size:15px!important}
+ .ro-banner-carousel{height:72px!important;margin-left:112px}
+}
+/* V11 — money, transfer and readability */
+.money-page{max-width:1120px!important;margin:0 auto}
+.money-primary-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 18px}
+.money-primary-nav button{min-height:92px;padding:18px;text-align:left;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:#090b0d;color:#9aa1aa;cursor:pointer;transition:.2s}
+.money-primary-nav button:hover{border-color:rgba(255,255,255,.22);background:#0d0f11}
+.money-primary-nav button.active{border-color:rgba(255,255,255,.30);background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));color:#fff}
+.money-primary-nav span{display:block;font-size:14px;font-weight:600;letter-spacing:.02em}
+.money-primary-nav small{display:block;margin-top:8px;font-size:11px;line-height:1.5;color:#69717a}
+.money-primary-nav button.active small{color:#9299a2}
+.money-panel{border:1px solid rgba(255,255,255,.11);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012));padding:24px;box-shadow:0 22px 70px rgba(0,0,0,.16)}
+.money-panel-head{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.07)}
+.money-panel-head span{font:10px ui-monospace;color:#737b85;letter-spacing:.16em}
+.money-panel-head b{font-size:15px;font-weight:550;color:#e7e9ec}
+.money-intro{margin:16px 0 20px;color:#858c95;font-size:13px;line-height:1.65}
+.money-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.money-choice{padding:19px;text-align:left;border:1px solid rgba(255,255,255,.10);border-radius:13px;background:#080a0c;color:#c7ccd2;cursor:pointer}
+.money-choice.active{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.045)}
+.money-choice span{display:block;font-size:14px;font-weight:600}
+.money-choice small{display:block;margin-top:8px;font-size:11px;line-height:1.55;color:#6d747d}
+.money-provider-surface{margin-top:18px}
+.money-provider-surface>div{border:0!important;padding:0!important;background:transparent!important}
+.money-wallet-grid{display:grid;grid-template-columns:300px 1fr;gap:28px;align-items:center;margin-top:24px}
+.money-qr{width:280px;height:280px;padding:10px;display:grid;place-items:center;border-radius:16px;background:#f4f5f7}
+.money-qr img{width:100%;height:100%;object-fit:contain;border-radius:8px}
+.money-qr-empty{color:#59616a;font-size:12px;text-align:center;line-height:1.5}
+.money-wallet-details>div:first-child span{display:block;font:9px ui-monospace;color:#69717a;letter-spacing:.13em}
+.money-wallet-details>div:first-child b{display:block;margin-top:9px;padding:14px;border:1px solid rgba(255,255,255,.10);border-radius:10px;background:#050607;color:#e5e8eb;font:12px ui-monospace;word-break:break-all}
+.money-wallet-details>button{margin-top:10px;height:42px;padding:0 16px;border:1px solid rgba(255,255,255,.13);border-radius:9px;background:rgba(255,255,255,.035);color:#dce0e4;font-size:12px;cursor:pointer}
+.money-wallet-details>button:hover{background:rgba(255,255,255,.08)}
+.money-note-block{margin-top:26px;padding:16px;border-top:1px solid rgba(255,255,255,.07)}
+.money-note-block b{font-size:13px;color:#e1e4e7}
+.money-note-block p{margin:7px 0 0;color:#737b84;font-size:11px;line-height:1.55}
+.send-workspace{margin-top:18px}
+.send-destination-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.send-destination-tabs button{padding:14px;text-align:left;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:#080a0c;color:#9097a0;cursor:pointer}
+.send-destination-tabs button.active{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.05);color:#fff}
+.send-destination-tabs b{display:block;font-size:13px}
+.send-destination-tabs span{display:block;margin-top:5px;font-size:10px;color:#626a73}
+.send-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.send-form-grid label{display:flex;flex-direction:column;gap:7px;font:9px ui-monospace;color:#69717a;letter-spacing:.11em}
+.send-form-grid label.send-full{grid-column:1/-1}
+.send-form-grid input,.send-form-grid select{height:48px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#050607;color:#f0f2f4;padding:0 14px;font:13px Inter,ui-sans-serif;letter-spacing:0;outline:none}
+.send-form-grid input:focus,.send-form-grid select:focus{border-color:rgba(255,255,255,.28)}
+.send-submit{width:100%;height:48px;margin-top:15px;border:0;border-radius:10px;background:#f3f4f5;color:#050607;font-size:13px;font-weight:650;cursor:pointer}
+.send-status{margin:12px 0 0;color:#7d858e;font-size:11px;line-height:1.55;word-break:break-all}
+.card-page{max-width:1120px!important;margin:0 auto}
+.card-page-head h1{font-size:44px!important}
+.card-page-head p{font-size:13px!important;line-height:1.65!important}
+.card-showcase,.card-status-panel,.card-info-panel,.card-activity-panel{background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012))!important;border-color:rgba(255,255,255,.11)!important}
+.card-status-panel h2,.card-info-panel h3,.card-activity-panel h3{font-size:22px!important}
+.card-status-panel p,.card-info-panel p,.card-empty-activity{font-size:12px!important;line-height:1.7!important;color:#7f8790!important}
+.money-funding-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.money-funding-options>div{padding:15px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:#07090a}
+.money-funding-options span{display:block;font:8px ui-monospace;color:#69717a;letter-spacing:.13em}
+.money-funding-options b{display:block;margin-top:7px;font-size:13px;font-weight:550;color:#e2e5e8}
+.money-funding-options small{display:block;margin-top:6px;font-size:10px;line-height:1.5;color:#666e77}
+@media(max-width:760px){
+ .money-primary-nav{grid-template-columns:1fr}
+ .money-choice-grid,.money-funding-options{grid-template-columns:1fr}
+ .money-wallet-grid{grid-template-columns:1fr}
+ .money-qr{width:min(280px,100%);height:auto;aspect-ratio:1;margin:0 auto}
+ .send-form-grid{grid-template-columns:1fr}
+ .send-form-grid label.send-full{grid-column:auto}
+}

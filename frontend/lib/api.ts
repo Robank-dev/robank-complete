@@ -13,9 +13,15 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     }
   });
 
+  const contentType = response.headers.get('content-type') || '';
   if (!response.ok) {
-    const message = await response.text();
+    const body = contentType.includes('application/json') ? await response.json().catch(() => null) : null;
+    const message = body?.message || body?.error || (contentType.includes('text/html') ? 'ROBANK data service is not connected.' : '');
     throw new Error(message || `API request failed: ${response.status}`);
+  }
+
+  if (!contentType.includes('application/json')) {
+    throw new Error('ROBANK data service returned an invalid response.');
   }
 
   return response.json() as Promise<T>;

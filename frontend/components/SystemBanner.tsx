@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 
 const slides = [
-  { image: '/robank-global.png', alt: 'ROBANK global markets' },
-  { image: '/robank-hero.png', alt: 'ROBANK capital operating layer' },
-  { image: '/robank-ai.png', alt: 'ROBANK Agent' },
+  { image: '/robank-banner-global.svg', alt: 'ROBANK global capital rails' },
+  { image: '/robank-banner-capital.svg', alt: 'ROBANK capital operating layer' },
+  { image: '/robank-banner-agent.svg', alt: 'ROBANK agent operating layer' },
 ];
 
 export default function SystemBanner() {

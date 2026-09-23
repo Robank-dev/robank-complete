@@ -12,8 +12,10 @@ export default function SendForm() {
   const { address, chainId } = useAccount();
   const { sendTransactionAsync } = useSendTransaction();
   const { switchChainAsync } = useSwitchChain();
+  const [destinationType, setDestinationType] = useState<'wallet' | 'bank'>('wallet');
   const [network, setNetwork] = useState<'base' | 'robinhood'>('base');
   const [to, setTo] = useState('');
+  const [bankName, setBankName] = useState('');
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('');
 
@@ -29,10 +31,11 @@ export default function SendForm() {
         return setStatus(`Switch your wallet to ${network === 'base' ? 'Base' : 'Robinhood Chain'}.`);
       }
     }
-    if (!isAddress(to)) return setStatus('Invalid recipient address.');
+    if (destinationType === 'wallet' && !isAddress(to)) return setStatus('Invalid wallet address.');
+    if (destinationType === 'bank') return setStatus('Bank payout rail is not connected yet. Your beneficiary details are not sent anywhere.');
     if (!amount || Number(amount) <= 0) return setStatus('Enter a valid amount.');
 
-    setStatus('Preparingâ€¦');
+    setStatus('Preparing…');
     try {
       const idempotencyKey = crypto.randomUUID();
       const result = await api.paymentIntent({
@@ -62,18 +65,22 @@ export default function SendForm() {
   }
 
   return (
-    <div className="rounded-2xl border border-ro-line bg-ro-panel p-5">
-      <div className="text-sm text-white/50">Send {network === 'base' ? 'USDC on Base' : 'USDG on Robinhood Chain'}</div>
-      <div className="mt-4 space-y-3">
-        <select value={network} onChange={(e) => setNetwork(e.target.value as 'base' | 'robinhood')} className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none">
-          <option value="base">Base Mainnet · USDC</option>
-          <option value="robinhood">Robinhood Chain Mainnet · USDG</option>
-        </select>
-        <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="Recipient 0xâ€¦" className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none focus:border-white/30" />
-        <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" inputMode="decimal" className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none focus:border-white/30" />
-        <button onClick={submit} className="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-white/90">
-          Preview & Send
-        </button>
+    <div className="send-workspace">
+      <div className="send-destination-tabs">
+        <button type="button" onClick={() => setDestinationType('wallet')} className={destinationType === 'wallet' ? 'active' : ''}><b>Wallet</b><span>Onchain address</span></button>
+        <button type="button" onClick={() => setDestinationType('bank')} className={destinationType === 'bank' ? 'active' : ''}><b>Bank</b><span>Beneficiary account</span></button>
+      </div>
+      <div className="send-form-grid">
+        {destinationType === 'wallet' ? <>
+          <label>NETWORK<select value={network} onChange={(e) => setNetwork(e.target.value as 'base' | 'robinhood')}><option value="base">Base · USDC</option><option value="robinhood">Robinhood Chain · USDG</option></select></label>
+          <label className="send-full">WALLET ADDRESS<input value={to} onChange={(e) => setTo(e.target.value)} placeholder="0x…" /></label>
+        </> : <>
+          <label>BANK / BENEFICIARY<input value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="Recipient or bank name" /></label>
+          <label>ACCOUNT / ADDRESS<input value={to} onChange={(e) => setTo(e.target.value)} placeholder="Account, IBAN or beneficiary address" /></label>
+        </>}
+        <label>ASSET<input value={destinationType === 'wallet' ? (network === 'base' ? 'USDC · Base' : 'USDG · Robinhood Chain') : 'Supported bank payout asset'} readOnly /></label>
+        <label>AMOUNT<input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" inputMode="decimal" /></label>
+        <button onClick={submit} className="send-submit">{destinationType === 'wallet' ? 'Review transfer' : 'Review bank transfer'}</button>
       </div>
       {status && <p className="mt-3 break-all text-xs text-white/55">{status}</p>}
     </div>
