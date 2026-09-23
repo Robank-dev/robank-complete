@@ -38,7 +38,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const { wallets } = useWallets();
   const [displayName, setDisplayName] = useState('');
   const [accountOpen, setAccountOpen] = useState(false);
+  const [systemSlide, setSystemSlide] = useState(0);
   const wallet = wallets.find((item) => item.walletClientType === 'privy');
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setSystemSlide((value) => (value + 1) % 7), 3800);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const key = user?.id ? `robank.profile.${user.id}` : '';
@@ -60,11 +66,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="ro-app-shell">
       <header className="ro-app-topbar">
-        <div className="ro-system-brand"><span className="ro-system-orbit"><i /><b /><em /></span><span><b>ROBANK SYSTEM</b><small>CAPITAL OPERATING LAYER</small></span></div>
-        <div className="ro-system-marquee" aria-label="ROBANK network status">
-          <div><span>LIVE MAINNET</span><i /> BASE <i /> ROBINHOOD CHAIN <i /> AI AGENT <i /> CAPITAL RAILS <i /> LIVE MAINNET <i /> BASE <i /> ROBINHOOD CHAIN</div>
+        <Link href="/" className="ro-system-brand ro-system-brand-logo"><span>ROBANK</span></Link>
+        <div className="ro-system-visual-window" aria-label="ROBANK product rail">
+          <div className="ro-system-visual" style={{ '--slide': systemSlide, backgroundPosition: `${systemSlide * 16.6667}% center` } as React.CSSProperties} />
+          <div className="ro-system-slide-count"><span>{String(systemSlide + 1).padStart(2, '0')}</span><i />07</div>
         </div>
-        <div className="ro-system-status"><span className="ro-online" /> SYSTEM ONLINE</div>
       </header>
       <div className="ro-app-body">
         <aside className="ro-app-sidebar">

@@ -8959,3 +8959,21 @@
   .asset-add-submit,.asset-add-hint{grid-column:1}
   .ro-sidebar-account-menu{left:0;right:0}
 }
+
+/* APP UI V8 - visual system rail */
+.ro-app-topbar{height:78px!important;grid-template-columns:260px minmax(0,1fr)!important;gap:24px!important;padding:0 30px!important;background:#070809!important;overflow:hidden!important}
+.ro-system-brand{display:flex!important;align-items:center!important;gap:12px!important;min-width:0!important}
+.ro-system-brand b{font:600 11px ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.16em!important;color:#e8eaed!important}
+.ro-system-brand small{font:9px ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.08em!important;color:#5f6670!important}
+.ro-system-visual-window{position:relative;min-width:0;height:52px;border:1px solid rgba(255,255,255,.09);border-radius:12px;overflow:hidden;background:#050608;box-shadow:inset 0 1px rgba(255,255,255,.035),0 12px 35px rgba(0,0,0,.18)}
+.ro-system-visual-window:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,6,8,.9),transparent 7%,transparent 92%,rgba(5,6,8,.9));pointer-events:none;z-index:2}
+.ro-system-visual{position:absolute;inset:0;background-image:url('/robank-system-visuals.svg');background-size:700% 100%;background-position:calc(var(--slide) * 16.6667%) center;background-repeat:no-repeat;transform:scale(1.01);transition:opacity .45s ease,transform .7s cubic-bezier(.2,.8,.2,1);animation:roVisualBreathe 5s ease-in-out infinite}
+.ro-system-slide-count{position:absolute;z-index:3;right:11px;bottom:7px;display:flex;align-items:center;gap:6px;font:7px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;color:#59616d;opacity:.9}
+.ro-system-slide-count span{color:#dfe5ee}.ro-system-slide-count i{width:18px;height:1px;background:rgba(255,255,255,.22);display:block}
+@keyframes roVisualBreathe{0%,100%{transform:scale(1.01)}50%{transform:scale(1.035)}}
+@media(max-width:900px){.ro-app-topbar{height:70px!important;grid-template-columns:1fr!important;padding:0 16px!important}.ro-system-brand{display:flex!important}.ro-system-brand small{display:none}.ro-system-visual-window{height:44px}.ro-system-visual{background-size:700% 100%}.ro-system-slide-count{display:none}}
+@media(max-width:560px){.ro-app-topbar{grid-template-columns:1fr!important}.ro-system-brand{position:absolute;z-index:4;left:16px}.ro-system-visual-window{margin-left:118px;height:42px}.ro-system-visual-window:after{background:linear-gradient(90deg,rgba(5,6,8,.7),transparent 14%,transparent 100%)}}
+/* APP UI V9 — simple ROBANK mark */
+.ro-system-brand-logo{color:#f4f5f7!important;text-decoration:none!important;font:700 15px ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.2em!important}
+.ro-system-brand-logo span{display:block!important}
+.ro-system-brand-logo:before{content:"";width:24px;height:24px;border:1px solid rgba(255,255,255,.5);border-radius:7px;display:block;background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.02));box-shadow:inset 0 0 16px rgba(255,255,255,.06)}
