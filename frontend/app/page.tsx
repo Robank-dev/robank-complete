@@ -27,7 +27,7 @@ export default function Home() {
     <main className="site-shell">
       <nav className="top-nav">
         <Link href="/" className="brand"><span className="brand-mark"><img src="/robank-mark.png" alt="" /></span><span>ROBANK</span></Link>
-        <div className={`nav-links ${menu ? "open" : ""}`}><a href="#product">Product</a><a href="/cli">CLI Install</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a><a href="#agent">Agent</a></div>
+        <div className={`nav-links ${menu ? "open" : ""}`}><a href="https://x.com/robankdev" target="_blank" rel="noreferrer">X</a><a href="/cli">Skill</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a></div>
         <div className="nav-actions"><Link href="/login" className="button button-small">App</Link></div>
         <button className="menu-button" onClick={() => setMenu(v => !v)} aria-label={menu ? "Close menu" : "Open menu"}>{menu ? "×" : "☰"}</button>
       </nav>
