@@ -458,15 +458,15 @@ export default function Home() {
         <div className="card-copy">
           <div className="section-kicker">THE ROBANK CARD</div>
 
-          <h2>Your digital wallet.<br /><em>In your pocket.</em></h2>
+          <h2>One account.<br /><em>One premium card.</em></h2>
 
           <p>
-            A clean virtual card for everyday online payments, managed directly
-            from your ROBANK account.
+            A premium virtual card designed around your ROBANK account — bringing
+            spending, assets and agent-powered control into one financial layer.
           </p>
 
-          <Link href="/dashboard" className="button hero-main-button">
-            Preview the card <span>?</span>
+          <Link href="/card" className="button hero-main-button">
+            Explore the card <span>→</span>
           </Link>
         </div>
 
@@ -480,7 +480,7 @@ export default function Home() {
 
                 <div className="card-top">
                   <span>ROBANK</span>
-                  <span>VIRTUAL</span>
+                  <span>FINANCIAL CARD</span>
                 </div>
 
                 <div className="card-chip">
@@ -499,7 +499,7 @@ export default function Home() {
                 <div className="card-meta">
                   <div>
                     <small>CARDHOLDER</small>
-                    <strong>ROBANK MEMBER</strong>
+                    <strong>ROBANK ACCOUNT</strong>
                   </div>
 
                   <div>
@@ -509,13 +509,13 @@ export default function Home() {
 
                   <div>
                     <small>TYPE</small>
-                    <strong>VIRTUAL</strong>
+                    <strong>DIGITAL</strong>
                   </div>
                 </div>
 
                 <div className="card-bottom">
                   <span>ROBANK</span>
-                  <span>VISA</span>
+                  <span>PRIVATE · DIGITAL</span>
                 </div>
 
                 <div className="card-shine" />
