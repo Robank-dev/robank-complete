@@ -1,64 +1,103 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import AppShell from '@/components/AppShell';
 import AssetList from '@/components/AssetList';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { api } from '@/lib/api';
+
+function short(value?: string) { return value ? `${value.slice(0, 6)}…${value.slice(-4)}` : ''; }
+
+function ActionIcon({ type }: { type: 'send' | 'receive' | 'card' }) {
+  const glyph = type === 'send' ? '↑' : type === 'receive' ? '↓' : '▣';
+  return <span className="ro-action-icon">{glyph}</span>;
+}
 
 export default function Dashboard() {
   const { user } = usePrivy();
   const { wallets } = useWallets();
   const wallet = wallets.find((item) => item.walletClientType === 'privy');
   const address = wallet?.address;
+  const [name, setName] = useState('');
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [card, setCard] = useState<Awaited<ReturnType<typeof api.cardStatus>>['card'] | null>(null);
+
+  const profileKey = useMemo(() => user?.id ? `robank.profile.${user.id}` : '', [user?.id]);
+  const fallbackName = user?.email?.address?.split('@')[0] || 'there';
+
+  useEffect(() => {
+    if (!profileKey) return;
+    const saved = localStorage.getItem(profileKey) || '';
+    setName(saved);
+    setDraft(saved);
+  }, [profileKey]);
+
+  useEffect(() => {
+    api.cardStatus().then((data) => setCard(data.card)).catch(() => setCard(null));
+  }, []);
+
+  const saveName = () => {
+    const value = draft.trim().slice(0, 40);
+    if (profileKey) {
+      if (value) localStorage.setItem(profileKey, value);
+      else localStorage.removeItem(profileKey);
+      setName(value);
+      window.dispatchEvent(new Event('robank-profile-updated'));
+    }
+    setEditing(false);
+  };
+
+  const cardIssued = card?.status === 'active' || card?.status === 'issued';
+  const cardReady = Boolean(card?.operations?.issue);
 
   return (
     <AppShell>
-      <div className="ro-page-head">
+      <div className="ro-dashboard-head">
         <div>
-          <div className="ro-kicker">CAPITAL OVERVIEW</div>
-          <h1>Your capital, operating.</h1>
-          <p>One account for your on-chain capital across Base and Robinhood Chain.</p>
+          <div className="ro-kicker">OVERVIEW</div>
+          <h1>Good to see you, <span>{name || fallbackName}</span>.</h1>
+          <p>Your capital, wallets and operating rails in one place.</p>
         </div>
-        <Link href="/agent" className="ro-primary">Open Agent <span>→</span></Link>
+        <button className="ro-edit-profile" onClick={() => { setDraft(name); setEditing(true); }}>Edit profile</button>
       </div>
 
-      <section className="ro-overview-hero">
-        <div className="ro-hero-copy">
-          <span className="ro-eyebrow">ACCOUNT</span>
-          <h2>{user?.email?.address ?? 'ROBANK account'}</h2>
-          <p>{address ? `${address.slice(0, 8)}…${address.slice(-6)}` : 'Privy wallet loading'}</p>
+      {editing && <div className="ro-profile-popover">
+        <div><span className="ro-kicker">PROFILE</span><strong>Choose your display name.</strong><small>This replaces the email-derived name across ROBANK.</small></div>
+        <div className="ro-profile-form"><input autoFocus value={draft} maxLength={40} onChange={(e) => setDraft(e.target.value)} placeholder="Your name" onKeyDown={(e) => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditing(false); }} /><button onClick={saveName}>Save</button></div>
+      </div>}
+
+      <section className="ro-balance-strip">
+        <div><span className="ro-kicker">TOTAL BALANCE</span><strong>—</strong><small>Live portfolio value will appear as pricing is connected.</small></div>
+        <div className="ro-balance-network"><span className="ro-network-badge"><i /> Base</span><span className="ro-network-badge"><i /> Robinhood Chain</span></div>
+      </section>
+
+      <section className="ro-overview-grid">
+        <div className="ro-overview-main">
+          <div className="ro-wallet-card">
+            <div className="ro-wallet-top"><span className="ro-kicker">PRIMARY WALLET</span><span>{address ? 'READY' : 'CREATING'}</span></div>
+            <div className="ro-wallet-row"><div><strong>{address ? short(address) : 'Preparing your wallet'}</strong><small>{address ? 'Privy embedded EVM wallet' : 'One wallet across supported EVM networks'}</small></div>{address && <button className="ro-copy-address" onClick={() => navigator.clipboard?.writeText(address)}>Copy</button>}</div>
+            <div className="ro-wallet-actions"><Link href="/send"><ActionIcon type="send" /><span>Send</span></Link><Link href="/receive"><ActionIcon type="receive" /><span>Receive</span></Link><Link href="/assets"><ActionIcon type="card" /><span>Assets</span></Link></div>
+          </div>
+
+          <div className="ro-assets-card">
+            <div className="ro-section-head"><div><span className="ro-kicker">ASSETS</span><h2>Your assets</h2></div><Link href="/assets">View all <b>→</b></Link></div>
+            {address ? <AssetList /> : <div className="ro-empty"><strong>Wallet is being prepared.</strong><span>Your EVM wallet will appear here once Privy finishes creation.</span></div>}
+          </div>
         </div>
-        <div className="ro-network-stack">
-          <div><span className="ro-live-dot" /> BASE</div>
-          <div><span className="ro-live-dot" /> ROBINHOOD</div>
-          <small>MAINNET RAILS</small>
+
+        <div className="ro-overview-side">
+          <div className={`ro-card-status ${cardIssued ? 'issued' : ''}`}>
+            <div className="ro-section-head"><div><span className="ro-kicker">ROBANK CARD</span><h2>{cardIssued ? 'Your card is ready.' : 'Your card is not issued.'}</h2></div><span className="ro-card-state">{cardIssued ? 'ACTIVE' : 'NOT ISSUED'}</span></div>
+            {cardIssued ? <><div className="ro-card-preview issued"><span>ROBANK</span><b>•••• 4821</b><small>{name || 'ROBANK USER'}</small></div><Link href="/card" className="ro-card-link">Manage card <b>→</b></Link></> : <><div className="ro-card-preview empty"><span>ROBANK</span><i>+</i><small>{cardReady ? 'Ready to request' : 'Provider connection required'}</small></div><p>{cardReady ? 'Request your ROBANK Card when you are ready.' : 'Card issuance will appear here when the provider rail is available.'}</p><Link href="/card" className="ro-card-link">View card <b>→</b></Link></>}
+          </div>
+
+          <div className="ro-agent-card"><div className="ro-section-head"><div><span className="ro-kicker">AI AGENT</span><h2>Operate with intent.</h2></div><span className="ro-agent-dot" /></div><p>Ask ROBANK to inspect balances, prepare actions and guide approved execution.</p><Link href="/agent" className="ro-card-link">Open Agent <b>→</b></Link></div>
         </div>
       </section>
 
-      <section className="ro-stat-grid">
-        <div className="ro-stat"><span>WALLET</span><strong>{address ? 'READY' : 'LOADING'}</strong><small>Privy embedded wallet</small></div>
-        <div className="ro-stat"><span>BASE</span><strong>ETH · USDC</strong><small>Live balance reads</small></div>
-        <div className="ro-stat"><span>ROBINHOOD</span><strong>ETH · USDG</strong><small>Live balance reads</small></div>
-        <div className="ro-stat"><span>AUTONOMY</span><strong>READY</strong><small>Open the agent terminal</small></div>
-      </section>
-
-      <section className="ro-content-grid">
-        <div className="ro-panel ro-assets-panel">
-          <div className="ro-panel-head"><div><span className="ro-kicker">ASSETS</span><h3>Your on-chain balances.</h3></div><span className="ro-panel-note">LIVE</span></div>
-          {address ? <AssetList /> : <div className="ro-empty">Your Privy wallet is loading.</div>}
-        </div>
-        <div className="ro-panel">
-          <div className="ro-panel-head"><div><span className="ro-kicker">AUTONOMY</span><h3>Let ROBANK operate.</h3></div><span className="ro-panel-note">AGENT</span></div>
-          <p className="ro-copy">Review balances, prepare wallet transfers and execute approved actions from one terminal.</p>
-          <div className="ro-command-preview"><span>robank-agent</span><b>READY</b><code>what's my balance</code></div>
-          <Link href="/agent" className="ro-text-link">Open autonomy center <span>→</span></Link>
-        </div>
-      </section>
-
-      <section className="ro-panel ro-activity-panel">
-        <div className="ro-panel-head"><div><span className="ro-kicker">ACTIVITY</span><h3>Recent capital movement.</h3></div></div>
-        <div className="ro-empty"><strong>No activity yet.</strong><span>Confirmed transactions will appear here after execution and reconciliation.</span></div>
-      </section>
+      <div className="ro-overview-foot"><span>MAINNET</span><span>Base · Robinhood Chain</span><span className="ro-foot-address">{address ? short(address) : 'Wallet provisioning'}</span></div>
     </AppShell>
   );
 }
