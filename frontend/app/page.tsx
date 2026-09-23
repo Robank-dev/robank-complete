@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 const features = [
-  ['01', 'One financial workspace', 'See account context, assets and activity together in one financial workspace.'],
-  ['02', 'An agent that can operate', 'Turn natural-language intent into structured financial work while keeping policy and execution boundaries visible.'],
-  ['03', 'Built beyond the browser', 'Use the app, ROBANK Skill, CLI and API as different surfaces over the same operating model.'],
+  ['01', 'One financial operating layer', 'Account, assets, payments, cards, borrowing and activity — organized in one workspace.'],
+  ['02', 'Agents that can actually act', 'Turn intent into structured financial work across payments and workflows, with policy and execution boundaries visible.'],
+  ['03', 'One system. Every surface.', 'Use the app, Skill, CLI and API against the same ROBANK operating model wherever your agent runs.'],
 ];
 
 export default function Home() {
@@ -212,7 +212,35 @@ export default function Home() {
 
       <section id="product" className="section product-section">
         <div className="section-intro"><div className="section-kicker">THE PRODUCT</div><h2>Financial context,<br /><em>ready to act.</em></h2><p>ROBANK brings account state, assets, payments and financial workflows into one interface — then exposes the same operating model to agents.</p></div>
-        <div className="feature-grid">{features.map(([n,t,d]) => <article className="feature-card" key={n}><span className="feature-number">{n}</span><div className="feature-image-wrap"><img src={n === '01' ? '/robank-wallet.png' : n === '02' ? '/robank-ai.png' : '/robank-global.png'} alt="" className="product-image" /></div><h3>{t}</h3><p>{d}</p><a href="#agent">Explore <span>?</span></a></article>)}</div>
+        <div className="feature-grid">
+          {features.map(([n,t,d]) => (
+            <article className="feature-card" key={n}>
+              <span className="feature-number">{n}</span>
+              <div className={`feature-image-wrap feature-visual-${n}`} aria-hidden="true">
+                {n === '01' && <div className="workspace-visual">
+                  <div className="workspace-glow" />
+                  <div className="workspace-panel workspace-back"><span>ASSETS</span><b>USDC</b><strong>$8,420.00</strong><i /></div>
+                  <div className="workspace-panel workspace-main"><div className="workspace-top"><span>ROBANK</span><em>ACCOUNT</em></div><small>TOTAL BALANCE</small><strong>$12,840.52</strong><div className="workspace-chart"><i/><i/><i/><i/><i/><i/><i/></div><div className="workspace-assets"><span>USDC</span><span>ETH</span><span>USDG</span></div></div>
+                  <div className="workspace-orbit orbit-one" /><div className="workspace-orbit orbit-two" /><div className="workspace-node node-one" /><div className="workspace-node node-two" />
+                </div>}
+                {n === '02' && <div className="agent-visual-card">
+                  <div className="agent-glow" />
+                  <div className="agent-command-card"><div><span className="agent-dot"/> ROBANK AI <em>ONLINE</em></div><strong>Send $250 USDC</strong><small>to treasury.base.eth</small><div className="agent-checks"><span>PAYMENT PREPARED</span><span>POLICY CHECKED</span></div><button>REVIEW ACTION <b>→</b></button></div>
+                  <div className="agent-orbit agent-orbit-one"/><div className="agent-orbit agent-orbit-two"/><div className="agent-node agent-node-one"/><div className="agent-node agent-node-two"/>
+                </div>}
+                {n === '03' && <div className="surfaces-visual">
+                  <div className="surface-core"><span>R</span><small>ROBANK</small></div>
+                  <div className="surface-ring ring-one"><div className="surface-node">APP</div></div>
+                  <div className="surface-ring ring-two"><div className="surface-node">CLI</div></div>
+                  <div className="surface-ring ring-three"><div className="surface-node">API</div></div>
+                  <div className="surface-pill skill-pill">SKILL <b>ACTIVE</b></div>
+                  <div className="surface-connection connection-one"/><div className="surface-connection connection-two"/><div className="surface-connection connection-three"/>
+                </div>}
+              </div>
+              <h3>{t}</h3><p>{d}</p><a href={n === '01' ? '/dashboard' : n === '02' ? '/how-it-works' : '/cli'}>{n === '01' ? 'Explore the workspace' : n === '02' ? 'See how it works' : 'Explore the CLI'} <span>→</span></a>
+            </article>
+          ))}
+        </div>
       </section>      <section id="agent" className="section agent-section">
 
         <div className="agent-intro">

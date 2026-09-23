@@ -8310,3 +8310,61 @@
 .install-card a:hover{text-decoration:underline}
 .install-card a span{margin-left:7px}
 @media(max-width:800px){.install-header{flex-direction:column;align-items:flex-start}.install-command{font-size:20px;padding:27px 22px;gap:10px}.install-grid{grid-template-columns:1fr}.install-card,.install-card:nth-child(2n),.install-card:nth-last-child(-n+2){border-right:0;border-bottom:1px solid rgba(255,255,255,.08)}.install-card:last-child{border-bottom:0}}
+/* =========================================================
+   ROBANK PRODUCT VISUALS — LIVE 3D SYSTEM V6
+   CSS-only scenes: contained, lightweight, no external assets.
+   ========================================================= */
+.product-section .feature-image-wrap{
+  position:relative!important;
+  height:225px!important;
+  min-height:225px!important;
+  max-height:225px!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+  background:
+    radial-gradient(circle at 50% 46%,rgba(255,255,255,.055),transparent 48%),
+    linear-gradient(145deg,#080a0c,#050607)!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+}
+.product-section .feature-image-wrap:before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:36px 36px;mask-image:radial-gradient(circle,black,transparent 78%);
+}
+.product-section .product-image{display:none!important}
+.product-section .feature-visual-01,.product-section .feature-visual-02,.product-section .feature-visual-03{perspective:900px}
+.workspace-visual{position:absolute;inset:0;transform-style:preserve-3d;animation:workspaceFloat 7s ease-in-out infinite}
+.workspace-glow{position:absolute;width:220px;height:110px;left:50%;top:54%;transform:translate(-50%,-50%);background:radial-gradient(ellipse,rgba(255,255,255,.16),transparent 68%);filter:blur(20px)}
+.workspace-panel{position:absolute;left:50%;border:1px solid rgba(255,255,255,.18);background:linear-gradient(145deg,rgba(27,30,34,.92),rgba(8,10,12,.94));box-shadow:0 28px 60px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.09);border-radius:15px;color:#dfe2e6;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.workspace-back{width:205px;height:116px;top:35px;transform:translateX(-39%) rotateX(55deg) rotateZ(7deg) translateZ(-35px);padding:14px;opacity:.65;animation:backPanel 7s ease-in-out infinite}
+.workspace-back span,.workspace-back b,.workspace-back strong{display:block}.workspace-back span{font-size:7px;letter-spacing:.16em;color:#777e87}.workspace-back b{font-size:11px;margin-top:13px}.workspace-back strong{font-size:16px;margin-top:4px;color:#fff}.workspace-back i{display:block;width:80px;height:2px;margin-top:12px;background:linear-gradient(90deg,#fff,transparent);opacity:.4}
+.workspace-main{width:245px;height:154px;top:25px;transform:translateX(-50%) rotateX(7deg) rotateY(-9deg) rotateZ(-2deg) translateZ(45px);padding:16px;z-index:3;animation:mainPanel 7s ease-in-out infinite}
+.workspace-top{display:flex;justify-content:space-between;font-size:7px;letter-spacing:.16em}.workspace-top em{font-style:normal;color:#777e87}.workspace-main small{display:block;margin-top:17px;font-size:7px;color:#7e858e;letter-spacing:.12em}.workspace-main strong{display:block;margin-top:5px;font-size:23px;letter-spacing:-.06em;color:#fff}
+.workspace-chart{height:30px;display:flex;align-items:flex-end;gap:7px;margin-top:10px}.workspace-chart i{width:19px;background:linear-gradient(to top,rgba(255,255,255,.12),rgba(255,255,255,.72));border-radius:3px 3px 1px 1px;animation:bars 2.8s ease-in-out infinite}.workspace-chart i:nth-child(1){height:10px}.workspace-chart i:nth-child(2){height:16px;animation-delay:-.4s}.workspace-chart i:nth-child(3){height:12px;animation-delay:-.8s}.workspace-chart i:nth-child(4){height:22px;animation-delay:-1.2s}.workspace-chart i:nth-child(5){height:18px;animation-delay:-1.6s}.workspace-chart i:nth-child(6){height:26px;animation-delay:-2s}.workspace-chart i:nth-child(7){height:30px;animation-delay:-2.4s}
+.workspace-assets{display:flex;gap:7px;margin-top:8px}.workspace-assets span{padding:4px 7px;border:1px solid rgba(255,255,255,.09);border-radius:6px;font-size:6px;color:#8c929a}
+.workspace-orbit{position:absolute;left:50%;top:50%;border:1px solid rgba(255,255,255,.13);border-radius:50%;transform-style:preserve-3d}.orbit-one{width:310px;height:92px;transform:translate(-50%,-50%) rotateX(68deg) rotateZ(-12deg);animation:orbitSlow 9s linear infinite}.orbit-two{width:250px;height:74px;transform:translate(-50%,-50%) rotateY(67deg) rotateZ(15deg);animation:orbitSlow 11s linear infinite reverse}.workspace-node{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 16px rgba(255,255,255,.9)}.node-one{left:calc(50% + 143px);top:94px}.node-two{left:calc(50% - 145px);top:131px}
+.agent-visual-card{position:absolute;inset:0;transform-style:preserve-3d;animation:agentFloat 6.5s ease-in-out infinite}.agent-glow{position:absolute;width:240px;height:120px;left:50%;top:52%;transform:translate(-50%,-50%);background:radial-gradient(ellipse,rgba(190,205,230,.13),transparent 68%);filter:blur(22px)}
+.agent-command-card{position:absolute;width:244px;height:166px;left:50%;top:20px;transform:translateX(-50%) rotateX(7deg) rotateY(6deg);padding:17px;border:1px solid rgba(255,255,255,.18);border-radius:16px;background:linear-gradient(145deg,rgba(22,25,30,.96),rgba(7,9,11,.96));box-shadow:0 30px 70px rgba(0,0,0,.62),inset 0 1px rgba(255,255,255,.08);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;z-index:4}
+.agent-command-card>div:first-child{font-size:8px;letter-spacing:.12em;color:#dce0e5}.agent-command-card em{font-style:normal;color:#6f767f;margin-left:8px;font-size:7px}.agent-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 12px #fff;margin-right:6px}.agent-command-card>strong{display:block;font-family:Arial,sans-serif;font-size:22px;letter-spacing:-.05em;margin-top:22px;color:#f5f6f7}.agent-command-card>small{display:block;color:#737a84;font-size:8px;margin-top:5px}.agent-checks{display:flex!important;gap:5px;margin-top:15px}.agent-checks span{padding:5px 6px;border:1px solid rgba(255,255,255,.09);border-radius:5px;font-size:5.5px;color:#9da3aa}.agent-command-card button{width:100%;margin-top:11px;height:27px;border:1px solid rgba(255,255,255,.13);border-radius:7px;background:rgba(255,255,255,.08);color:#e7e9ec;font:7px ui-monospace;letter-spacing:.08em;text-align:left;padding:0 9px}.agent-command-card button b{float:right;font-size:12px;font-weight:400}.agent-orbit{position:absolute;left:50%;top:50%;border:1px solid rgba(255,255,255,.12);border-radius:50%;transform-style:preserve-3d}.agent-orbit-one{width:320px;height:88px;transform:translate(-50%,-50%) rotateX(68deg) rotateZ(8deg);animation:orbitSlow 8s linear infinite}.agent-orbit-two{width:230px;height:230px;transform:translate(-50%,-50%) rotateY(68deg);animation:orbitSlow 12s linear infinite reverse}.agent-node{position:absolute;width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 20px rgba(255,255,255,.95)}.agent-node-one{left:calc(50% + 140px);top:95px}.agent-node-two{left:calc(50% - 125px);top:171px}
+.surfaces-visual{position:absolute;inset:0;transform-style:preserve-3d;animation:surfaceFloat 8s ease-in-out infinite}.surface-core{position:absolute;left:50%;top:50%;width:82px;height:82px;transform:translate(-50%,-50%) rotateX(8deg) rotateY(-8deg);border:1px solid rgba(255,255,255,.2);border-radius:20px;background:linear-gradient(145deg,#181b20,#07090b);box-shadow:0 24px 55px rgba(0,0,0,.6),0 0 45px rgba(255,255,255,.07);display:grid;place-items:center;z-index:5}.surface-core span{font:500 42px Arial;color:#f4f5f7}.surface-core small{position:absolute;bottom:10px;font:6px ui-monospace;color:#747b84;letter-spacing:.18em}
+.surface-ring{position:absolute;left:50%;top:50%;border:1px solid rgba(255,255,255,.12);border-radius:50%;transform-style:preserve-3d}.ring-one{width:280px;height:92px;transform:translate(-50%,-50%) rotateX(69deg) rotateZ(-12deg);animation:orbitSlow 9s linear infinite}.ring-two{width:250px;height:82px;transform:translate(-50%,-50%) rotateY(67deg) rotateZ(14deg);animation:orbitSlow 11s linear infinite reverse}.ring-three{width:205px;height:205px;transform:translate(-50%,-50%) rotateX(14deg) rotateY(67deg);animation:orbitSlow 13s linear infinite}.surface-node{position:absolute;left:50%;top:-15px;transform:translateX(-50%);padding:6px 9px;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:#0b0d0f;box-shadow:0 10px 25px rgba(0,0,0,.45);font:7px ui-monospace;color:#e2e5e8;letter-spacing:.1em}.ring-two .surface-node{top:auto;bottom:-15px}.ring-three .surface-node{left:auto;right:-24px;top:50%;transform:translateY(-50%)}
+.surface-pill{position:absolute;right:22px;top:31px;padding:7px 9px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:rgba(8,10,12,.8);font:6px ui-monospace;color:#8b929b;letter-spacing:.12em;z-index:6}.surface-pill b{color:#fff;margin-left:5px;font-weight:500}.surface-connection{position:absolute;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transform-origin:left center}.connection-one{width:90px;left:calc(50% + 40px);top:50%}.connection-two{width:78px;left:calc(50% - 118px);top:40%;transform:rotate(-25deg)}.connection-three{width:95px;left:calc(50% - 15px);top:67%;transform:rotate(24deg)}
+@keyframes workspaceFloat{0%,100%{transform:translateY(2px) rotateX(0deg)}50%{transform:translateY(-5px) rotateX(1deg)}}
+@keyframes mainPanel{0%,100%{transform:translateX(-50%) rotateX(7deg) rotateY(-9deg) rotateZ(-2deg) translateZ(45px)}50%{transform:translateX(-50%) rotateX(9deg) rotateY(-13deg) rotateZ(-2deg) translateZ(56px)}}
+@keyframes backPanel{0%,100%{transform:translateX(-39%) rotateX(55deg) rotateZ(7deg) translateZ(-35px)}50%{transform:translateX(-39%) rotateX(58deg) rotateZ(9deg) translateZ(-22px)}}
+@keyframes bars{0%,100%{opacity:.5;transform:scaleY(.82)}50%{opacity:1;transform:scaleY(1)}}
+@keyframes agentFloat{0%,100%{transform:translateY(2px) rotateY(-1deg)}50%{transform:translateY(-6px) rotateY(2deg)}}
+@keyframes surfaceFloat{0%,100%{transform:translateY(2px) rotateZ(0deg)}50%{transform:translateY(-5px) rotateZ(1deg)}}
+@keyframes orbitSlow{to{transform:translate(-50%,-50%) rotateX(68deg) rotateZ(368deg)}}
+/* Keep each orbital plane intact while it rotates in its own axis. */
+.workspace-visual .orbit-one{animation-name:workspaceOrbitA}.workspace-visual .orbit-two{animation-name:workspaceOrbitB}
+.agent-visual-card .agent-orbit-one{animation-name:agentOrbitA}.agent-visual-card .agent-orbit-two{animation-name:agentOrbitB}
+.surfaces-visual .ring-one{animation-name:surfaceOrbitA}.surfaces-visual .ring-two{animation-name:surfaceOrbitB}.surfaces-visual .ring-three{animation-name:surfaceOrbitC}
+@keyframes workspaceOrbitA{to{transform:translate(-50%,-50%) rotateX(68deg) rotateZ(368deg)}}
+@keyframes workspaceOrbitB{to{transform:translate(-50%,-50%) rotateY(67deg) rotateZ(375deg)}}
+@keyframes agentOrbitA{to{transform:translate(-50%,-50%) rotateX(68deg) rotateZ(368deg)}}
+@keyframes agentOrbitB{to{transform:translate(-50%,-50%) rotateY(68deg) rotateZ(360deg)}}
+@keyframes surfaceOrbitA{to{transform:translate(-50%,-50%) rotateX(69deg) rotateZ(348deg)}}
+@keyframes surfaceOrbitB{to{transform:translate(-50%,-50%) rotateY(67deg) rotateZ(374deg)}}
+@keyframes surfaceOrbitC{to{transform:translate(-50%,-50%) rotateX(14deg) rotateY(427deg)}}
+@media(prefers-reduced-motion:reduce){.workspace-visual,.agent-visual-card,.surfaces-visual,.workspace-panel,.workspace-chart i,.workspace-orbit,.agent-orbit,.surface-ring{animation:none!important}}
