@@ -12,8 +12,7 @@ import { BASE_MAINNET_CHAIN_ID, ROBINHOOD_CHAIN_ID } from '@/lib/constants';
 const ERC20_ABI = [{ type: 'function', name: 'balanceOf', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ type: 'uint256' }] }] as const;
 
 type Asset = 'USDC' | 'USDG';
-type Source = 'wallet' | 'bank';
-type Pending = { amount: string; destination: string; asset?: Asset; source?: Source };
+type Pending = { amount: string; destination: string; asset?: Asset };
 
 export default function AgentTerminal() {
   const { authenticated } = usePrivy();
@@ -48,9 +47,7 @@ export default function AgentTerminal() {
           { symbol: 'ETH', balance: walletBalances['Robinhood ETH'] == null ? 'loading' : String(walletBalances['Robinhood ETH']), network: 'robinhood' }
         ]
       },
-      bank: { connected: false, balance: null, currency: 'USD' },
       capabilities: ['wallet balance', 'wallet transfers for USDC on Base', 'wallet transfers for USDG on Robinhood Chain', 'payment intent', 'agent information'],
-      bankCapabilities: []
     };
   }
 
@@ -84,23 +81,12 @@ export default function AgentTerminal() {
     setInput('');
     setOutput((prev) => [...prev, `> ${message}`]);
     const transfer = message.match(/(?:send|transfer|pay|kirim|bayar)\s+([0-9]+(?:\.[0-9]+)?)\s*(USDC|USDG)?\s+to\s+(0x[a-fA-F0-9]{40})/i);
-    const explicitBank = /\b(bank|fiat|cash|rekening)\b/i.test(message);
-    const explicitWallet = /\b(wallet|crypto|onchain)\b/i.test(message);
     try {
       if (transfer) {
         const [, amount, rawAsset, destination] = transfer;
-        if (explicitBank) {
-          setOutput((prev) => [...prev, 'Bank selected, but no live bank provider is connected to ROBANK yet. Nothing was prepared. Choose Wallet when you want an on-chain transfer.']);
-          return;
-        }
         const asset = rawAsset?.toUpperCase() as Asset | undefined;
-        if (!asset && !explicitWallet) {
-          setPending({ amount, destination });
-          setOutput((prev) => [...prev, '**Choose funding source:** Wallet or Bank. I will not prepare a transaction before you choose.']);
-          return;
-        }
         if (!asset) {
-          setPending({ amount, destination, source: 'wallet' });
+          setPending({ amount, destination });
           setOutput((prev) => [...prev, '**Choose asset:** USDC on Base or USDG on Robinhood Chain.']);
           return;
         }
@@ -111,7 +97,7 @@ export default function AgentTerminal() {
       if (/\b(balance|saldo)\b/i.test(message)) {
         const c = balanceContext();
         const b = c.wallet.balances;
-        setOutput((prev) => [...prev, `**Wallet** ${address ? `(${address})` : '(not connected)'}\n- ${b[0].balance} USDC · Base\n- ${b[1].balance} USDG · Robinhood Chain\n- ${b[2].balance} ETH · Base\n- ${b[3].balance} ETH · Robinhood Chain\n\n**Bank** not connected to a live provider.`]);
+        setOutput((prev) => [...prev, `**Wallet** ${address ? `(${address})` : '(not connected)'}\n- ${b[0].balance} USDC · Base\n- ${b[1].balance} USDG · Robinhood Chain\n- ${b[2].balance} ETH · Base\n- ${b[3].balance} ETH · Robinhood Chain`]);
         return;
       }
 
@@ -123,17 +109,6 @@ export default function AgentTerminal() {
       setOutput((prev) => [...prev, error instanceof Error ? error.message : 'Agent error']);
     }
   }
-  async function chooseSource(source: Source) {
-    if (!pending) return;
-    if (source === 'bank') {
-      setOutput((prev) => [...prev, '**Bank selected.** No live bank provider is connected, so ROBANK cannot spend or transfer bank funds yet.']);
-      setPending(null);
-      return;
-    }
-    setPending({ ...pending, source });
-    if (!pending.asset) setOutput((prev) => [...prev, '**Wallet selected.** Now choose USDC (Base) or USDG (Robinhood Chain).']);
-  }
-
   async function chooseAsset(asset: Asset) {
     if (!pending) return;
     try {
@@ -157,12 +132,14 @@ export default function AgentTerminal() {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-ro-line bg-black/30">
-      <div className="border-b border-ro-line px-4 py-3 font-mono text-xs text-white/45">robank-agent</div>
-      <div className="min-h-[360px] space-y-4 overflow-y-auto p-4 font-mono text-sm leading-6 text-white/75">
+      <div className="agent-terminal-head"><div><span>ROBANK AGENT</span><small>Intent → policy → execution</small></div><i>READY</i></div>
+      <div className="agent-suggestions">
+        {['What is my balance?', 'Show my assets', 'Prepare 25 USDC to 0x...'].map((prompt) => <button key={prompt} onClick={() => setInput(prompt)}>{prompt}</button>)}
+      </div>
+      <div className="min-h-[360px] space-y-4 overflow-y-auto p-5 font-mono text-sm leading-6 text-white/75">
         {output.map((line, index) => line.startsWith('> ') ? <div key={index} className="whitespace-pre-wrap text-white">{line}</div> : <div key={index} className="prose prose-invert prose-sm max-w-none"><ReactMarkdown remarkPlugins={[remarkGfm]}>{line}</ReactMarkdown></div>)}
       </div>
-      {pending && !pending.source && <div className="flex gap-2 border-t border-ro-line p-3"><button onClick={() => chooseSource('wallet')} className="rounded-xl bg-white px-4 py-2 text-xs font-semibold text-black">Wallet</button><button onClick={() => chooseSource('bank')} className="rounded-xl border border-ro-line px-4 py-2 text-xs">Bank</button></div>}
-      {pending?.source === 'wallet' && !pending.asset && <div className="flex gap-2 border-t border-ro-line p-3"><button onClick={() => chooseAsset('USDC')} className="rounded-xl bg-white px-4 py-2 text-xs font-semibold text-black">USDC · Base</button><button onClick={() => chooseAsset('USDG')} className="rounded-xl border border-ro-line px-4 py-2 text-xs">USDG · Robinhood</button></div>}
+      {pending && !pending.asset && <div className="flex flex-wrap gap-2 border-t border-ro-line p-3"><span className="agent-choice-label">Choose asset</span><button onClick={() => chooseAsset('USDC')} className="agent-choice agent-choice-primary">USDC · Base</button><button onClick={() => chooseAsset('USDG')} className="agent-choice">USDG · Robinhood Chain</button></div>}
       {tx && <div className="border-t border-ro-line p-3"><button onClick={signAndSend} className="rounded-xl bg-white px-4 py-3 text-xs font-semibold text-black">Review & Sign in Wallet</button></div>}
       <div className="flex border-t border-ro-line p-3"><input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') run(); }} placeholder="send 50 USDC to 0x..." className="flex-1 bg-transparent px-2 font-mono text-sm outline-none" /><button onClick={run} className="rounded-lg border border-white/10 px-3 py-2 text-xs hover:bg-white/5">Run</button></div>
     </div>

@@ -70,7 +70,7 @@ export default function Dashboard() {
 
       <section className="ro-balance-strip">
         <div><span className="ro-kicker">TOTAL BALANCE</span><strong>—</strong><small>Live portfolio value will appear as pricing is connected.</small></div>
-        <div className="ro-balance-network"><span className="ro-network-badge"><i /> Base</span><span className="ro-network-badge"><i /> Robinhood Chain</span></div>
+        <div className="ro-balance-network"><span className="ro-network-badge"><img src="/chain-icons/base.svg" alt="" /> Base</span><span className="ro-network-badge"><img src="/chain-icons/robinhood.svg" alt="" /> Robinhood Chain</span></div>
       </section>
 
       <section className="ro-overview-grid">

@@ -8700,3 +8700,181 @@
 @media(max-width:1000px){.ro-overview-grid{grid-template-columns:1fr}.ro-overview-side{grid-template-columns:1fr 1fr}.ro-card-preview{height:150px}}
 @media(max-width:900px){.ro-dashboard-head{align-items:flex-start;flex-direction:column}.ro-edit-profile{align-self:flex-start}.ro-profile-popover{flex-direction:column;align-items:stretch}.ro-profile-form input{flex:1;width:auto}.ro-balance-strip{align-items:flex-start;flex-direction:column}.ro-overview-side{grid-template-columns:1fr}}
 @media(max-width:560px){.ro-app-sidebar{display:none}.ro-app-main{padding:30px 14px 55px!important}.ro-dashboard-head h1{font-size:32px}.ro-balance-strip{padding:20px}.ro-balance-strip strong{font-size:34px}.ro-wallet-card,.ro-assets-card,.ro-card-status,.ro-agent-card{padding:18px}.ro-wallet-row strong{font-size:22px}.ro-wallet-actions a{height:50px}.ro-profile-form{width:100%}.ro-profile-form button{flex:none}.ro-overview-foot{flex-wrap:wrap}.ro-foot-address{margin-left:0;width:100%}}
+/* =========================================================
+   APP UI V6 - CRISP TYPE, NETWORK MARKS, AGENT SURFACE
+   ========================================================= */
+.ro-app-main{
+  max-width:1540px!important;
+  padding:54px clamp(28px,4vw,72px) 86px!important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:geometricPrecision;
+}
+.ro-dashboard-head h1,.ro-page-head h1{
+  font-size:clamp(38px,3.5vw,56px)!important;
+  letter-spacing:-.045em!important;
+}
+.ro-dashboard-head p,.ro-page-head p{
+  font-size:14px!important;
+  color:#8a919b!important;
+}
+.ro-balance-strip{
+  min-height:156px!important;
+  padding:27px 29px!important;
+}
+.ro-balance-strip strong{font-size:44px!important}
+.ro-network-badge{
+  min-height:40px;
+  padding:9px 13px!important;
+  gap:9px!important;
+  font-size:10px!important;
+}
+.ro-network-badge img{
+  width:16px;
+  height:16px;
+  object-fit:contain;
+  flex:none;
+}
+.ro-assets-card .asset-list{margin-top:17px!important}
+.ro-assets-card .asset-row{
+  min-height:67px;
+  padding:14px 0!important;
+  gap:14px!important;
+}
+.ro-assets-card .asset-symbol{
+  width:40px!important;
+  height:40px!important;
+  padding:7px!important;
+  background:#0d0f11!important;
+}
+.ro-assets-card .asset-symbol img{
+  object-fit:contain!important;
+}
+.ro-assets-card .asset-symbol img[src*="/token-icons/eth.svg"]{
+  filter:brightness(0) invert(1);
+}
+.ro-assets-card .asset-name b{
+  font-size:13px!important;
+  letter-spacing:-.01em;
+}
+.ro-assets-card .asset-name span{
+  display:flex!important;
+  align-items:center;
+  gap:6px;
+  margin-top:5px!important;
+  font-size:9px!important;
+}
+.asset-chain-icon{
+  width:13px;
+  height:13px;
+  object-fit:contain;
+  flex:none;
+}
+.ro-assets-card .asset-value b{
+  font-size:12px!important;
+}
+.ro-assets-card .asset-value span{
+  font-size:9px!important;
+}
+.ro-overview-grid{gap:14px!important}
+.ro-wallet-card,.ro-assets-card,.ro-card-status,.ro-agent-card{
+  border-color:rgba(255,255,255,.11)!important;
+}
+.ro-wallet-card,.ro-assets-card,.ro-card-status,.ro-agent-card{box-shadow:0 18px 55px rgba(0,0,0,.12)}
+.ro-wallet-row strong{font-size:29px!important}
+.ro-wallet-actions a{height:60px!important;font-size:12px!important}
+.ro-action-icon{width:28px!important;height:28px!important}
+.ro-card-status .ro-section-head h2,.ro-agent-card .ro-section-head h2{font-size:21px!important}
+.ro-agent-card p,.ro-card-status p{font-size:11px!important;color:#808792!important}
+.ro-overview-foot{font-size:9px!important}
+.ro-page-head{margin-bottom:38px!important}
+.ro-agent-stats{gap:12px!important}
+.ro-stat{
+  min-height:136px!important;
+  padding:21px!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.032),rgba(255,255,255,.01))!important;
+}
+.ro-stat span{font-size:9px!important;color:#6d747e!important}
+.ro-stat strong{font-size:21px!important;margin-top:17px!important}
+.ro-stat small{font-size:11px!important;color:#686f78!important}
+.ro-content-grid{gap:14px!important;margin-top:14px!important}
+.ro-panel{padding:25px!important}
+.ro-panel-head h3{font-size:22px!important}
+.ro-list-row{padding:17px 2px!important}
+.ro-list-row b{font-size:13px!important}
+.ro-list-row span{font-size:10px!important}
+.ro-list-row em{font-size:9px!important}
+.ro-terminal-section{margin-top:34px!important}
+.ro-terminal-section h3{font-size:27px!important;margin-top:9px!important}
+.ro-terminal-section>div:last-child{
+  border-radius:16px!important;
+  background:#07090a!important;
+  box-shadow:0 25px 80px rgba(0,0,0,.3)!important;
+}
+.agent-terminal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 18px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));
+}
+.agent-terminal-head span{
+  display:block;
+  font:10px ui-monospace;
+  letter-spacing:.16em;
+  color:#e4e7ea;
+}
+.agent-terminal-head small{
+  display:block;
+  margin-top:5px;
+  color:#626a74;
+  font-size:9px;
+}
+.agent-terminal-head i{
+  font:9px ui-monospace;
+  color:#d7ffe1;
+  letter-spacing:.12em;
+  font-style:normal;
+}
+.agent-suggestions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  padding:11px 14px;
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+.agent-suggestions button{
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.025);
+  color:#8d949d;
+  border-radius:999px;
+  padding:8px 11px;
+  font:9px ui-monospace;
+  cursor:pointer;
+}
+.agent-suggestions button:hover{
+  color:#f2f3f4;
+  background:rgba(255,255,255,.06);
+}
+.agent-choice-label{
+  display:flex;
+  align-items:center;
+  color:#626a74;
+  font:9px ui-monospace;
+  letter-spacing:.08em;
+  margin-right:3px;
+}
+.agent-choice{
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.025);
+  color:#d8dce0;
+  border-radius:10px;
+  padding:9px 12px;
+  font-size:10px;
+}
+.agent-choice-primary{
+  background:#f2f3f5;
+  color:#070809;
+  font-weight:650;
+}
+.ro-notice{font-size:11px!important;padding:15px 17px!important}

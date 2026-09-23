@@ -12,17 +12,18 @@ const ERC20_ABI = [
   { type: 'function', name: 'name', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] }
 ] as const;
 
-type Token = { id: string; chainId: number; chain: string; symbol: string; name: string; address?: `0x${string}`; image: string };
+type Token = { id: string; chainId: number; chain: string; symbol: string; name: string; address?: `0x${string}`; image: string; chainImage?: string };
 
 const DEFAULT_TOKENS: Token[] = [
-  { id: 'base-eth', chainId: BASE_MAINNET_CHAIN_ID, chain: 'Base', symbol: 'ETH', name: 'Ethereum', image: '/token-icons/eth.svg' },
-  { id: 'base-usdc', chainId: BASE_MAINNET_CHAIN_ID, chain: 'Base', symbol: 'USDC', name: 'USD Coin', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', image: '/token-icons/usdc.svg' },
-  { id: 'rh-eth', chainId: ROBINHOOD_CHAIN_ID, chain: 'Robinhood Chain', symbol: 'ETH', name: 'Ethereum', image: '/token-icons/eth.svg' },
-  { id: 'rh-usdg', chainId: ROBINHOOD_CHAIN_ID, chain: 'Robinhood Chain', symbol: 'USDG', name: 'Global Dollar', address: '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168', image: '/token-icons/usdg.svg' }
+  { id: 'base-eth', chainId: BASE_MAINNET_CHAIN_ID, chain: 'Base', symbol: 'ETH', name: 'Ethereum', image: '/token-icons/eth.svg', chainImage: '/chain-icons/base.svg' },
+  { id: 'base-usdc', chainId: BASE_MAINNET_CHAIN_ID, chain: 'Base', symbol: 'USDC', name: 'USD Coin', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', image: '/token-icons/usdc.svg', chainImage: '/chain-icons/base.svg' },
+  { id: 'rh-eth', chainId: ROBINHOOD_CHAIN_ID, chain: 'Robinhood Chain', symbol: 'ETH', name: 'Ethereum', image: '/token-icons/eth.svg', chainImage: '/chain-icons/robinhood.svg' },
+  { id: 'rh-usdg', chainId: ROBINHOOD_CHAIN_ID, chain: 'Robinhood Chain', symbol: 'USDG', name: 'Global Dollar', address: '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168', image: '/token-icons/usdg.png', chainImage: '/chain-icons/robinhood.svg' }
 ];
 
 function TokenRow({ token, owner }: { token: Token; owner: `0x${string}` }) {
   const native = !token.address;
+  const chainImage = token.chainImage || (token.chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg');
   const nativeBalance = useBalance({ address: owner, chainId: token.chainId, query: { enabled: native } });
   const tokenBalance = useReadContract({
     address: token.address,
@@ -50,7 +51,7 @@ function TokenRow({ token, owner }: { token: Token; owner: `0x${string}` }) {
       </div>
       <div className="asset-name">
         <b>{token.symbol}</b>
-        <span>{token.name} · {token.chain}</span>
+        <span><img src={chainImage} alt="" className="asset-chain-icon" />{token.name} · {token.chain}</span>
       </div>
       <div className="asset-value">
         <b>{amount} {token.symbol}</b>
@@ -90,7 +91,7 @@ export default function AssetList() {
       symbol: form.symbol.trim().toUpperCase(),
       name: form.name.trim(),
       address: form.address as `0x${string}`,
-      image: '/robank-mark.png'
+      image: '/robank-mark.png', chainImage: chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg'
     };
     const next = [...custom.filter((item) => item.id !== token.id), token];
     setCustom(next);
