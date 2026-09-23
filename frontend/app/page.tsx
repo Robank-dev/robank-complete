@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 const features = [
-  ['01', 'One financial operating layer', 'Account, assets, payments, cards, borrowing and activity — organized in one workspace.'],
-  ['02', 'Agents that can actually act', 'Turn intent into structured financial work across payments and workflows, with policy and execution boundaries visible.'],
-  ['03', 'One system. Every surface.', 'Use the app, Skill, CLI and API against the same ROBANK operating model wherever your agent runs.'],
+  ['01', 'Your financial command center', 'See your account, assets, payments, borrowing and activity together — with the context your agent needs to work.'],
+  ['02', 'From intent to execution', 'Give ROBANK a task in natural language or the CLI. It can prepare the workflow, check policy and surface the action before execution.'],
+  ['03', 'One ROBANK. Every surface.', 'Use the App, Skill, CLI or API against the same account context, operating rules and execution model.'],
 ];
 
 export default function Home() {
@@ -219,17 +219,27 @@ export default function Home() {
               <div className={`feature-image-wrap feature-visual-${n}`} aria-hidden="true">
                 {n === '01' && <div className="workspace-visual">
                   <div className="workspace-glow" />
-                  <div className="workspace-panel workspace-back"><span>ASSETS</span><b>USDC</b><strong>$8,420.00</strong><i /></div>
-                  <div className="workspace-panel workspace-main"><div className="workspace-top"><span>ROBANK</span><em>ACCOUNT</em></div><small>TOTAL BALANCE</small><strong>$12,840.52</strong><div className="workspace-chart"><i/><i/><i/><i/><i/><i/><i/></div><div className="workspace-assets"><span>USDC</span><span>ETH</span><span>USDG</span></div></div>
+                  <div className="workspace-panel workspace-back"><div className="workspace-panel-head"><span>ASSETS</span><em>3 ACTIVE</em></div><strong>$8,420.00</strong><div className="workspace-mini-bars"><i/><i/><i/><i/></div></div>
+                  <div className="workspace-panel workspace-main"><div className="workspace-top"><span>ROBANK</span><em>ACCOUNT</em></div><small>AVAILABLE BALANCE</small><strong>$12,840.52</strong><div className="workspace-chart"><i/><i/><i/><i/><i/><i/><i/></div><div className="workspace-assets"><span>USDC</span><span>ETH</span><span>USDG</span></div></div>
+                  <div className="workspace-panel workspace-side"><span>ACTIVITY</span><b>+ $250 USDC</b><em>Payment prepared</em></div>
                   <div className="workspace-orbit orbit-one" /><div className="workspace-orbit orbit-two" /><div className="workspace-node node-one" /><div className="workspace-node node-two" />
                 </div>}
                 {n === '02' && <div className="agent-visual-card">
                   <div className="agent-glow" />
-                  <div className="agent-command-card"><div><span className="agent-dot"/> ROBANK AI <em>ONLINE</em></div><strong>Send $250 USDC</strong><small>to treasury.base.eth</small><div className="agent-checks"><span>PAYMENT PREPARED</span><span>POLICY CHECKED</span></div><button>REVIEW ACTION <b>→</b></button></div>
+                  <div className="terminal-card">
+                    <div className="terminal-card-head"><span className="terminal-dots"><i/><i/><i/></span><b>robank</b><em>CLI</em></div>
+                    <div className="terminal-card-body">
+                      <div className="terminal-line"><span>robank@agent:~$</span> robank send --to alice --amount 20 --token USDC</div>
+                      <div className="terminal-result"><i>✓</i> recipient resolved <b>alice</b></div>
+                      <div className="terminal-result"><i>✓</i> policy check <b>passed</b></div>
+                      <div className="terminal-result"><i>✓</i> transaction <b>prepared</b></div>
+                      <div className="terminal-action"><span>READY FOR REVIEW</span><b>→</b></div>
+                    </div>
+                  </div>
                   <div className="agent-orbit agent-orbit-one"/><div className="agent-orbit agent-orbit-two"/><div className="agent-node agent-node-one"/><div className="agent-node agent-node-two"/>
                 </div>}
                 {n === '03' && <div className="surfaces-visual">
-                  <div className="surface-core"><span>R</span><small>ROBANK</small></div>
+                  <div className="surface-core"><img src="/robank-mark.png" alt="" /><small>ROBANK</small></div>
                   <div className="surface-ring ring-one"><div className="surface-node">APP</div></div>
                   <div className="surface-ring ring-two"><div className="surface-node">CLI</div></div>
                   <div className="surface-ring ring-three"><div className="surface-node">API</div></div>
