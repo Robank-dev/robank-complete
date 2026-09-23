@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
+import { IntroLoader } from '@/components/Experience';
 
 const features = [
   ['01', 'Your financial command center', 'See your account, assets, payments, borrowing and activity together — with the context your agent needs to work.'],
@@ -11,6 +13,8 @@ const features = [
 
 export default function Home() {
   const [menu, setMenu] = useState(false);
+  const { ready, authenticated } = usePrivy();
+  const appHref = ready && authenticated ? '/dashboard' : '/login';
 
   useEffect(() => {
     const move = (e: MouseEvent) => {
@@ -25,10 +29,11 @@ export default function Home() {
   }, []);
   return (
     <main className="site-shell">
+      <IntroLoader />
       <nav className="top-nav">
         <Link href="/" className="brand"><span className="brand-mark"><img src="/robank-mark.png" alt="" /></span><span>ROBANK</span></Link>
         <div className={`nav-links ${menu ? "open" : ""}`}><a href="https://x.com/robankdev" target="_blank" rel="noreferrer">X</a><a href="/cli">Skill</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a></div>
-        <div className="nav-actions"><Link href="/login" className="button button-small">App</Link></div>
+        <div className="nav-actions"><Link href={appHref} className="button button-small">App</Link></div>
         <button className="menu-button" onClick={() => setMenu(v => !v)} aria-label={menu ? "Close menu" : "Open menu"}>{menu ? "×" : "☰"}</button>
       </nav>
 
@@ -50,8 +55,8 @@ export default function Home() {
           <p className="hero-lead hero-reveal">ROBANK connects your account, assets, payments, cards and financial workflows — giving agents the context and rails to act within your rules.</p>
 
           <div className="hero-actions hero-reveal">
-            <Link href="/login" className="button hero-main-button">
-              Enter ROBANK <span>→</span>
+            <Link href={appHref} className="button hero-main-button">
+              {ready && authenticated ? 'Open ROBANK' : 'Enter ROBANK'} <span>→</span>
             </Link>
           </div>
         </div>

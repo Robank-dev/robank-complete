@@ -1,6 +1,6 @@
 import './globals.css';
 import Providers from '@/components/Providers';
-import { CursorScene, IntroLoader } from '@/components/Experience';
+import { CursorScene } from '@/components/Experience';
 
 export const metadata = {
   title: 'ROBANK — Your money. Your agent. Your bank.',
@@ -12,7 +12,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <IntroLoader />
         <CursorScene />
         <Providers>{children}</Providers>
       </body>

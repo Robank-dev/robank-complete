@@ -21,7 +21,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     if (ready && !authenticated) window.location.replace('/login');
   }, [ready, authenticated]);
 
-  if (!ready || !authenticated) return null;
+  if (!ready) {
+    return (
+      <main className="min-h-screen bg-ro-bg text-white">
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="flex items-center gap-3 text-xs tracking-[.18em] text-white/45">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
+            LOADING ROBANK
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!authenticated) return null;
 
   return (
     <div className="ro-app-shell">
