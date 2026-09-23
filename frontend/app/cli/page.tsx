@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 export default function CliPage() {
   const [copied, setCopied] = useState(false);
-  const command = 'git clone https://github.com/Robank-dev/robank-complete.git && cd robank-complete\\cli && npm install && npm link';
+  const command = 'npx skills add Robank-dev/robank-skill';
   const copy = async () => {
     await navigator.clipboard?.writeText(command);
     setCopied(true);
@@ -52,14 +52,14 @@ export default function CliPage() {
       <div className="cli-main">
         <header className="cli-hero">
           <span className="cli-eyebrow">ROBANK CLI</span>
-          <h1>Financial operations,<br /><em>from your terminal.</em></h1>
-          <p>ROBANK CLI brings the same account, asset, payment, agent, company and job workflows into a terminal-native interface. The ROBANK operating context is part of the runtime — there is no separate Skill install step for the CLI workflow.</p>
+          <h1>Give your agent<br /><em>a financial interface.</em></h1>
+          <p>Install the ROBANK Skill with one command, then give your agent the context to work with accounts, assets, payments, cards, companies, jobs and on-chain workflows. The CLI is the terminal surface for the same ROBANK operating model.</p>
         </header>
 
         <div className="cli-terminal">
-          <div className="cli-head"><div className="cli-dots"><i/><i/><i/></div><span>~ shell</span><button className="cli-copy" onClick={copy}>{copied ? 'COPIED' : 'COPY'}</button></div>
+          <div className="cli-head"><div className="cli-dots"><i/><i/><i/></div><span>~ shell</span><span className="cli-shell-label">npx</span><button className="cli-copy" onClick={copy}>{copied ? 'COPIED' : 'COPY'}</button></div>
           <div className="cli-command"><b>$</b><strong>{command}</strong></div>
-          <div className="cli-foot"><span>ROBANK CLI</span><span>NODE 20+</span><span>WINDOWS / LINUX / MACOS</span></div>
+          <div className="cli-foot"><span>ROBANK SKILL</span><span>NPX</span><span>WINDOWS / LINUX / MACOS</span></div>
         </div>
 
         <div className="cli-grid">
@@ -69,17 +69,16 @@ export default function CliPage() {
         </div>
         <section className="cli-section">
           <span className="cli-kicker">QUICK START</span>
-          <h2>Install once. Start working.</h2>
-          <p>The current repository contains the CLI package. After linking it locally, the <b>robank</b> command is available in your shell. The bundled ROBANK context travels with the CLI package.</p>
-          <pre className="cli-code"><code>{`cd robank-complete\\cli
-npm install
-npm link
+          <h2>One command. Full context.</h2>
+          <p>The ROBANK Skill is installed through the Skills CLI. It gives compatible agents the current ROBANK operating context and reference layer for the workflows supported by the product.</p>
+          <pre className="cli-code"><code>{`npx skills add Robank-dev/robank-skill
 
+# then use ROBANK from your agent or terminal
 robank --help
 robank status
 robank wallet
 robank agent status`}</code></pre>
-          <div className="cli-note"><b>No second Skill install.</b> The separate <code>npx skills add ...</code> flow remains useful for agents that consume the ROBANK Skill directly, but it is not a prerequisite for the ROBANK CLI runtime.</div>
+          <div className="cli-note"><b>Skill-first workflow.</b> Install the context layer once. The App, CLI and API remain separate surfaces over the same ROBANK operating model.</div>
         </section>
 
         <section className="cli-section">

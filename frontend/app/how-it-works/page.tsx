@@ -199,9 +199,9 @@ function Visual({ kind }: { kind: string }) {
         <div className="hw-card">
           <div className="hw-card-top"><span>ROBANK</span><span>VIRTUAL</span></div>
           <div className="hw-chip" />
-          <div className="hw-card-r">R</div>
+          <div className="hw-card-r"><img src="/robank-mark.png" alt="" /></div>
           <div className="hw-card-number">•••• •••• •••• 4821</div>
-          <div className="hw-card-bottom"><span>ROBANK MEMBER</span><span>VISA</span></div>
+          <div className="hw-card-bottom"><span>ROBANK MEMBER</span><span>PRIVATE Â· DIGITAL</span></div>
         </div>
       </div>
     );
@@ -258,7 +258,7 @@ function Visual({ kind }: { kind: string }) {
     return (
       <div className="hw-visual">
         <div className="hw-agent-stack">
-          <div className="hw-agent-head"><span className="hw-avatar">R</span><div><b>ROBANK AI</b><small>Financial agent</small></div><span className="hw-online">● Online</span></div>
+          <div className="hw-agent-head"><span className="hw-avatar"><img src="/robank-mark.png" alt="" /></span><div><b>ROBANK AI</b><small>Financial agent</small></div><span className="hw-online">● Online</span></div>
           <div className="hw-command">“What can you do with my wallet?”</div>
           <div className="hw-agent-reply">I can read your balance, payments and transaction history, and act on approved financial instructions.</div>
           <div className="hw-agent-tags"><span>PAYMENTS</span><span>SWAPS</span><span>TREASURY</span><span>ON-CHAIN</span></div>
@@ -317,7 +317,7 @@ function Visual({ kind }: { kind: string }) {
     return (
       <div className="hw-visual">
         <div className="hw-routing">
-          <div className="hw-route-center">R</div>
+          <div className="hw-route-center"><img src="/robank-mark.png" alt="" /></div>
           {[
             ['ROBINHOOD CHAIN', 'SUPPORTED'],
             ['BASE MAINNET', 'SUPPORTED'],
@@ -379,7 +379,7 @@ function Visual({ kind }: { kind: string }) {
       <div className="hw-terminal">
         <div className="hw-terminal-top"><span>● ● ●</span><b>ubuntu@robank</b><small>bash</small></div>
         <div className="hw-terminal-body">
-          <p><span>ubuntu@robank:~$</span> roBank agent run</p>
+          <p><span>ubuntu@robank:~$</span> robank agent status</p>
           <p className="muted">loading financial context...</p>
           <p className="ok">✓ wallet connected</p>
           <p className="ok">✓ policy loaded</p>
@@ -401,8 +401,8 @@ export default function HowItWorksPage() {
       <nav className="hw-nav">
         <a href="/" className="hw-brand"><img src="/robank-mark.png" alt="" /><span>ROBANK</span></a>
         <div className="hw-nav-links">
-          <a href="/#product">Product</a>
-          <a href="/#agent">AI</a>
+          <a href="https://x.com/robankdev" target="_blank" rel="noreferrer">X</a>
+          <a href="/cli">Skill</a>
           <a href="/how-it-works" className="active">How it works</a>
           <a href="/docs">Docs</a>
         </div>

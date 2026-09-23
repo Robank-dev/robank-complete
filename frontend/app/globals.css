@@ -8528,3 +8528,72 @@
 .security-section>.security-links{width:min(1120px,92vw)!important;margin:64px auto 0!important;padding:20px 0 0!important;border-top:1px solid rgba(255,255,255,.08)!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;flex-wrap:wrap!important}.security-section>.security-links a{height:34px!important;padding:0 11px!important;display:inline-flex!important;align-items:center!important;gap:7px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:9px!important;background:rgba(255,255,255,.025)!important;color:#747b84!important;backdrop-filter:blur(10px)!important;font:9px ui-monospace,SFMono-Regular,Menlo,monospace!important;transition:all .25s ease!important}.security-section>.security-links a:hover{color:#fff!important;border-color:rgba(255,255,255,.2)!important;background:rgba(255,255,255,.055)!important;transform:translateY(-2px)!important}.security-section>.security-links img{width:13px!important;height:13px!important;opacity:.72!important}
 .security-section>.security-links a:nth-child(n+6){display:none!important}
 @media(max-width:700px){.security-section{min-height:720px!important;padding:90px 5vw 34px!important}.security-section>h2{font-size:clamp(52px,13vw,82px)!important}.security-section>p:after{font-size:13px}.security-section>.robank-auth{flex-direction:column!important;align-items:stretch!important;padding:20px!important}.security-section>.robank-auth .button{justify-content:center!important}.security-section>.security-links{margin-top:42px!important;justify-content:flex-start!important}}
+
+/* FINAL POLISH — CLI INSTALL + PRODUCT GRID */
+.cli-shell-label{margin-left:auto!important;margin-right:12px!important;padding:5px 8px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:6px!important;color:#aeb4bc!important;font:8px ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.12em!important;text-transform:uppercase!important;background:rgba(255,255,255,.025)!important}
+.cli-copy{margin-left:0!important}
+.cli-command{display:flex!important;align-items:center!important;gap:0!important;min-height:92px!important}
+.cli-command strong{font-size:clamp(13px,1.35vw,17px)!important;letter-spacing:-.025em!important}
+.cli-terminal{background:linear-gradient(145deg,#090b0d,#050607)!important;box-shadow:0 35px 110px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.025)!important}
+.cli-card{transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .35s ease,background .35s ease!important}
+.cli-card:hover{transform:translateY(-4px)!important;border-color:rgba(255,255,255,.16)!important;background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.012))!important}
+
+.product-section .feature-grid{align-items:stretch!important}
+.product-section .feature-card{height:540px!important;min-height:540px!important;padding:24px 30px 24px!important;grid-template-rows:22px 300px auto 1fr 22px!important}
+.product-section .feature-image-wrap{height:300px!important;min-height:300px!important;max-height:300px!important;margin:0!important;width:100%!important;border-radius:18px!important}
+.product-section .feature-card .feature-number{align-self:start!important}
+.product-section .feature-card h3{margin-top:18px!important;font-size:26px!important;line-height:1.06!important}
+.product-section .feature-card p{margin-top:10px!important;line-height:1.58!important}
+.product-section .workspace-visual,.product-section .agent-visual-card,.product-section .surfaces-visual{transform:scale(1.18)!important}
+.product-section .workspace-main{width:270px!important;height:172px!important}
+.product-section .workspace-back{width:225px!important;height:126px!important}
+.product-section .workspace-side{width:166px!important;height:78px!important}
+.product-section .terminal-card{width:350px!important;height:198px!important}
+.product-section .surface-core{width:102px!important;height:102px!important}
+.product-section .surface-core img{width:64px!important;height:64px!important}
+
+/* HOW IT WORKS — use the real ROBANK visual language */
+.hw-visual{background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.065),transparent 52%),linear-gradient(145deg,#090b0d,#040506)!important;border-color:rgba(255,255,255,.11)!important;box-shadow:inset 0 1px rgba(255,255,255,.035),0 30px 90px rgba(0,0,0,.3)!important}
+.hw-visual:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:38px 38px;mask-image:radial-gradient(circle at center,#000,transparent 76%);opacity:.7}
+.hw-window,.hw-wallet,.hw-flow-card,.hw-agent-card,.hw-receive,.hw-swap,.hw-agent-stack,.hw-perms,.hw-automation,.hw-a2a,.hw-rwa,.hw-treasury,.hw-terminal{position:relative;z-index:2;box-shadow:0 35px 100px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.055)!important;background:linear-gradient(145deg,#0c0f12,#07090b)!important}
+.hw-window-head,.hw-terminal-top{background:rgba(255,255,255,.018)!important}
+.hw-card-r{display:grid!important;place-items:center!important;background:#080a0c!important;border:1px solid rgba(255,255,255,.18)!important;box-shadow:0 10px 30px rgba(0,0,0,.45)!important;overflow:hidden!important}
+.hw-card-r img{width:42px!important;height:42px!important;object-fit:cover!important;border-radius:50%!important;display:block!important;filter:grayscale(1) contrast(1.12)!important}
+.hw-avatar{display:grid!important;place-items:center!important;overflow:hidden!important;background:#080a0c!important;border:1px solid rgba(255,255,255,.16)!important}
+.hw-avatar img{width:28px!important;height:28px!important;border-radius:50%!important;object-fit:cover!important;display:block!important;filter:grayscale(1) contrast(1.1)!important}
+.hw-route-center{display:grid!important;place-items:center!important;overflow:hidden!important;background:#080a0c!important;border:1px solid rgba(255,255,255,.18)!important}
+.hw-route-center img{width:58px!important;height:58px!important;border-radius:50%!important;object-fit:cover!important;filter:grayscale(1) contrast(1.1)!important;display:block!important}
+.hw-terminal-body{background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)!important}
+
+/* PRODUCT GRID — equal frames, centered artwork, no spill */
+.product-section .feature-card{height:520px!important;min-height:520px!important;grid-template-rows:22px 285px auto 1fr 22px!important;padding:24px 30px 22px!important}
+.product-section .feature-image-wrap{height:285px!important;min-height:285px!important;max-height:285px!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.product-section .workspace-visual,.product-section .agent-visual-card,.product-section .surfaces-visual{transform:scale(1.05)!important;transform-origin:center!important}
+.product-section .workspace-back{display:none!important}
+.product-section .workspace-main{width:280px!important;height:178px!important;top:45px!important;transform:translateX(-50%) rotateX(6deg) rotateY(-7deg) rotateZ(-1deg)!important}
+.product-section .workspace-side{width:150px!important;height:72px!important;right:12px!important;top:145px!important}
+.product-section .workspace-orbit{opacity:.65!important}
+.product-section .terminal-card{width:360px!important;height:202px!important;top:42px!important;transform:translateX(-50%) rotateX(4deg) rotateY(-3deg)!important}
+.product-section .surface-core{width:108px!important;height:108px!important}
+.product-section .surface-core img{width:68px!important;height:68px!important}
+.product-section .surface-pill{right:24px!important;top:34px!important}
+.product-section .surface-ring{opacity:.78!important}
+.product-section .feature-card h3{margin-top:15px!important}
+@media(max-width:900px){.product-section .feature-card{height:520px!important}.product-section .feature-image-wrap{height:285px!important}.product-section .workspace-visual,.product-section .agent-visual-card,.product-section .surfaces-visual{transform:scale(.98)!important}}
+@media(max-width:600px){.product-section .feature-card{height:500px!important;min-height:500px!important;grid-template-rows:20px 255px auto 1fr 20px!important}.product-section .feature-image-wrap{height:255px!important;min-height:255px!important;max-height:255px!important}.product-section .terminal-card{width:320px!important}.product-section .workspace-main{width:250px!important}.product-section .workspace-side{display:none!important}}
+
+/* HOW IT WORKS — align visuals with the live ROBANK product UI */
+.hw-login .hw-window-head b{font-size:0!important;width:24px!important;height:24px!important;border-radius:50%!important;background:#0a0c0e url('/robank-mark.png') center/cover no-repeat!important;border:1px solid rgba(255,255,255,.14)!important;display:block!important}
+.hw-login .hw-window-head span{font-size:8px!important;letter-spacing:.16em!important}
+.hw-login .hw-window-body h3{font-size:34px!important;letter-spacing:-.045em!important}
+.hw-card{background:linear-gradient(145deg,#202428,#090b0d 62%,#030405)!important;color:#eef0f2!important;border:1px solid rgba(255,255,255,.22)!important;box-shadow:35px 40px 100px rgba(0,0,0,.65),inset 0 1px rgba(255,255,255,.18)!important}
+.hw-card-r img{filter:grayscale(1) brightness(1.15) contrast(1.08)!important}
+.hw-agent-stack .hw-agent-head{border-bottom:1px solid rgba(255,255,255,.06)!important;padding-bottom:16px!important}
+.hw-agent-stack .hw-command{background:rgba(255,255,255,.025)!important}
+.hw-route-center{box-shadow:0 0 80px rgba(255,255,255,.08)!important}
+.hw-route-center img{filter:grayscale(1) brightness(1.12) contrast(1.1)!important}
+.hw-terminal{overflow:hidden!important}
+.hw-terminal-top{height:48px!important}
+.hw-terminal-body p{letter-spacing:-.01em!important}
+.hw-step.is-active .hw-visual{box-shadow:inset 0 1px rgba(255,255,255,.05),0 40px 110px rgba(0,0,0,.4)!important}
+.hw-stage{min-width:0!important}
