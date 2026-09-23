@@ -1,4 +1,4 @@
-﻿import 'dotenv/config';
+import 'dotenv/config';
 
 export const config = {
   port: Number(process.env.PORT || 3001),
@@ -8,5 +8,10 @@ export const config = {
   robankLlmModel: process.env.ROBANK_LLM_MODEL || 'xiaomi/mimo-v2.6-flash',
   moonpayApiKey: process.env.MOONPAY_API_KEY || '',
   moonpaySecretKey: process.env.MOONPAY_SECRET_KEY || '',
-  baseRpcUrl: process.env.BASE_RPC_URL || 'https://sepolia.base.org'
+  baseRpcUrl: process.env.BASE_RPC_URL || 'https://mainnet.base.org',
+  robinhoodRpcUrl: process.env.ROBINHOOD_RPC_URL || 'https://rpc.mainnet.chain.robinhood.com',
+  diditApiKey: process.env.DIDIT_API_KEY || '',
+  diditKybWorkflowId: process.env.DIDIT_KYB_WORKFLOW_ID || '',
+  diditKycWorkflowId: process.env.DIDIT_KYC_WORKFLOW_ID || '',
+  tiingoApiKey: process.env.TIINGO_API_KEY || ''
 };

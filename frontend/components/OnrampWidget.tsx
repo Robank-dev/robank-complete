@@ -1,16 +1,19 @@
 ﻿'use client';
 
 import { useState } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 import { useAccount } from 'wagmi';
 import { api } from '@/lib/api';
 
 export default function OnrampWidget() {
+  const { authenticated } = usePrivy();
   const { address } = useAccount();
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('');
 
   async function start() {
-    if (!address) return setStatus('Connect your wallet first.');
+    if (!authenticated) return setStatus('Sign in with email first.');
+    if (!address) return setStatus('Privy wallet is still loading. Try again in a moment.');
     setStatus('Preparing on-rampâ€¦');
     try {
       const result = await api.onramp(address, amount || undefined);

@@ -227,9 +227,10 @@ Load balance + transactions
   ↓
 ROBANK dashboard`}</Code>
             <Callout title="Development note">
-              Development is intended to start on Base Sepolia before production
-              network deployment. The live supported networks and signing model
-              should always match the actual environment you have configured.
+              The current production-facing configuration targets Base Mainnet
+              for payments and vault operations, with Robinhood Chain Mainnet
+              available as the tokenized-asset rail. The live signing model should
+              always match the actual environment you have configured.
             </Callout>
           </section>
 
@@ -395,8 +396,8 @@ ROBANK CLI v0.1.0
               <thead><tr><th>Endpoint</th><th>Purpose</th></tr></thead>
               <tbody>
                 <tr><td><strong>POST /api/agent/chat</strong></td><td>Send a message and receive an agent response/action.</td></tr>
-                <tr><td><strong>GET /api/vault/:address/balance</strong></td><td>Read supported vault balance.</td></tr>
-                <tr><td><strong>GET /api/vault/:address/transactions</strong></td><td>Read recent vault transactions.</td></tr>
+                <tr><td><strong>GET /api/vault/:address</strong></td><td>Read the wallet's Base Mainnet USDC balance.</td></tr>
+                <tr><td><strong>GET /api/borrow/status/:address</strong></td><td>Read the wallet's Morpho/Base credit positions.</td></tr>
                 <tr><td><strong>POST /api/payments/route</strong></td><td>Build payment routing data and fee estimates.</td></tr>
                 <tr><td><strong>GET /api/onramp/url</strong></td><td>Create/retrieve an on-ramp entry URL.</td></tr>
               </tbody>
@@ -407,17 +408,16 @@ ROBANK CLI v0.1.0
             <span className="docs-section-kicker">10 / NETWORKS</span>
             <h2>One financial layer, more than one chain.</h2>
             <p>
-              ROBANK is designed as a multi-chain interface. The development
-              environment starts with Base Sepolia, while the broader product
-              design includes Base, Arbitrum and Robinhood Chain.
+              ROBANK is a multi-chain interface. Base Mainnet is the primary
+              payment and settlement rail, while Robinhood Chain Mainnet is the
+              tokenized-asset rail. Other networks remain outside the current live scope.
             </p>
             <table className="docs-table">
               <thead><tr><th>Network</th><th>Role in the design</th><th>Status</th></tr></thead>
               <tbody>
-                <tr><td><strong>Base Sepolia</strong></td><td>Primary development/test environment</td><td><Badge>DEV</Badge></td></tr>
-                <tr><td><strong>Base</strong></td><td>Core EVM production target in the original architecture</td><td><Badge muted>PLANNED</Badge></td></tr>
-                <tr><td><strong>Arbitrum</strong></td><td>Multi-chain expansion</td><td><Badge muted>PLANNED</Badge></td></tr>
-                <tr><td><strong>Robinhood Chain</strong></td><td>Target network for selected ecosystem integrations</td><td><Badge muted>PLANNED</Badge></td></tr>
+                <tr><td><strong>Base Mainnet</strong></td><td>Primary payment and settlement rail</td><td><Badge>LIVE</Badge></td></tr>
+                <tr><td><strong>Robinhood Chain Mainnet</strong></td><td>Tokenized-asset rail and Stock Token ecosystem</td><td><Badge>LIVE</Badge></td></tr>
+                <tr><td><strong>Arbitrum</strong></td><td>Future multi-chain expansion</td><td><Badge muted>PLANNED</Badge></td></tr>
               </tbody>
             </table>
             <Callout title="Do not hard-code production assumptions">

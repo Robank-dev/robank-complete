@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 import WalletConnect from './WalletConnect';
 
 const nav = [
@@ -11,11 +13,22 @@ const nav = [
   ['/send', 'Send'],
   ['/receive', 'Receive'],
   ['/agent', 'Agent'],
-  ['/onramp', 'Buy USDC']
+  ['/onramp', 'Buy USDC'],
+  ['/company', 'Company'],
+  ['/markets', 'Markets'],
+  ['/news', 'News'],
+  ['/jobs', 'Jobs']
 ] as const;
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { ready, authenticated } = usePrivy();
+
+  useEffect(() => {
+    if (ready && !authenticated) window.location.replace('/login');
+  }, [ready, authenticated]);
+
+  if (!ready || !authenticated) return null;
 
   return (
     <div className="min-h-screen bg-ro-bg text-white">

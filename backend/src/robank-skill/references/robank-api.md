@@ -375,9 +375,8 @@ GET /v1/treasury/status?treasury_id=trs_001 HTTP/1.1
 ```json
 {
   "networks": [
-    { "name": "base", "status": "planned" },
-    { "name": "arbitrum", "status": "planned" },
-    { "name": "base-sepolia", "status": "dev" }
+    { "name": "base", "chain_id": 8453, "status": "mainnet" },
+    { "name": "robinhood", "chain_id": 4663, "status": "mainnet" }
   ]
 }
 ```
@@ -387,5 +386,12 @@ GET /v1/treasury/status?treasury_id=trs_001 HTTP/1.1
 ---
 
 **Note on status labels:** every endpoint above is documented as a target
-specification. Treat all as **PLANNED** unless the calling environment confirms a
-live backend for a specific endpoint. Never present sample responses as real data.
+specification. Treat the API capability itself as **PLANNED** unless the calling
+environment confirms a live backend for that endpoint. Network names and chain IDs
+above identify the intended production networks; they do not prove that ROBANK has a
+live integration. Never present sample responses as real data.
+
+**Production network rule:** production configuration must use Base Mainnet (`8453`)
+or Robinhood Chain Mainnet (`4663`). Base Sepolia (`84532`) and Robinhood Chain
+Testnet (`46630`) are development/testnet networks and must not be used by production
+execution paths.

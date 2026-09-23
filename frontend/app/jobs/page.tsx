@@ -1,0 +1,18 @@
+'use client';
+import { useEffect, useState } from 'react';
+import AppShell from '@/components/AppShell';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { api } from '@/lib/api';
+
+export default function JobsPage(){
+ const {authenticated}=usePrivy(); const {wallets}=useWallets(); const wallet=wallets.find(w=>w.walletClientType==='privy');
+ const [jobs,setJobs]=useState<any[]>([]); const [title,setTitle]=useState(''); const [description,setDescription]=useState(''); const [budget,setBudget]=useState(''); const [error,setError]=useState('');
+ const load=async()=>{try{setJobs((await api.jobs('?status=open')).jobs||[])}catch(e){setError(e instanceof Error?e.message:'Unable to load jobs')}}; useEffect(()=>{load()},[]);
+ async function create(){if(!wallet?.address||!title.trim()||!description.trim())return;try{await api.createJob({walletAddress:wallet.address,title:title.trim(),description:description.trim(),budgetAmount:budget||null,budgetAsset:budget?'USDC':null,network:budget?'base':null});setTitle('');setDescription('');setBudget('');await load()}catch(e){setError(e instanceof Error?e.message:'Unable to create job')}}
+ async function claim(id:string){if(!wallet?.address)return;try{await api.claimJob(id,wallet.address);await load()}catch(e){setError(e instanceof Error?e.message:'Unable to claim job')}}
+ if(!authenticated)return null;
+ return <AppShell><div className="space-y-6"><div><div className="text-xs uppercase tracking-[.2em] text-white/40">JOBS</div><h1 className="mt-2 text-3xl font-semibold">Work marketplace for people and agents.</h1><p className="mt-2 max-w-2xl text-sm text-white/50">Create a task from the web or ROBANK terminal, claim work, submit proof, and let the creator approve it. Payout execution stays separate until a real payment rail is configured.</p></div>
+ <div className="rounded-2xl border border-ro-line bg-ro-panel p-5"><div className="grid gap-3"><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Job title" className="rounded-xl border border-ro-line bg-black/30 px-4 py-3 text-sm outline-none"/><textarea value={description} onChange={e=>setDescription(e.target.value)} placeholder="Describe exactly what must be delivered" rows={4} className="rounded-xl border border-ro-line bg-black/30 px-4 py-3 text-sm outline-none"/><input value={budget} onChange={e=>setBudget(e.target.value)} placeholder="Optional budget · USDC on Base" className="rounded-xl border border-ro-line bg-black/30 px-4 py-3 text-sm outline-none"/></div><button onClick={create} disabled={!wallet?.address||!title.trim()||!description.trim()} className="mt-3 rounded-xl bg-white px-4 py-3 text-xs font-semibold text-black disabled:opacity-40">Create job</button>{error&&<p className="mt-3 text-xs text-white/55">{error}</p>}</div>
+ <div className="space-y-3">{jobs.length===0?<div className="rounded-2xl border border-ro-line p-6 text-sm text-white/45">No open jobs yet.</div>:jobs.map(j=><div key={j.id} className="rounded-2xl border border-ro-line bg-ro-panel p-5"><div className="flex flex-col gap-3 md:flex-row md:justify-between"><div><h3 className="font-medium">{j.title}</h3><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/50">{j.description}</p><div className="mt-3 text-[10px] font-mono text-white/35">{j.budget_amount?`${j.budget_amount} ${j.budget_asset}`:'NO BUDGET SET'} · {j.status.toUpperCase()}</div></div><button onClick={()=>claim(j.id)} disabled={!wallet?.address} className="h-fit rounded-xl border border-white/15 px-4 py-2 text-xs hover:bg-white/5 disabled:opacity-40">Claim</button></div></div>)}</div>
+ </div></AppShell>
+}

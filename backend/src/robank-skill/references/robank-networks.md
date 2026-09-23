@@ -10,10 +10,8 @@ speed, mandate compatibility), not a fixed default.
 
 | Network | Status |
 |---|---|
-| Base | PLANNED |
-| Arbitrum | PLANNED |
-| Robinhood Chain | PLANNED |
-| Base Sepolia | DEV |
+| Base Mainnet | MAINNET (chain ID 8453) |
+| Robinhood Chain Mainnet | MAINNET (chain ID 4663) |
 
 Do not present any of the above as currently live in production unless the runtime
 environment explicitly confirms it. Use `network.list` / `GET /v1/networks` to check

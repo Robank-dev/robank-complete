@@ -1,10 +1,12 @@
 ﻿'use client';
 
 import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 import { SAFE_STORAGE_KEY } from '@/lib/constants';
 import { useEffect, useState } from 'react';
 
 export default function ReceiveCard() {
+  const { authenticated } = usePrivy();
   const { address } = useAccount();
   const [vault, setVault] = useState('');
 
@@ -19,7 +21,7 @@ export default function ReceiveCard() {
         <div className="mx-auto mb-4 grid h-28 w-28 place-items-center rounded-xl border border-white/10 bg-white/[.03] font-mono text-[10px] text-white/35">
           QR
         </div>
-        <div className="break-all font-mono text-xs text-white/70">{vault || 'Connect wallet and create a vault'}</div>
+        <div className="break-all font-mono text-xs text-white/70">{!authenticated ? 'Sign in with email to view your wallet' : vault || 'Create a vault or use your Privy wallet'}</div>
       </div>
     </div>
   );

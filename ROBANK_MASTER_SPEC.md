@@ -115,7 +115,7 @@ PORT=3001
 # Frontend (NEXT_PUBLIC_ prefix wajib)
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=   # dari cloud.walletconnect.com
 NEXT_PUBLIC_API_URL=http://localhost:3001
-NEXT_PUBLIC_CHAIN_ID=84532              # 84532=testnet, 8453=mainnet
+NEXT_PUBLIC_CHAIN_ID=8453               # Base Mainnet; Robinhood Chain Mainnet uses chain ID 4663
 ```
 
 ---

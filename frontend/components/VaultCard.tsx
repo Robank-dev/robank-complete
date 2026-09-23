@@ -5,10 +5,10 @@ import { useAccount } from 'wagmi';
 import type { EIP1193Provider } from 'viem';
 import { api } from '@/lib/api';
 import { getPredictedSafeAddress } from '@/lib/safe';
-import { SAFE_STORAGE_KEY } from '@/lib/constants';
+import { BASE_MAINNET_CHAIN_ID, SAFE_STORAGE_KEY } from '@/lib/constants';
 
 export default function VaultCard() {
-  const { address, connector } = useAccount();
+  const { address, connector, chainId } = useAccount();
   const [vault, setVault] = useState<string>();
   const [status, setStatus] = useState('');
 
@@ -20,7 +20,11 @@ export default function VaultCard() {
 
   async function prepareVault() {
     if (!address || !connector) return;
-    setStatus('Preparing Safe vaultâ€¦');
+    if (chainId !== BASE_MAINNET_CHAIN_ID) {
+      setStatus('Switch your wallet to Base Mainnet.');
+      return;
+    }
+    setStatus('Preparing Safe vault…');
     try {
       const provider = await connector.getProvider() as EIP1193Provider;
       const predicted = await getPredictedSafeAddress(provider, address);
@@ -38,7 +42,7 @@ export default function VaultCard() {
       <div className="mb-3 flex items-center justify-between">
         <div>
           <div className="text-sm text-white/50">Personal vault</div>
-          <div className="mt-1 font-mono text-xs text-white/40">Safe smart account Â· Base Sepolia</div>
+          <div className="mt-1 font-mono text-xs text-white/40">Safe smart account Â· Base Mainnet</div>
         </div>
         <span className="rounded-full border border-white/10 px-2 py-1 text-[10px] uppercase tracking-wider text-white/50">non-custodial</span>
       </div>

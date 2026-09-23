@@ -21,5 +21,12 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  "routes": [
+    {
+      "pattern": "robank.co",
+      "custom_domain": true,
+      "zone_name": "robank.co"
+    }
+  ]
 }

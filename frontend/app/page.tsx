@@ -27,8 +27,8 @@ export default function Home() {
     <main className="site-shell">
       <nav className="top-nav">
         <Link href="/" className="brand"><span className="brand-mark"><img src="/robank-mark.png" alt="" /></span><span>ROBANK</span></Link>
-        <div className={`nav-links ${menu ? "open" : ""}`}><a href="https://x.com/robank" target="_blank" rel="noreferrer">X</a><a href="#install">Install Skill</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a><a href="#agent">AI</a></div>
-        <div className="nav-actions"><Link href="/dashboard" className="button button-small">App</Link></div>
+        <div className={`nav-links ${menu ? "open" : ""}`}><a href="https://x.com/robank_co" target="_blank" rel="noreferrer">X</a><a href="#install">Install Skill</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a><a href="#agent">AI</a></div>
+        <div className="nav-actions"><Link href="/login" className="button button-small">App</Link></div>
         <button className="menu-button" onClick={() => setMenu(v => !v)} aria-label="Open menu">â˜°</button>
       </nav>
 
@@ -208,6 +208,60 @@ export default function Home() {
         </div>
       </section>
 
+            <section id="install" className="section install-section">
+        <div className="install-header">
+          <div>
+            <div className="section-kicker">ROBANK AGENT SKILL</div>
+            <h2>Give your agent <em>ROBANK context.</em></h2>
+            <p>Install the ROBANK Skill and give compatible agents structured context for wallets, payments, treasury, networks, security, x402, APIs, commands and the broader ROBANK system.</p>
+          </div>
+          <a className="install-github-link" href="https://github.com/Robank-dev/robank-skill" target="_blank" rel="noreferrer">VIEW ON GITHUB <span>→</span></a>
+        </div>
+
+        <div className="install-terminal">
+          <div className="install-terminal-head">
+            <div className="install-dots"><i /><i /><i /></div>
+            <span>~ shell</span>
+            <button type="button" onClick={() => navigator.clipboard?.writeText('npx skills add Robank-dev/robank-skill')}>COPY</button>
+          </div>
+          <div className="install-command"><b>$</b><span>npx skills add</span><strong>Robank-dev/robank-skill</strong></div>
+          <div className="install-terminal-foot">
+            <span>ROBANK SKILL</span>
+            <span>AGENT-FIRST FINANCIAL CONTEXT</span>
+            <span>WINDOWS / LINUX / MACOS</span>
+          </div>
+        </div>
+
+        <div className="install-grid">
+          <article className="install-card">
+            <span className="install-card-kicker">01 / AGENT</span>
+            <h3>Built for financial agents.</h3>
+            <p>Structured ROBANK context for agents working with wallets, payments, treasury, networks, security and execution concepts.</p>
+            <a href="/docs#agent">READ AGENT DOCS <span>→</span></a>
+          </article>
+
+          <article className="install-card">
+            <span className="install-card-kicker">02 / SKILL</span>
+            <h3>One install. One reference layer.</h3>
+            <p>The package includes the ROBANK Skill together with reference material covering the system's core financial concepts.</p>
+            <a href="https://github.com/Robank-dev/robank-skill" target="_blank" rel="noreferrer">VIEW REPOSITORY <span>→</span></a>
+          </article>
+
+          <article className="install-card">
+            <span className="install-card-kicker">03 / CAPABILITIES</span>
+            <h3>Payments, x402, treasury &amp; more.</h3>
+            <p>Explore documented ROBANK concepts across payments, treasury, RWA, networks, security, APIs, commands and machine payments.</p>
+            <a href="/docs">EXPLORE DOCS <span>→</span></a>
+          </article>
+
+          <article className="install-card">
+            <span className="install-card-kicker">04 / DEVELOPERS</span>
+            <h3>Use ROBANK where you work.</h3>
+            <p>ROBANK is designed beyond one website through agent workflows, terminal usage and API-facing integrations.</p>
+            <a href="/docs#developer">DEVELOPER DOCS <span>→</span></a>
+          </article>
+        </div>
+      </section>
       <section className="ticker"><div className="ticker-track"><div className="ticker-set"><span>YOUR MONEY</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>GLOBAL PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>AI FINANCE</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>ARBITRUM</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div><div className="ticker-set" aria-hidden="true"><span>YOUR MONEY</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>GLOBAL PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>AI FINANCE</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>ARBITRUM</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div></div></section>
 
       <section id="product" className="section product-section">
@@ -512,7 +566,7 @@ export default function Home() {
 
       </section>
 
-      <section id="security" className="section security-section"><div className="security-orb" /><div className="section-kicker">CONTROL</div><h2>Quietly powerful.<br /><em>Clearly yours.</em></h2><p>ROBANK is designed around user-controlled wallets and transparent actions. The interface stays simple; the underlying rails do the heavy lifting.</p><div className="robank-auth"><span>Sign in or create your account with your email.</span><form onSubmit={(e)=>e.preventDefault()}><input type="email" placeholder="you@example.com" aria-label="Email address" required /><button type="submit">Continue with email <b>→</b></button></form></div><div className="security-links"><a href="#" aria-label="GitHub"><img src="https://cdn.simpleicons.org/github/FFFFFF" alt="" /><span>GitHub</span></a><a href="#" aria-label="Contact"><span className="contact-icon">✉</span><span>Contact</span></a><a href="#" aria-label="X"><img src="https://cdn.simpleicons.org/x/FFFFFF" alt="" /><span>X</span></a><a href="#" aria-label="Telegram"><img src="https://cdn.simpleicons.org/telegram/FFFFFF" alt="" /><span>Telegram</span></a><a href="#" aria-label="Contract"><span className="contract-icon">⌘</span><span>Contract</span></a><a href="#" aria-label="DexScreener"><img src="/dex-screener-logo.png" alt="" /><span>DexScreener</span></a><a href="#" aria-label="Uniswap"><img src="/uniswap_logo.png" alt="" /><span>Uniswap</span></a><a href="#" aria-label="CoinGecko"><img src="/coingecko_logo.png" alt="" /><span>CoinGecko</span></a><a href="#" aria-label="Docs"><img src="https://cdn.simpleicons.org/readthedocs/FFFFFF" alt="" /><span>Docs</span></a></div></section>
+      <section id="security" className="section security-section"><div className="security-orb" /><div className="section-kicker">CONTROL</div><h2>Quietly powerful.<br /><em>Clearly yours.</em></h2><p>ROBANK is designed around user-controlled wallets and transparent actions. The interface stays simple; the underlying rails do the heavy lifting.</p><div className="robank-auth"><span>Sign in or create your account with your email.</span><Link href="/login" className="button">Continue with email <b>→</b></Link></div><div className="security-links"><a href="https://github.com/Robank-dev/robank-complete" target="_blank" rel="noreferrer" aria-label="GitHub"><img src="https://cdn.simpleicons.org/github/FFFFFF" alt="" /><span>GitHub</span></a><a href="mailto:contact@robank.co" aria-label="Contact"><span className="contact-icon">✉</span><span>Contact</span></a><a href="https://x.com/robank_co" target="_blank" rel="noreferrer" aria-label="X"><img src="https://cdn.simpleicons.org/x/FFFFFF" alt="" /><span>X</span></a><a href="https://t.me/robank_tg" target="_blank" rel="noreferrer" aria-label="Telegram"><img src="https://cdn.simpleicons.org/telegram/FFFFFF" alt="" /><span>Telegram</span></a><a href="#" aria-label="Contract"><span className="contract-icon">⌘</span><span>Contract</span></a><a href="#" aria-label="DexScreener"><img src="/dex-screener-logo.png" alt="" /><span>DexScreener</span></a><a href="#" aria-label="Uniswap"><img src="/uniswap_logo.png" alt="" /><span>Uniswap</span></a><a href="#" aria-label="CoinGecko"><img src="/coingecko_logo.png" alt="" /><span>CoinGecko</span></a><a href="/docs" aria-label="Docs"><img src="https://cdn.simpleicons.org/readthedocs/FFFFFF" alt="" /><span>Docs</span></a></div></section>
     </main>
   );
 }

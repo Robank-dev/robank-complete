@@ -1,0 +1,25 @@
+{
+  "name": "robank-cli",
+  "version": "0.1.0",
+  "description": "ROBANK command-line interface for agent-native financial operations",
+  "type": "module",
+  "bin": {
+    "robank": "./bin/robank.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node ./bin/robank.js",
+    "dev": "node --watch ./bin/robank.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "viem": "^2.56.8"
+  }
+}

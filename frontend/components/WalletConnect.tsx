@@ -1,39 +1,42 @@
-﻿'use client';
+'use client';
 
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { useEffect } from 'react';
+import { useSetActiveWallet } from '@privy-io/wagmi';
 
 function short(value?: string) {
   return value ? `${value.slice(0, 6)}…${value.slice(-4)}` : '';
 }
 
 export default function WalletConnect() {
-  const { address, isConnected, chainId } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
-  const { disconnect } = useDisconnect();
+  const { ready, authenticated, login, logout, user } = usePrivy();
+  const { wallets } = useWallets();
+  const { setActiveWallet } = useSetActiveWallet();
+  const wallet = wallets.find((item) => item.walletClientType === 'privy');
+  const email = user?.email?.address;
 
-  if (isConnected) {
+  useEffect(() => {
+    if (authenticated && wallet) setActiveWallet(wallet).catch(() => undefined);
+  }, [authenticated, wallet, setActiveWallet]);
+
+  if (!ready) return <span className="text-sm text-white/40">Loading…</span>;
+  if (!authenticated) {
     return (
-      <button
-        onClick={() => disconnect()}
-        className="rounded-xl border border-ro-line bg-white/5 px-4 py-2 text-sm hover:bg-white/10"
-      >
-        {short(address)} · {chainId === 84532 ? 'Sepolia' : `Chain ${chainId}`}
+      <button onClick={() => login()} className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black">
+        Sign in
       </button>
     );
   }
 
   return (
-    <div className="flex gap-2">
-      {connectors.slice(0, 2).map((connector) => (
-        <button
-          key={connector.uid}
-          disabled={isPending}
-          onClick={() => connect({ connector })}
-          className="rounded-xl border border-ro-line bg-white/5 px-4 py-2 text-sm hover:bg-white/10 disabled:opacity-50"
-        >
-          {connector.name}
-        </button>
-      ))}
+    <div className="flex items-center gap-3">
+      <div className="hidden text-right sm:block">
+        <div className="text-xs text-white/75">{email ?? 'ROBANK user'}</div>
+        <div className="text-[10px] text-white/35">{short(wallet?.address)}</div>
+      </div>
+      <button onClick={() => logout()} className="rounded-xl border border-ro-line bg-white/5 px-4 py-2 text-sm hover:bg-white/10">
+        Sign out
+      </button>
     </div>
   );
 }

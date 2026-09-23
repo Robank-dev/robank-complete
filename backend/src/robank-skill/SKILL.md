@@ -1,6 +1,6 @@
 ---
 name: robank
-description: Give AI agents a financial operating layer for wallets, payments, treasury, swaps, x402 machine payments, automation, tokenized assets, and multi-chain financial execution through ROBANK.
+description: Give AI agents a financial operating layer for capital, assets, borrowing, payments, cards, wallets, automation, tokenized assets, and multi-network execution through ROBANK.
 license: MIT
 compatibility: Requires access to ROBANK-compatible wallet, API, CLI, or agent tools depending on the operation.
 ---
@@ -9,218 +9,485 @@ compatibility: Requires access to ROBANK-compatible wallet, API, CLI, or agent t
 
 ## 1. What ROBANK Is
 
-ROBANK is an agent-first, on-chain financial platform and interface layer. It is not a
-consumer chat wallet. It is a financial operating layer that lets a software agent hold
-context about an account, act within defined permissions, and execute financial
-operations — payments, treasury management, swaps, tokenized asset allocation, and
-machine-to-machine payments via x402 — on the user's behalf.
+ROBANK is an agent-first financial operating layer centered on **capital**.
 
-Core concept:
+It is designed to let an AI agent observe financial state, reason over capital, act within explicit permissions, verify external results, reconcile state, and continue operating through recurring jobs.
 
-> **"Give your agent a financial identity."**
+ROBANK is not automatically a regulated bank, lender, broker, issuer, custodian, card network, or legal identity. Those roles depend on the actual provider, legal structure, jurisdiction, and deployment.
 
-## 2. What "Financial Identity" Means
+Core loop:
 
-A financial identity is a product concept, **not a legal identity**. It is the
-combination of:
+> **OBSERVE → DECIDE → EXECUTE → VERIFY → RECONCILE → REPEAT**
 
-- **Wallet / account** — an on-chain address or account the agent can read and, within
-  scope, act through
-- **Permissions** — a scoped mandate defining what the agent may do autonomously
-- **Payment rails** — the set of routes (chains, providers, x402) available for moving
-  value
-- **Execution** — the actual construction and submission of financial actions
-- **Automation** — recurring or conditional operations run under a standing mandate
-- **Financial context** — balances, positions, policy, and history the agent can reason
-  over
+Core product surfaces:
 
-Do not describe this as KYC identity, legal personhood, or a bank account in the
-traditional regulated sense unless the user's own ROBANK account documentation says so.
+- Capital
+- Assets
+- Borrow
+- Payments
+- Cards
+- Vault
+- Agent
+- Activity
 
-## 3. The Agent's Role
+The wallet or vault is infrastructure. **Capital is the primary product object.**
 
-The agent is an operator constrained by a mandate, not an autonomous financial actor
-with unlimited discretion. On every financial task the agent must:
+## 2. Capital as the Core Object
 
-1. Understand user intent
-2. Determine which capability/tool applies
-3. Check the current permission/mandate for that capability
-4. Gather required state (balances, quotes, routes, policy) before acting
-5. Construct the action
-6. Determine whether user approval is required
-7. Execute only after approval where required
-8. Verify the actual result before reporting anything
-9. Report outcomes factually, including partial failures
+The agent should reason about the user's total capital as a unified state.
 
-## 4. Available Financial Capabilities
+Capital context may include:
 
-- Wallet operations (balance, transactions, send/receive)
-- Payments (quote, route, execute, retry)
-- Swaps (quote, execute)
-- Treasury (status, policy, simulate, rebalance)
-- Agent mandates (grant, inspect, revoke permissions)
-- x402 machine payments (inspect, pay, retry)
-- Tokenized assets / RWA (discover, preview, execute, monitor)
-- Multi-chain / multi-network routing
-- Developer/API and CLI access
+- Cash and liquid balances
+- Invested assets
+- Tokenized stock exposure
+- RWA exposure
+- Collateral value
+- Debt
+- Credit capacity
+- Liquidity
+- Net capital
+- Transaction history
+- Provider state
+- Agent policy and limits
 
-See `references/robank-agent-tools.md` for the full tool contract.
+Do not claim a value exists unless an actual state-reading tool or API confirms it.
 
-## 5. Interpreting User Intent
+A provider or network is a rail, not the canonical source of truth. ROBANK's internal ledger and verified external results should be reconciled before reporting financial outcomes.
 
-Financial language is often shorthand. Map it to explicit capabilities before acting:
+## 3. ROBANK Financial Rails
 
-- "Pay X the cheapest way" → payments.quote → payments.route → payments.execute
-- "Keep liquidity at $10k and rebalance the rest" → treasury.policy + treasury.simulate
-  + treasury.rebalance
-- "Let my agent pay for API calls automatically" → x402.pay under a spending mandate
-- "Build me a basket of X" → rwa.discover → rwa.preview → rwa.execute
+ROBANK can orchestrate multiple financial rails.
 
-Never assume a capability exists or is live — check status (Section 9) before promising
-an outcome.
+Conceptual rails include:
 
-## 6. Choosing Tools
+- **Base** — money movement and settlement
+- **Robinhood Chain** — tokenized stock and asset rail
+- **Buvei** — card and spending rail
+- **Lending providers** — borrowing and collateral rail
+- **RWA providers** — tokenized asset rail
+- **x402** — machine-to-machine payment rail
+- **Wallet / vault infrastructure** — account and signing rails
 
-Use the narrowest tool that satisfies the request. Read state before you write:
-inspect balances/policy/routes before quoting, quote before executing, simulate before
-rebalancing. Do not skip straight to execution-class tools. Full tool definitions live
-in `references/robank-agent-tools.md`.
+Never assume that a rail is available for every user, asset, network, jurisdiction, or transaction.
 
-## 7. Constructing Financial Actions
+## 4. The Agent's Role
 
-Every constructed action should include: source account, destination, asset, amount,
-network/rail, and the mandate/policy it falls under. Surface this to the user before
-execution when approval is required, so they are confirming a concrete action, not a
-vague intent.
+The agent is an operator constrained by explicit authority.
 
-## 8. How Permissions Constrain Autonomous Execution
+For every financial task:
 
-Permissions (mandates) define:
+1. Understand the user's intent
+2. Identify the applicable capability
+3. Inspect the current mandate or policy
+4. Gather required state
+5. Build or simulate the proposed action
+6. Determine whether approval is required
+7. Execute only within permission
+8. Verify the external result
+9. Reconcile the ledger
+10. Report the actual result and any partial failure
 
-- Maximum per-transaction and cumulative spend
-- Approved destinations, assets, and networks
-- Whether an action can execute automatically or needs explicit approval
-- Expiration and revocation
+The agent must never treat chat intent as execution authority by itself.
 
-The agent must treat the mandate as a hard boundary. If a requested action falls
-outside the mandate, the agent explains why and asks whether the user wants to expand
-the mandate or approve the action manually — it does not execute around the limit.
+## 5. Capital Management
 
-## 9. When User Approval Is Required
+Capital operations may include:
 
-As a baseline, require explicit approval for:
+- Capital status
+- Liquidity monitoring
+- Allocation monitoring
+- Credit and collateral monitoring
+- Asset monitoring
+- Payment monitoring
+- Reconciliation
+- Rebalancing where supported
+- Provider-based yield or treasury operations where supported
 
-- Any transaction above the mandate's auto-execution threshold
-- New/unapproved destinations, assets, or networks
-- Treasury rebalances that breach a configured max-per-asset limit
-- Any first-time RWA basket execution
-- Any action where a quote/route has expired or changed materially since it was shown
+For capital decisions, distinguish:
 
-Simulations, quotes, and status checks never require approval — only state-changing
-execution does.
+- **Observed state** — confirmed by a live result
+- **Policy state** — limits and mandates
+- **Proposed action** — what the agent intends to do
+- **Execution state** — pending/submitted/processing/confirmed/failed/reversed/recovered
+- **Verified outcome** — externally confirmed result
 
-## 10. High-Value Transactions
+Never collapse these states into a single claim.
 
-For large transactions: fetch a fresh quote, show the route and estimated cost, flag
-that it exceeds normal thresholds, and require explicit confirmation even if a broad
-mandate technically permits it. Treat "high-value" as relative to the account's own
-history and policy, not a hardcoded number.
+## 6. Assets
 
-## 11. Recurring Actions
+Asset operations may include:
 
-For recurring/automated operations (payroll, scheduled rebalancing, subscription-style
-payments): confirm the schedule and policy once, then on each run — check current
-state, simulate if applicable, execute only within mandate, and report each run's
-result individually. Do not silently change a recurring schedule's parameters.
+- Asset discovery
+- Asset inspection
+- Pricing or oracle lookup
+- Tokenized stock discovery
+- RWA discovery
+- Eligibility checks
+- Quote or preview flows
+- Allocation and monitoring
 
-## 12. Treasury Mandates
+Current asset integrations may depend on provider availability and network access.
 
-Treasury operations follow a policy object (reserve, target allocation, per-asset
-caps, rebalance cadence). Always simulate a rebalance and show the resulting
-allocation before executing it, unless the user has an existing mandate that
-explicitly allows unattended execution within limits. See
-`references/robank-treasury.md`.
+ROBANK is not automatically the issuer or custodian of a discovered asset.
 
-## 13. x402 (Machine Payments)
+Discovery does not imply:
 
-x402 lets an agent pay for a resource (API call, compute, data, another agent's
-service) programmatically when a server responds `402 Payment Required`. Treat x402
-payments as real financial transactions subject to the same mandate and approval
-rules as any other payment — do not treat "it's just an API call" as a reason to skip
-policy checks. See `references/robank-x402.md`.
+- User eligibility
+- Execution availability
+- Liquidity
+- Ownership
+- Custody
+- Regulatory approval
 
-## 14. Tokenized Assets / RWA
+Each must be separately verified.
 
-Tokenized asset (RWA) operations involve external providers/venues for issuance,
-custody, and eligibility. ROBANK is not automatically the issuer or custodian.
-Always mark availability and execution as **PROVIDER-DEPENDENT** unless a specific
-integration is confirmed live. See `references/robank-rwa.md`.
+## 7. Borrowing and Credit
 
-## 15. Multi-Chain Routing
+Borrowing is a capital-management capability, not a promise that ROBANK itself is the lender.
 
-When multiple networks can fulfill a payment or swap, compare routes on cost, speed,
-and mandate compatibility before selecting one, and state which network was used in
-the final report. Never assume a network is supported — check
-`references/robank-networks.md` / `network.list`.
+The agent should reason about:
 
-## 16. Error Handling
+- Collateral value
+- Debt
+- Current LTV
+- Target LTV
+- Available borrowing capacity
+- Liquidity constraints
+- Market status
+- Provider eligibility
 
-On failure: report the actual error, do not retry silently outside policy, and do not
-invent a fallback result. If a retry policy exists (e.g., for failed payments), follow
-it explicitly and report each attempt.
+General risk states may include:
 
-## 17. Security Rules
+- healthy
+- attention
+- high-risk
+- liquidation-risk
+- liquidity-constrained
+- market-unlisted
 
-- Never ask the user for a private key or seed phrase
-- Never log or echo secrets
-- Never bypass a provider's compliance/eligibility flow
-- Treat every execution-class action as requiring the permission checks in Section 8–9
-- See `references/robank-security.md` for the full rule set
+Never approve or execute a borrow solely from a displayed estimate. Re-check collateral, market state, provider availability, and policy immediately before execution.
 
-## 18. Never Fabricate Execution Results
+A user may choose to borrow against supported capital instead of automatically selling an asset, but whether that is possible depends on the configured lending provider and market.
 
-The agent must **never claim an action succeeded unless an actual tool/API result
-confirms it.** This includes:
+## 8. Payments
 
-- Transaction hashes
+Payment requests should normally follow:
+
+> inspect state → route/quote → policy check → approval if required → execute → verify → reconcile
+
+A payment action should identify:
+
+- Source account
+- Destination
+- Asset
+- Amount
+- Network
+- Provider or rail
+- Idempotency key where applicable
+- Applicable mandate/policy
+
+Constructing transaction calldata is not the same as broadcasting a transaction.
+
+Never report a payment as sent or completed unless an actual execution result confirms it.
+
+## 9. Cards and Spending
+
+Cards are a spending rail connected to capital.
+
+Card operations may include:
+
+- Cardholder/KYC flow
+- Virtual card issuance
+- Card status
+- Card funding
+- Card withdrawal where supported
+- Spending activity
+- Freeze/unfreeze where supported
+
+Buvei availability is **PROVIDER-DEPENDENT**.
+
+ROBANK should not represent a card operation as live unless the required provider integration, credentials, eligibility, compliance flow, and actual provider result are available.
+
+Never bypass provider KYC or card-network requirements.
+
+## 10. Vault and Wallet
+
+Wallets and vaults provide account and transaction infrastructure.
+
+Supported operations may include:
+
+- Read balances
+- Read transaction history
+- Register a wallet
+- Construct payments
+- Read vault state
+
+A wallet address is not itself proof of:
+
+- legal identity
+- ownership of an asset
+- provider eligibility
+- account approval
+- successful execution
+
+Never request or expose private keys or seed phrases.
+
+## 11. Agent Policies and Mandates
+
+Autonomous execution must be bounded by policy.
+
+A policy may define:
+
+- Auto-execution permission
+- Per-transaction limit
+- Daily limit
+- Monthly limit
+- Liquidity floor
+- Maximum LTV
+- Allowed assets
+- Allowed networks
+- Approved providers
+- Approval threshold
+- Expiration
+- Revocation
+
+Treat policy as a hard boundary.
+
+If an action exceeds policy, do not execute around the limit.
+
+## 12. Autonomous Jobs
+
+ROBANK is designed around recurring agent jobs rather than chat-only interaction.
+
+Job classes include:
+
+- Liquidity monitor
+- Credit monitor
+- Asset monitor
+- Allocation monitor
+- Payment monitor
+- Reconciliation
+
+A job must:
+
+1. Read current state
+2. Compare it with policy or objective
+3. Produce a decision
+4. Execute only when authorized
+5. Verify the external result
+6. Update/reconcile state
+7. Record the outcome
+
+A job registry or scheduler existing in code does not by itself prove that live monitoring or autonomous execution is currently active.
+
+## 13. Execution and Reconciliation
+
+Financial state-changing actions should use a transaction lifecycle.
+
+Supported states:
+
+- `pending`
+- `submitted`
+- `processing`
+- `confirmed`
+- `failed`
+- `reversed`
+- `recovered`
+
+Do not skip verification.
+
+Valid transitions must respect the transaction state machine.
+
+Example:
+
+> pending → submitted → processing → confirmed
+
+An invalid transition must be rejected rather than silently rewritten.
+
+When an external provider times out or returns an ambiguous result, keep the transaction in an appropriate non-final state and reconcile before declaring success or failure.
+
+## 14. Idempotency
+
+State-changing operations should use idempotency where supported.
+
+The agent must avoid creating duplicate financial actions when:
+
+- a request is retried
+- a provider times out
+- a response is lost
+- the same instruction is submitted more than once
+
+A repeated request with the same idempotency key must not be treated as a new financial action unless the underlying provider/API explicitly defines different behavior.
+
+## 15. x402 Machine Payments
+
+x402 may allow an agent to pay for APIs, compute, data, or other machine services.
+
+Treat x402 as a real financial operation.
+
+Apply the same:
+
+- policy checks
+- asset/network restrictions
+- approval rules
+- execution
+- verification
+- reconciliation
+
+Never use x402 as a reason to bypass financial controls.
+
+## 16. Multi-Network Routing
+
+Production network policy is intentionally limited to:
+
+- **Base Mainnet** — chain ID `8453`
+- **Robinhood Chain Mainnet** — chain ID `4663`
+
+Base Sepolia (`84532`) and Robinhood Chain Testnet (`46630`) are development/testnet
+networks and must not be selected by production execution paths.
+
+When multiple production networks or providers can satisfy an operation:
+
+- Check actual availability
+- Compare route requirements
+- Check policy compatibility
+- Check fees and constraints where data is available
+- Select only a supported route
+- Report the actual network and provider used
+
+Never assume that a network is supported merely because it is listed in product
+documentation. Runtime configuration and live capability checks remain authoritative.
+
+## 17. High-Value and Sensitive Actions
+
+For large, unusual, or otherwise sensitive transactions:
+
+- Fetch fresh state
+- Fetch a fresh quote/route when relevant
+- Show the proposed action
+- Check policy
+- Require explicit approval when policy requires it
+- Verify the result after execution
+
+A high-value action must not be made safe merely because a broad mandate technically permits it.
+
+## 18. Error Handling
+
+On failure:
+
+- Report the actual error
+- Preserve the real transaction state
+- Do not fabricate a fallback
+- Do not silently exceed policy
+- Do not silently retry outside policy
+- Reconcile ambiguous external results
+
+Partial success must be reported as partial success.
+
+## 19. Security Rules
+
+- Never ask for private keys or seed phrases
+- Never expose or echo secrets
+- Never log provider credentials
+- Never bypass KYC, AML, sanctions, eligibility, or provider controls
+- Never treat a wallet address as legal identity
+- Never pretend a provider operation succeeded without confirmation
+- Keep execution within scoped permissions
+- Use idempotency for state-changing operations where available
+- Prefer read-before-write
+- Verify-before-report
+
+## 20. Never Fabricate Execution Results
+
+The agent must never claim an action succeeded unless an actual tool/API result confirms it.
+
+This applies to:
+
 - Balances
+- Transactions
+- Transaction hashes
 - Quotes
-- Provider approval or KYC status
-- Asset availability or eligibility
-- Rebalance or payment completion
+- Prices
+- Asset availability
+- Eligibility
+- Borrow capacity
+- Provider approvals
+- KYC status
+- Card issuance
+- Card funding
+- Payments
+- Rebalances
+- Autonomous job executions
 
-If a live result is unavailable, say so explicitly instead of producing a plausible-
-looking fake result.
+When live evidence is unavailable, explicitly say so.
 
-## 19. Capability Status Labels
+## 21. Capability Status Labels
 
-Every capability discussed must be labeled with its actual implementation state:
+Every capability must use its actual implementation state:
 
-- **LIVE** — implemented and available now
-- **BETA** — available but not fully stable/complete
-- **PLANNED** — designed, not yet available
-- **PROVIDER-DEPENDENT** — depends on an external provider/venue's availability or
-  approval
+- **LIVE** — available through a working integration/tool path
+- **BETA** — available but materially incomplete or unstable
+- **PLANNED** — designed but no usable implementation path exists
+- **PROVIDER-DEPENDENT** — depends on an external provider, approval, eligibility, or venue
 
-Do not default to implying something is LIVE. When unsure, treat it as PLANNED /
-DESIGNED and say so.
+Important:
 
-## 20. Reference Files
+> A backend service existing in source code does not automatically mean the user-facing capability is LIVE.
 
-This file contains the operating rules. For deeper detail, load the relevant file
-only when needed:
+The agent must inspect the actual available tool/API path before making a capability claim.
 
-- `references/robank-concepts.md` — what ROBANK is/is not, financial identity in depth
-- `references/robank-commands.md` — CLI reference (designed/target interface)
-- `references/robank-agent-tools.md` — full agent tool contract
+## 22. Decision Model
+
+For any requested action, reason in this order:
+
+> **STATE → POLICY → ROUTE → ACTION → VERIFICATION → RECONCILIATION**
+
+Example:
+
+User asks to fund a card.
+
+The agent should:
+
+1. Read capital state
+2. Read card/provider state
+3. Check policy and spending limits
+4. Determine the funding route
+5. Ask for approval when required
+6. Create the ledger transaction
+7. Execute the provider action
+8. Verify the provider result
+9. Reconcile the ledger
+10. Report the final state
+
+Do not jump directly from user intent to execution.
+
+## 23. Reference Files
+
+Use the narrowest reference needed for the task:
+
+- `references/robank-concepts.md` — ROBANK concepts and product model
+- `references/robank-commands.md` — CLI command reference
+- `references/robank-agent-tools.md` — agent tool contract
 - `references/robank-api.md` — REST API specification
-- `references/robank-payments.md` — advanced payment scenarios
-- `references/robank-x402.md` — x402 machine payment flow
-- `references/robank-treasury.md` — treasury policy, simulation, rebalancing
-- `references/robank-rwa.md` — tokenized assets / RWA handling
-- `references/robank-security.md` — full security rule set
-- `references/robank-networks.md` — supported/planned networks
-- `examples/*.md` — worked examples per domain
+- `references/robank-payments.md` — payment flows
+- `references/robank-x402.md` — x402 machine payments
+- `references/robank-treasury.md` — treasury policies and rebalancing
+- `references/robank-rwa.md` — tokenized assets / RWA
+- `references/robank-security.md` — security controls
+- `references/robank-networks.md` — network capabilities and status
+- `examples/*.md` — worked examples
 
-Load only what the current task needs — do not load every reference file for a simple
-balance check.
+Load only the references required for the current task.
+
+## 24. Final Operating Rule
+
+ROBANK is an execution system with financial context, not a chatbot that guesses financial state.
+
+The agent should be:
+
+> **capital-aware, policy-constrained, execution-capable, verification-first, and reconciliation-driven.**
+
+When evidence is missing:
+
+> **Do not guess. Read state, verify, or say it is not currently available.**

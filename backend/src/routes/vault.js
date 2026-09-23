@@ -1,17 +1,17 @@
 import { Router } from 'express';
 import { createPublicClient, http, getContract, erc20Abi } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { base } from 'viem/chains';
 import { config } from '../config.js';
-import { USDC_BASE_SEPOLIA } from '../constants.js';
+import { USDC_BASE_MAINNET } from '../constants.js';
 
 const router = Router();
-const client = createPublicClient({ chain: baseSepolia, transport: http(config.baseRpcUrl) });
+const client = createPublicClient({ chain: base, transport: http(config.baseRpcUrl) });
 
 router.get('/:address', async (req, res) => {
   const address = req.params.address;
   try {
     const balance = await client.readContract({
-      address: USDC_BASE_SEPOLIA,
+      address: USDC_BASE_MAINNET,
       abi: erc20Abi,
       functionName: 'balanceOf',
       args: [address]

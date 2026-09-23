@@ -5,10 +5,10 @@ import AppShell from '@/components/AppShell';
 import { useAccount, usePublicClient } from 'wagmi';
 import type { EIP1193Provider } from 'viem';
 import { getSafeDeploymentTransaction } from '@/lib/safe';
-import { SAFE_STORAGE_KEY } from '@/lib/constants';
+import { BASE_MAINNET_CHAIN_ID, SAFE_STORAGE_KEY } from '@/lib/constants';
 
 export default function VaultPage() {
-  const { address, connector } = useAccount();
+  const { address, connector, chainId } = useAccount();
   const publicClient = usePublicClient();
   const [vault, setVault] = useState('');
   useEffect(() => {
@@ -18,7 +18,8 @@ export default function VaultPage() {
 
   async function deploy() {
     if (!address || !connector || !publicClient) return setStatus('Connect a wallet first.');
-    setStatus('Building deployment transactionâ€¦');
+    if (chainId !== BASE_MAINNET_CHAIN_ID) return setStatus('Switch your wallet to Base Mainnet.');
+    setStatus('Building deployment transaction…');
     try {
       const provider = await connector.getProvider() as EIP1193Provider;
       const { safeAddress, deployment } = await getSafeDeploymentTransaction(provider, address);
@@ -49,7 +50,7 @@ export default function VaultPage() {
           <div className="text-xs uppercase tracking-[.16em] text-white/40">Current vault</div>
           <div className="mt-3 break-all font-mono text-sm">{vault || 'No deployed vault yet'}</div>
           {!vault && <button onClick={deploy} className="mt-5 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-black">Deploy Safe</button>}
-          <p className="mt-4 text-xs leading-5 text-white/45">Deployment requires Base Sepolia ETH for gas. ROBANK never receives your private key.</p>
+          <p className="mt-4 text-xs leading-5 text-white/45">Deployment requires ETH on Base Mainnet for gas. ROBANK never receives your private key.</p>
           {status && <div className="mt-3 break-all text-xs text-white/60">{status}</div>}
         </div>
       </div>
