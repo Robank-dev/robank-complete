@@ -9062,3 +9062,65 @@
   .ro-banner-carousel{height:72px}
   .ro-banner-arrow{width:26px;height:26px;font-size:18px}
 }
+/* Final header cleanup */
+.ro-system-brand-logo:before{display:none!important;content:none!important}
+.ro-system-brand-logo img{width:38px!important;height:38px!important;display:block!important}
+.ro-system-brand-logo span{font-size:17px!important;letter-spacing:.2em!important}
+.ro-app-topbar{height:112px!important}
+.ro-banner-carousel{height:92px!important}
+.ro-banner-image{object-fit:cover!important;object-position:center!important}
+/* Money + card product surfaces */
+.money-page{max-width:1080px;margin:0 auto}
+.money-mode-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.money-mode{min-height:105px;padding:16px;text-align:left;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:rgba(255,255,255,.02);color:#aeb4bc;cursor:pointer;transition:.2s}
+.money-mode:hover{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.045)}
+.money-mode.active{border-color:rgba(255,255,255,.3);background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));color:#fff;box-shadow:0 18px 50px rgba(0,0,0,.16)}
+.money-mode span{display:block;font-size:13px;font-weight:600}
+.money-mode small{display:block;margin-top:9px;font-size:10px;line-height:1.55;color:#686f79}
+.money-mode.active small{color:#858d97}
+.money-workspace{padding:24px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(255,255,255,.018);box-shadow:0 22px 70px rgba(0,0,0,.16)}
+.money-workspace-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font:9px ui-monospace;color:#737b84;letter-spacing:.13em}
+.money-workspace-head b{color:#e6e8eb;font:600 12px Inter,Arial,sans-serif;letter-spacing:0}
+.money-note{margin:0 0 14px;color:#737b84;font-size:11px}
+.money-workspace .rounded-2xl{background:rgba(0,0,0,.12)}
+.money-unavailable{min-height:280px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;max-width:620px}
+.money-unavailable h2{margin:9px 0 8px;font-size:28px;letter-spacing:-.035em;font-weight:500;color:#f1f2f3}
+.money-unavailable p{margin:0;color:#737b84;font-size:12px;line-height:1.7}
+.card-page{max-width:1240px;margin:0 auto}
+.card-page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px}
+.card-back-link{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 13px;color:#cdd1d6;text-decoration:none;font-size:11px}
+.card-back-link span{margin-left:14px;color:#727983}
+.card-hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
+.card-showcase,.card-status-panel,.card-info-panel,.card-activity-panel{border:1px solid rgba(255,255,255,.1);background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012));border-radius:16px}
+.card-showcase{min-height:470px;padding:25px}
+.card-showcase-top,.card-panel-head{display:flex;justify-content:space-between;align-items:center}
+.card-showcase-top{font:9px ui-monospace;color:#737a84;letter-spacing:.13em}
+.ro-virtual-card{position:relative;width:min(560px,100%);aspect-ratio:1.62;margin:48px auto 0;border-radius:24px;padding:28px;background:linear-gradient(145deg,#f2f3f1 0%,#898c90 46%,#111316 100%);color:#070809;box-shadow:28px 32px 75px rgba(0,0,0,.48);overflow:hidden}
+.ro-virtual-card:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.18) 45%,transparent 58%);mix-blend-mode:screen;pointer-events:none}
+.ro-card-brand{display:flex;align-items:center;gap:8px;font:700 11px ui-monospace;letter-spacing:.14em}
+.ro-card-brand img{width:22px;height:22px;object-fit:contain}
+.ro-card-chip{position:absolute;left:28px;top:91px;width:42px;height:31px;border-radius:7px;background:linear-gradient(145deg,#b6b9bb,#6f7275);border:1px solid rgba(0,0,0,.22)}
+.ro-card-number{position:absolute;left:28px;bottom:79px;font:15px ui-monospace;letter-spacing:.08em}
+.ro-card-bottom{position:absolute;left:28px;right:28px;bottom:25px;display:flex;justify-content:space-between;font:8px ui-monospace;letter-spacing:.1em}
+.card-showcase-note{display:flex;gap:10px;align-items:center;margin-top:25px;padding:12px 13px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.018)}
+.card-showcase-note b{display:block;font-size:11px;color:#dfe2e5}
+.card-showcase-note small{display:block;margin-top:4px;font-size:9px;color:#666e78}
+.card-live-dot{width:7px;height:7px;border-radius:50%;background:#555b64;flex:none}
+.card-live-dot.active{background:#d7ffe1;box-shadow:0 0 12px rgba(215,255,225,.7)}
+.card-status-panel{padding:25px;display:flex;flex-direction:column}
+.card-status-panel h2{margin:10px 0 8px;font-size:31px;letter-spacing:-.045em;font-weight:500}
+.card-status-panel>p{margin:0;color:#737a84;font-size:11px;line-height:1.7}
+.card-status-list{margin-top:26px;border-top:1px solid rgba(255,255,255,.07)}
+.card-status-list>div{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:11px}
+.card-status-list span{color:#666e78}.card-status-list b{font-weight:500;color:#dfe2e5;text-align:right}
+.card-policy-link{margin-top:auto;padding-top:22px;color:#d7dade;text-decoration:none;font-size:11px}.card-policy-link span{float:right}
+.card-lower-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:16px;margin-top:16px}
+.card-info-panel,.card-activity-panel{padding:25px}
+.card-info-panel h3,.card-activity-panel h3{margin:8px 0 8px;font-size:20px;font-weight:500;letter-spacing:-.03em}
+.card-info-panel>p{margin:0 0 20px;color:#737a84;font-size:11px;line-height:1.7}
+.card-feature-row{display:flex;gap:14px;padding:14px 0;border-top:1px solid rgba(255,255,255,.06)}
+.card-feature-row>span{font:9px ui-monospace;color:#606872}.card-feature-row b{display:block;font-size:11px}.card-feature-row small{display:block;margin-top:4px;color:#686f78;font-size:9px}
+.card-panel-head>span{font:8px ui-monospace;color:#626a74;letter-spacing:.1em}
+.card-empty-activity{margin-top:20px;padding:42px 0;border-top:1px solid rgba(255,255,255,.06);color:#626a74;font-size:11px}
+@media(max-width:900px){.money-mode-grid{grid-template-columns:1fr 1fr}.card-hero-grid,.card-lower-grid{grid-template-columns:1fr}.card-page-head{align-items:flex-start;flex-direction:column}.ro-virtual-card{margin-top:32px}}
+@media(max-width:560px){.money-mode-grid{grid-template-columns:1fr}.money-workspace{padding:16px}.card-showcase,.card-status-panel,.card-info-panel,.card-activity-panel{padding:18px}.ro-card-number{font-size:11px}.ro-app-topbar{height:84px!important}.ro-system-brand-logo img{width:30px!important;height:30px!important}.ro-system-brand-logo span{font-size:14px!important}}

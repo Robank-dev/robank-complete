@@ -8,8 +8,8 @@ import SystemBanner from './SystemBanner';
 
 const groups = [
   { label: 'ROBANK', links: [['/dashboard', 'Overview', 'grid'], ['/agent', 'AI Agent', 'spark']] },
-  { label: 'CAPITAL', links: [['/vault', 'Vault', 'lock'], ['/send', 'Send', 'arrow-up'], ['/receive', 'Receive', 'arrow-down'], ['/borrow', 'Borrow', 'credit'], ['/assets', 'Assets', 'layers']] },
-  { label: 'OPERATE', links: [['/onramp', 'Buy USDC', 'plus'], ['/card', 'Card', 'card']] },
+  { label: 'CAPITAL', links: [['/vault', 'Vault', 'lock'], ['/money', 'Money', 'arrow-up'], ['/borrow', 'Borrow', 'credit'], ['/assets', 'Assets', 'layers']] },
+  { label: 'OPERATE', links: [['/card', 'Card', 'card']] },
   { label: 'NETWORK', links: [['/company', 'Company', 'building'], ['/markets', 'Markets', 'chart'], ['/news', 'News', 'news'], ['/jobs', 'Jobs', 'briefcase']] }
 ] as const;
 

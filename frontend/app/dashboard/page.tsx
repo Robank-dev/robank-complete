@@ -97,7 +97,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <div className="ro-overview-foot"><span>MAINNET</span><span>Base · Robinhood Chain</span><span className="ro-foot-address">{address ? short(address) : 'Wallet provisioning'}</span></div>
+
     </AppShell>
   );
 }
