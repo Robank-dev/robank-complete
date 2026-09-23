@@ -13,5 +13,7 @@ export const config = {
   diditApiKey: process.env.DIDIT_API_KEY || '',
   diditKybWorkflowId: process.env.DIDIT_KYB_WORKFLOW_ID || '',
   diditKycWorkflowId: process.env.DIDIT_KYC_WORKFLOW_ID || '',
-  tiingoApiKey: process.env.TIINGO_API_KEY || ''
+  tiingoApiKey: process.env.TIINGO_API_KEY || '',
+  privyAppId: process.env.PRIVY_APP_ID || '',
+  privyAppSecret: process.env.PRIVY_APP_SECRET || ''
 };

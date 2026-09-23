@@ -1,10 +1,14 @@
+import { getAccessToken } from '@privy-io/react-auth';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const accessToken = await getAccessToken().catch(() => null);
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(options?.headers || {})
     }
   });

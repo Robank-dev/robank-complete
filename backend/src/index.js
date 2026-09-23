@@ -16,12 +16,14 @@ import jobs from './routes/jobs.js';
 import markets from './routes/markets.js';
 import news from './routes/news.js';
 import kyc from './routes/kyc.js';
+import { requirePrivyAuth } from './middleware/privyAuth.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'robank-backend', mode: 'mvp' }));
+app.use('/api', requirePrivyAuth);
 app.use('/api/users', users);
 app.use('/api/vault', vault);
 app.use('/api/payments', payments);
