@@ -8977,3 +8977,88 @@
 .ro-system-brand-logo{color:#f4f5f7!important;text-decoration:none!important;font:700 15px ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.2em!important}
 .ro-system-brand-logo span{display:block!important}
 .ro-system-brand-logo:before{content:"";width:24px;height:24px;border:1px solid rgba(255,255,255,.5);border-radius:7px;display:block;background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.02));box-shadow:inset 0 0 16px rgba(255,255,255,.06)}
+/* V8 — actual logo + image carousel */
+.ro-app-topbar{
+  height:112px!important;
+  grid-template-columns:190px minmax(0,1fr)!important;
+  gap:22px!important;
+  padding:10px 30px!important;
+  align-items:center!important;
+}
+.ro-system-brand-logo{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  color:#f3f4f5!important;
+  text-decoration:none!important;
+}
+.ro-system-brand-logo img{
+  width:31px!important;
+  height:31px!important;
+  object-fit:contain!important;
+  border-radius:0!important;
+  filter:none!important;
+}
+.ro-system-brand-logo span{
+  font:700 14px ui-monospace,SFMono-Regular,Menlo,monospace!important;
+  letter-spacing:.18em!important;
+  color:#f1f2f3!important;
+}
+.ro-system-brand-logo:hover{opacity:.88}
+.ro-banner-carousel{
+  position:relative;
+  height:92px;
+  min-width:0;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:15px;
+  background:#080a0b;
+  box-shadow:0 18px 55px rgba(0,0,0,.22);
+}
+.ro-banner-image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  transform:scale(1.015);
+  transition:opacity .55s ease,transform .8s ease;
+}
+.ro-banner-image.active{opacity:1;transform:scale(1)}
+.ro-banner-arrow{
+  position:absolute;
+  top:50%;
+  z-index:3;
+  width:30px;
+  height:30px;
+  margin-top:-15px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:50%;
+  background:rgba(5,7,8,.58);
+  color:#eef0f2;
+  font-size:22px;
+  line-height:24px;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+}
+.ro-banner-arrow:hover{background:rgba(255,255,255,.12)}
+.ro-banner-prev{left:10px}.ro-banner-next{right:10px}
+.ro-banner-dots{
+  position:absolute;
+  right:15px;
+  bottom:10px;
+  z-index:4;
+  display:flex;
+  gap:5px;
+}
+.ro-banner-dots button{
+  width:18px;height:3px;padding:0;border:0;border-radius:99px;background:rgba(255,255,255,.25);cursor:pointer;
+}
+.ro-banner-dots button.active{background:#f2f3f4}
+@media(max-width:760px){
+  .ro-app-topbar{height:88px!important;grid-template-columns:1fr!important;padding:8px 14px!important}
+  .ro-system-brand-logo{display:none!important}
+  .ro-banner-carousel{height:72px}
+  .ro-banner-arrow{width:26px;height:26px;font-size:18px}
+}

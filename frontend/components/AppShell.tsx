@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import SystemBanner from './SystemBanner';
 
 const groups = [
   { label: 'ROBANK', links: [['/dashboard', 'Overview', 'grid'], ['/agent', 'AI Agent', 'spark']] },
@@ -38,13 +39,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const { wallets } = useWallets();
   const [displayName, setDisplayName] = useState('');
   const [accountOpen, setAccountOpen] = useState(false);
-  const [systemSlide, setSystemSlide] = useState(0);
   const wallet = wallets.find((item) => item.walletClientType === 'privy');
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setSystemSlide((value) => (value + 1) % 7), 3800);
-    return () => window.clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     const key = user?.id ? `robank.profile.${user.id}` : '';
@@ -66,11 +61,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="ro-app-shell">
       <header className="ro-app-topbar">
-        <Link href="/" className="ro-system-brand ro-system-brand-logo"><span>ROBANK</span></Link>
-        <div className="ro-system-visual-window" aria-label="ROBANK product rail">
-          <div className="ro-system-visual" style={{ '--slide': systemSlide, backgroundPosition: `${systemSlide * 16.6667}% center` } as React.CSSProperties} />
-          <div className="ro-system-slide-count"><span>{String(systemSlide + 1).padStart(2, '0')}</span><i />07</div>
-        </div>
+        <Link href="/dashboard" className="ro-system-brand ro-system-brand-logo">
+          <img src="/robank-mark.png" alt="ROBANK" />
+          <span>ROBANK</span>
+        </Link>
+        <SystemBanner />
       </header>
       <div className="ro-app-body">
         <aside className="ro-app-sidebar">
