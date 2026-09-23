@@ -39,11 +39,25 @@ export default function CardPage() {
               <span>ROBANK VIRTUAL</span>
               <span>{active ? 'ACTIVE' : 'PROVIDER RAIL'}</span>
             </div>
-            <div className="ro-virtual-card">
-              <div className="ro-card-brand"><img src="/robank-mark.png" alt="" /><span>ROBANK</span></div>
-              <div className="ro-card-chip" />
-              <div className="ro-card-number">•••• &nbsp; •••• &nbsp; •••• &nbsp; 4821</div>
-              <div className="ro-card-bottom"><span>ROBANK USER</span><span>VIRTUAL</span></div>
+            <div className="card-stage">
+              <div className="card-3d-wrap">
+                <div className="card-glow" />
+                <div className="virtual-card">
+                  <div className="card-surface">
+                    <div className="card-top"><span>ROBANK</span><span>FINANCIAL CARD</span></div>
+                    <div className="card-chip"><span /><span /></div>
+                    <div className="card-logo"><img src="/robank-mark.png" alt="ROBANK" /></div>
+                    <div className="card-number">•••• &nbsp; •••• &nbsp; •••• &nbsp; 4821</div>
+                    <div className="card-meta">
+                      <div><small>CARDHOLDER</small><strong>ROBANK ACCOUNT</strong></div>
+                      <div><small>EXPIRES</small><strong>12/28</strong></div>
+                      <div><small>TYPE</small><strong>DIGITAL</strong></div>
+                    </div>
+                    <div className="card-bottom"><span>ROBANK</span><span>PRIVATE · DIGITAL</span></div>
+                    <div className="card-shine" />
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="card-showcase-note">
               <span className={active ? 'card-live-dot active' : 'card-live-dot'} />

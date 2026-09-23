@@ -9206,3 +9206,56 @@
  .send-form-grid{grid-template-columns:1fr}
  .send-form-grid label.send-full{grid-column:auto}
 }
+/* V11 — banner/card/readability cleanup */
+.ro-system-brand-logo{gap:15px!important}
+.ro-system-brand-logo img{width:54px!important;height:54px!important;background:transparent!important;border-radius:50%!important;object-fit:cover!important}
+.ro-system-brand-logo span{font-size:20px!important;letter-spacing:.22em!important}
+.ro-banner-carousel{position:relative!important;overflow:hidden!important;background:#050607!important}
+.ro-banner-image{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:1!important;display:block!important;object-fit:cover!important;object-position:center!important}
+.ro-banner-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,5,6,.88) 0%,rgba(4,5,6,.58) 36%,rgba(4,5,6,.12) 72%,rgba(4,5,6,.5) 100%);z-index:1}
+.ro-banner-copy{position:absolute;left:30px;top:50%;transform:translateY(-50%);z-index:3;max-width:620px;display:flex;flex-direction:column;gap:6px}
+.ro-banner-copy span{font:9px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;color:#9aa2ab}
+.ro-banner-copy strong{font-size:23px;line-height:1.08;letter-spacing:-.035em;font-weight:500;color:#f4f5f7}
+.ro-banner-copy small{font-size:11px;line-height:1.45;color:#a0a7af;max-width:520px}
+.ro-banner-arrow,.ro-banner-dots{z-index:4}
+.ro-banner-arrow{margin-top:-17px!important}
+.ro-banner-dots{z-index:5}
+.ro-app-main{font-size:14px}
+.ro-app-main input,.ro-app-main select,.ro-app-main textarea{font-size:14px!important}
+.ro-app-main button{font-size:13px}
+.ro-app-main p{font-size:14px}
+.ro-app-main .text-xs{font-size:11px!important}
+.ro-app-main .text-sm{font-size:14px!important}
+.ro-app-main .text-base{font-size:16px!important}
+.ro-app-main .text-3xl{font-size:40px!important;line-height:1.08!important}
+.card-page{max-width:1320px!important}
+.card-showcase{min-height:560px!important;padding:30px!important}
+.card-showcase-top{font-size:10px!important}
+.card-showcase .card-stage{min-height:430px!important}
+.card-showcase .virtual-card{position:absolute}
+.card-page .card-status-panel h2{font-size:36px!important}
+.card-page .card-status-panel>p,.card-page .card-info-panel>p,.card-page .card-empty-activity{font-size:14px!important}
+.card-page .card-status-list>div{font-size:13px!important}
+.card-page .card-feature-row b{font-size:13px!important}
+.card-page .card-feature-row small{font-size:11px!important}
+.money-page{max-width:1240px!important;margin:0 auto}
+.money-primary-nav{gap:10px!important}
+.money-primary-nav button{min-height:92px!important;padding:18px 20px!important}
+.money-primary-nav button span{font-size:15px!important}
+.money-primary-nav button small{font-size:12px!important;line-height:1.5!important}
+.money-panel{padding:28px!important}
+.money-panel-head span{font-size:10px!important}
+.money-panel-head b{font-size:17px!important}
+.money-intro,.money-note{font-size:13px!important;line-height:1.65!important}
+.money-choice-grid{gap:12px!important}
+.money-choice{min-height:110px!important;padding:18px!important}
+.money-choice span{font-size:15px!important}
+.money-choice small{font-size:12px!important;line-height:1.55!important}
+.money-wallet-details>div span{font-size:10px!important}
+.money-wallet-details>div b{font-size:14px!important;line-height:1.45!important}
+.money-wallet-details button{font-size:13px!important;padding:12px 15px!important}
+.money-note-block b{font-size:14px!important}
+.money-note-block p{font-size:12px!important}
+.money-qr{min-height:280px!important}
+.money-qr img{width:260px!important;height:260px!important;display:block!important}
+.money-qr-empty{font-size:12px!important}

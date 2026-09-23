@@ -8,6 +8,7 @@ import OnrampWidget from '@/components/OnrampWidget';
 import { useAccount } from 'wagmi';
 
 type Mode = 'send' | 'fund-bank' | 'fund-wallet';
+type BankFundingMode = 'bank' | 'crypto';
 
 function FundWalletPanel() {
   const { address } = useAccount();
@@ -31,20 +32,24 @@ function FundWalletPanel() {
 
 export default function MoneyPage() {
   const [mode, setMode] = useState<Mode>('send');
+  const [bankFundingMode, setBankFundingMode] = useState<BankFundingMode>('bank');
   return <AppShell><div className="money-page">
     <div className="ro-page-head">
-      <div><div className="ro-kicker">MONEY</div><h1>Move money.</h1><p>Send, fund your bank, or fund your wallet from one clean operating surface.</p></div>
+      <div><div className="ro-kicker">MONEY</div><h1>Move money.</h1><p>Send value, fund your bank, or fund your wallet from one place.</p></div>
     </div>
     <div className="money-primary-nav">
-      {([['send','SEND','Transfer to a wallet or bank'],['fund-bank','FUND BANK','Move value into your bank rail'],['fund-wallet','FUND WALLET','Receive and top up your ROBANK wallet']] as const).map(([id,title,desc]) =>
+      {([['send','SEND','Wallet or bank'],['fund-bank','FUND BANK','Add value to your bank'],['fund-wallet','FUND WALLET','Add crypto to your wallet']] as const).map(([id,title,desc]) =>
         <button key={id} type="button" onClick={() => setMode(id)} className={mode===id?'active':''}><span>{title}</span><small>{desc}</small></button>
       )}
     </div>
-    {mode==='send' && <section className="money-panel"><div className="money-panel-head"><span>SEND</span><b>Choose destination</b></div><p className="money-intro">Send supported value to a wallet or a bank beneficiary. The next step only asks for the details required for that destination.</p><SendForm /></section>}
-    {mode==='fund-bank' && <section className="money-panel"><div className="money-panel-head"><span>FUND BANK</span><b>Choose how to add value</b></div><div className="money-choice-grid">
-      <button type="button" className="money-choice active"><span>Top up with your bank</span><small>Buy supported crypto through the configured bank/on-ramp rail.</small></button>
-      <button type="button" className="money-choice"><span>Top up with your crypto</span><small>Move supported crypto value into a connected bank payout rail when available.</small></button>
-    </div><div className="money-provider-surface"><OnrampWidget /></div></section>}
+    {mode==='send' && <section className="money-panel"><div className="money-panel-head"><span>SEND</span><b>Where should it go?</b></div><p className="money-intro">Choose a wallet or bank, then enter the recipient, asset and amount.</p><SendForm /></section>}
+    {mode==='fund-bank' && <section className="money-panel"><div className="money-panel-head"><span>FUND BANK</span><b>Choose your funding rail</b></div>
+      <div className="money-choice-grid">
+        <button type="button" onClick={() => setBankFundingMode('bank')} className={bankFundingMode==='bank'?'money-choice active':'money-choice'}><span>Top up with your bank</span><small>Use a supported bank or payment method through the connected provider.</small></button>
+        <button type="button" onClick={() => setBankFundingMode('crypto')} className={bankFundingMode==='crypto'?'money-choice active':'money-choice'}><span>Top up with your crypto</span><small>Use supported crypto to fund a bank payout when that rail is connected.</small></button>
+      </div>
+      {bankFundingMode==='bank' ? <div className="money-provider-surface"><OnrampWidget /></div> : <div className="money-provider-surface money-unavailable"><div className="ro-kicker">CRYPTO → BANK</div><h2>Bank payout rail</h2><p>Choose the bank beneficiary and asset when the connected payout provider is available. ROBANK will not simulate a bank transfer.</p></div>}
+    </section>}
     {mode==='fund-wallet' && <FundWalletPanel />}
   </div></AppShell>;
 }

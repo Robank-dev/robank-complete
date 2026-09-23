@@ -172,14 +172,14 @@ export default function BorrowPage() {
 
         {loading && (
           <section className="rounded-2xl border border-ro-line bg-ro-panel p-5 text-sm text-white/50">
-            Loading live credit marketsÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦
+            Loading live credit markets…
           </section>
         )}
 
         {error && (
           <section className="rounded-2xl border border-white/10 bg-ro-panel p-5 text-sm text-white/50">
             Credit market data is currently unavailable.
-            <div className="mt-2 text-xs text-white/30">{error}</div>
+            <div className="mt-2 text-sm text-white/40">The connected credit provider is unavailable. No borrow action is simulated.</div>
           </section>
         )}
 
