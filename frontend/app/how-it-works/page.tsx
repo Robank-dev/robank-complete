@@ -84,26 +84,38 @@ const steps: Step[] = [
   },
   {
     n: '13',
-    title: 'Route across networks',
-    text: 'Move value across supported chains and choose the rail that fits the action.',
+    title: 'Understand markets and assets',
+    text: 'Use the Assets, Markets and News surfaces for discovery and context. Information is kept separate from authoritative wallet state and execution confirmation.',
     visual: 'routing',
   },
   {
     n: '14',
-    title: 'Access tokenized assets',
-    text: 'Discover supported tokenized baskets and real-world asset products through connected providers such as The Index / Blend.',
-    visual: 'rwa',
+    title: 'Add your company',
+    text: 'Create or register an existing company with legal information and verification state. KYC/KYB remains provider-dependent and status-driven.',
+    visual: 'agent',
   },
   {
     n: '15',
-    title: 'Run an autonomous treasury',
-    text: 'Create a policy for your idle capital: reserve liquidity, allocate approved assets, and rebalance within your rules.',
-    visual: 'treasury',
+    title: 'Turn work into a job',
+    text: 'Create work with a clear budget and lifecycle, then let a worker or agent claim, work and submit it through explicit states.',
+    visual: 'automation',
   },
   {
     n: '16',
+    title: 'Access tokenized assets',
+    text: 'Discover supported tokenized products through connected providers, check eligibility and review the product before any provider-backed execution.',
+    visual: 'rwa',
+  },
+  {
+    n: '17',
+    title: 'Run an autonomous treasury',
+    text: 'Create a policy for idle capital: reserve liquidity, allocate approved assets and rebalance only within the rules and live execution path.',
+    visual: 'treasury',
+  },
+  {
+    n: '18',
     title: 'Run ROBANK anywhere',
-    text: 'Use the app, terminal, API or your own agent workflow. ROBANK becomes the financial layer behind the work.',
+    text: 'Use the app, ROBANK Skill, CLI, API or your own agent workflow. The interface changes; the operating model stays the same.',
     visual: 'terminal',
   },
 ];
@@ -206,7 +218,7 @@ function Visual({ kind }: { kind: string }) {
             <span>Network <b>Robinhood Chain</b></span>
             <span>Amount <b>20 USDC</b></span>
           </div>
-          <div className="hw-success">✓ Payment complete</div>
+          <div className="hw-success">✓ Example result · verified</div>
         </div>
       </div>
     );
@@ -307,9 +319,9 @@ function Visual({ kind }: { kind: string }) {
         <div className="hw-routing">
           <div className="hw-route-center">R</div>
           {[
-            ['ROBINHOOD', 'FASTEST'],
-            ['ARBITRUM', 'LOW FEE'],
-            ['BASE', 'AVAILABLE'],
+            ['ROBINHOOD CHAIN', 'SUPPORTED'],
+            ['BASE MAINNET', 'SUPPORTED'],
+            ['PROVIDER RAIL', 'CHECK AVAILABILITY'],
           ].map(([a,b], i) => (
             <div className={`hw-chain c${i+1}`} key={a}><b>{a}</b><small>{b}</small></div>
           ))}
@@ -325,7 +337,7 @@ function Visual({ kind }: { kind: string }) {
     return (
       <div className="hw-visual">
         <div className="hw-rwa">
-          <div className="hw-row hw-muted"><span>TOKENIZED ASSETS</span><span>THE INDEX / BLEND</span></div>
+          <div className="hw-row hw-muted"><span>TOKENIZED ASSETS</span><span>PROVIDER RAIL</span></div>
           <div className="hw-rwa-main">
             <div><small>AI BASKET</small><strong>GLOBAL TECH</strong><span>ERC-20 basket</span></div>
             <b className="hw-basket">R</b>
@@ -392,15 +404,15 @@ export default function HowItWorksPage() {
           <a href="/#product">Product</a>
           <a href="/#agent">AI</a>
           <a href="/how-it-works" className="active">How it works</a>
-          <a href="/#security">Docs</a>
+          <a href="/docs">Docs</a>
         </div>
-        <a href="/dashboard" className="hw-app">App <span>→</span></a>
+        <a href="/login" className="hw-app">App <span>→</span></a>
       </nav>
 
       <header className="hw-header">
-        <span>HOW IT WORKS</span>
-        <h1>From a wallet to a<br /><em>financial operator.</em></h1>
-        <p>ROBANK is built so you can move from manual money management to an agent that can operate within the rules you set.</p>
+        <span>HOW ROBANK WORKS</span>
+        <h1>From financial context<br /><em>to financial action.</em></h1>
+        <p>ROBANK connects account state, assets, payments, agents and programmable workflows into one operating model. The interface stays readable while the execution path remains explicit.</p>
       </header>
 
       <section className="hw-timeline">

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 const sections = [
-  ['Introduction', 'overview'],
+  ['Start here', 'overview'],
   ['How ROBANK works', 'architecture'],
   ['Account & wallet', 'wallet'],
   ['Payments', 'payments'],
@@ -14,9 +14,13 @@ const sections = [
   ['Terminal & API', 'developer'],
   ['Networks', 'networks'],
   ['Assets', 'assets'],
+  ['Markets & news', 'markets'],
+  ['Company & KYC/KYB', 'company'],
+  ['Jobs', 'jobs'],
   ['Tokenized assets', 'rwa'],
   ['Card', 'card'],
   ['Security', 'security'],
+  ['Capability status', 'status'],
   ['Roadmap', 'roadmap'],
   ['FAQ', 'faq'],
 ];
@@ -124,7 +128,7 @@ export default function DocsPage() {
           <a href="/#agent">AI</a>
         </div>
 
-        <a href="/dashboard" className="docs-app">App <span>→</span></a>
+        <a href="/login" className="docs-app">App <span>→</span></a>
         <button className="docs-menu" onClick={() => setOpen(v => !v)}>Menu</button>
       </nav>
 
@@ -141,16 +145,17 @@ export default function DocsPage() {
             <span className="docs-eyebrow">ROBANK DOCUMENTATION</span>
             <h1>Give your agent a<br /><em>financial identity.</em></h1>
             <p>
-              ROBANK gives an agent the financial layer to hold value, move money,
-              access payment rails, interact with on-chain markets and operate within
-              rules you define. Wallet, permissions, execution and automation live
-              in one system.
+              ROBANK is an agent-first financial operating layer. The public site explains the system;
+              the authenticated app brings together account entry, wallet and asset views, payments,
+              borrowing, card, company, jobs, markets and news surfaces. The ROBANK Skill, CLI and API
+              extend the same operating model into developer and agent workflows.
             </p>
             <div className="docs-meta">
-              <Badge>PRODUCT DOCS</Badge>
-              <Badge>WEB3</Badge>
-              <Badge>AI AGENT</Badge>
-              <Badge muted>BUILDING IN PUBLIC</Badge>
+              <Badge>BASE MAINNET · 8453</Badge>
+              <Badge>ROBINHOOD CHAIN · 4663</Badge>
+              <Badge>PRIVY EMAIL LOGIN</Badge>
+              <Badge>AGENT-FIRST</Badge>
+              <Badge muted>PROVIDER-DEPENDENT WHERE NOTED</Badge>
             </div>
           </header>
 
@@ -204,28 +209,26 @@ export default function DocsPage() {
             <span className="docs-section-kicker">03 / ACCOUNT &amp; WALLET</span>
             <h2>Your financial home.</h2>
             <p>
-              The wallet is more than an address on a screen. It is the account
-              layer that gives the rest of ROBANK somewhere to read balances from
-              and somewhere to send authorized actions to.
+              The current web entry is email-first through Privy. The user enters a verification code,
+              then the authenticated app selects the associated Privy EVM wallet for account context.
+              This keeps the public landing and docs usable without authentication while account actions stay behind the app.
             </p>
-            <h3>Vault model</h3>
+            <h3>Wallet model</h3>
             <p>
-              The original ROBANK architecture uses a Safe/Gnosis smart-account
-              style vault. The application checks whether a user already has a
-              vault, creates one when needed, and then loads balances and
-              transaction history against that vault.
+              Wallet and vault are infrastructure around the account. The exact signing, delegated authorization and vault implementation
+              must follow the configured production runtime. Never infer custody or signing properties from the UI alone.
             </p>
-            <Code>{`User
+            <Code>{`Email + Privy verification
   ↓
-Connect wallet / sign in
+Authenticated account
   ↓
-Check for existing vault
+Associated Privy EVM wallet
   ↓
-Create Safe vault if needed
+Read account / asset / activity state
   ↓
-Load balance + transactions
+Prepare authorized actions
   ↓
-ROBANK dashboard`}</Code>
+ROBANK app`}</Code>
             <Callout title="Development note">
               The current production-facing configuration targets Base Mainnet
               for payments and vault operations, with Robinhood Chain Mainnet
@@ -382,15 +385,15 @@ Rebalance:         Monthly`}</Code>
               agent should be able to reach the same financial capabilities from a
               terminal, API or workflow.
             </p>
-            <h3>CLI direction</h3>
-            <Code>{`roBank send --to alice.robinhood --amount 20 --token USDC
+            <h3>Install the ROBANK Skill</h3>
+            <Code>{`npx skills add Robank-dev/robank-skill`}</Code>
+            <p>The Skill gives a compatible agent ROBANK operating rules and reference material. Installing it does not create a wallet, fund an account, or grant signing authority.</p>
+            <h3>CLI command families</h3>
+            <Code>{`capital · assets · borrow · payments · card
+agent · jobs · company · wallet · users
+autopilot · onramp · swap · x402 · rwa · networks
 
-ROBANK CLI v0.1.0
-✓ wallet connected
-✓ balance: 12,840.52 USDC
-✓ recipient: alice.robinhood
-✓ network: Robinhood Chain
-✓ transaction confirmed`}</Code>
+Run: robank --help`}</Code>
             <h3>Core API surface</h3>
             <table className="docs-table">
               <thead><tr><th>Endpoint</th><th>Purpose</th></tr></thead>
@@ -408,16 +411,15 @@ ROBANK CLI v0.1.0
             <span className="docs-section-kicker">10 / NETWORKS</span>
             <h2>One financial layer, more than one chain.</h2>
             <p>
-              ROBANK is a multi-chain interface. Base Mainnet is the primary
-              payment and settlement rail, while Robinhood Chain Mainnet is the
-              tokenized-asset rail. Other networks remain outside the current live scope.
+              ROBANK is a multi-chain interface, but the current production scope is intentionally explicit:
+              Base Mainnet for supported payment/settlement flows and Robinhood Chain Mainnet for supported
+              Robinhood Chain assets and tokenized-asset integrations. Other networks are outside the current production scope.
             </p>
             <table className="docs-table">
               <thead><tr><th>Network</th><th>Role in the design</th><th>Status</th></tr></thead>
               <tbody>
-                <tr><td><strong>Base Mainnet</strong></td><td>Primary payment and settlement rail</td><td><Badge>LIVE</Badge></td></tr>
-                <tr><td><strong>Robinhood Chain Mainnet</strong></td><td>Tokenized-asset rail and Stock Token ecosystem</td><td><Badge>LIVE</Badge></td></tr>
-                <tr><td><strong>Arbitrum</strong></td><td>Future multi-chain expansion</td><td><Badge muted>PLANNED</Badge></td></tr>
+                <tr><td><strong>Base Mainnet</strong></td><td>Primary production rail for supported payment and settlement flows · chain ID 8453</td><td><Badge>MAINNET</Badge></td></tr>
+                <tr><td><strong>Robinhood Chain Mainnet</strong></td><td>Production rail for supported assets and tokenized-asset integrations · chain ID 4663</td><td><Badge>MAINNET</Badge></td></tr>
               </tbody>
             </table>
             <Callout title="Do not hard-code production assumptions">
@@ -430,21 +432,60 @@ ROBANK CLI v0.1.0
             <span className="docs-section-kicker">11 / ASSETS</span>
             <h2>What can the wallet hold?</h2>
             <p>
-              The original product design uses USDC as the primary unit for
-              payments, with USDT, USDG and WETH included in the broader asset
-              design. Actual supported assets depend on deployment, liquidity and
-              provider availability.
+              The current asset model is network-aware. Base Mainnet supports the primary USDC payment flow, while Robinhood Chain Mainnet
+              is configured for supported Robinhood assets including USDG. ETH is part of the broader wallet/asset experience. The app shows
+              an asset's name/ticker and icon where metadata is available, and users can add supported tokens through the asset surface.
             </p>
             <div className="docs-grid">
-              <div className="docs-card"><b>USDC</b><span>Primary payment and accounting asset in the current product design.</span></div>
-              <div className="docs-card"><b>USDT</b><span>Planned stablecoin support in the broader asset model.</span></div>
-              <div className="docs-card"><b>USDG</b><span>Planned on selected network integrations.</span></div>
-              <div className="docs-card"><b>WETH</b><span>Used as a crypto asset and swap destination in the current design.</span></div>
+              <div className="docs-card"><b>USDC</b><span>Primary stablecoin/payment asset in the current Base Mainnet flow.</span></div>
+              <div className="docs-card"><b>USDG</b><span>Robinhood Chain Mainnet stablecoin asset used by the current network-aware asset model.</span></div>
+              <div className="docs-card"><b>ETH</b><span>Native crypto asset represented in the wallet/asset experience where the network supports it.</span></div>
+              <div className="docs-card"><b>Additional tokens</b><span>Supported token metadata can be added through the asset surface rather than assuming every contract is automatically supported.</span></div>
+            </div>
+          </section>
+
+          <section id="markets" className="docs-section">
+            <span className="docs-section-kicker">12 / MARKETS &amp; NEWS</span>
+            <h2>Information around the financial account.</h2>
+            <p>The current web includes dedicated Markets and News surfaces alongside Assets. These surfaces provide market context and discovery; they are separate from authoritative wallet balances and transaction confirmation.</p>
+            <div className="docs-grid">
+              <div className="docs-card"><b>Markets</b><span>Market-oriented information for supported crypto, public-market and RWA-related instruments as the runtime integrations provide it.</span></div>
+              <div className="docs-card"><b>News</b><span>News/context for research and monitoring. A news item is never proof of ownership, eligibility or execution.</span></div>
+              <div className="docs-card"><b>Assets</b><span>Asset metadata and supported-token context stay distinct from market commentary.</span></div>
+              <div className="docs-card"><b>Live-data rule</b><span>If a provider is not configured or verified, the agent must say the data is unavailable rather than inventing a live value.</span></div>
+            </div>
+          </section>
+
+          <section id="company" className="docs-section">
+            <span className="docs-section-kicker">13 / COMPANY &amp; KYC / KYB</span>
+            <h2>Organization workflows, with verification boundaries.</h2>
+            <p>The current web includes a Company surface for adding or registering an existing company. Company records include legal name, registration number, country, status, verification status and provider verification/session context.</p>
+            <div className="docs-grid">
+              <div className="docs-card"><b>Company record</b><span>Create and manage the organization's core legal information and account context.</span></div>
+              <div className="docs-card"><b>KYC / KYB</b><span>Verification is provider-dependent. A UI record is not proof that an external verification has completed.</span></div>
+              <div className="docs-card"><b>Agent access</b><span>The agent can work with company context only through the authenticated/authorized runtime path.</span></div>
+              <div className="docs-card"><b>Status-first</b><span>Verification states must reflect the actual provider result, not a locally fabricated approval.</span></div>
+            </div>
+          </section>
+
+          <section id="jobs" className="docs-section">
+            <span className="docs-section-kicker">14 / JOBS</span>
+            <h2>Turn work into an explicit lifecycle.</h2>
+            <p>The current Jobs surface models work that can be created, claimed and submitted by users or agents. The workflow is explicit so a job state is not confused with a payment state.</p>
+            <Code>{`open → claimed → in_progress → submitted → approved
+
+Alternative final state:
+cancelled`}</Code>
+            <div className="docs-grid">
+              <div className="docs-card"><b>Create</b><span>Title, description, budget, asset/network context and optional company linkage.</span></div>
+              <div className="docs-card"><b>Claim</b><span>A worker or agent claims an available job through the supported workflow.</span></div>
+              <div className="docs-card"><b>Submit</b><span>Attach the work result to the job record.</span></div>
+              <div className="docs-card"><b>Approve</b><span>Approval changes the job state; it does not automatically prove that an escrow or payment was settled.</span></div>
             </div>
           </section>
 
           <section id="rwa" className="docs-section">
-            <span className="docs-section-kicker">12 / TOKENIZED ASSETS</span>
+            <span className="docs-section-kicker">15 / TOKENIZED ASSETS</span>
             <h2>Make the agent work with real-world assets.</h2>
             <p>
               A future ROBANK capability is to let users discover and interact
@@ -491,7 +532,7 @@ Require approval for any new provider.`}</Code>
           </section>
 
           <section id="card" className="docs-section">
-            <span className="docs-section-kicker">13 / CARD</span>
+            <span className="docs-section-kicker">16 / CARD</span>
             <h2>A card when you need one.</h2>
             <p>
               ROBANK's card concept is a virtual card layer connected to the
@@ -507,7 +548,7 @@ Require approval for any new provider.`}</Code>
           </section>
 
           <section id="security" className="docs-section">
-            <span className="docs-section-kicker">14 / SECURITY</span>
+            <span className="docs-section-kicker">17 / SECURITY</span>
             <h2>Control stays visible.</h2>
             <p>
               Financial software becomes easier to trust when it tells you what
@@ -528,8 +569,23 @@ Require approval for any new provider.`}</Code>
             </Callout>
           </section>
 
+          <section id="status" className="docs-section">
+            <span className="docs-section-kicker">18 / CAPABILITY STATUS</span>
+            <h2>Know what is actually available.</h2>
+            <p>ROBANK separates UI surfaces, backend routes and real provider execution. A source file existing does not automatically make a capability production-live.</p>
+            <table className="docs-table">
+              <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td><Badge>LIVE</Badge></td><td>A working runtime/tool/provider path has been verified for the stated scope.</td></tr>
+                <tr><td><Badge> BETA </Badge></td><td>Usable but materially incomplete, unstable or still being hardened.</td></tr>
+                <tr><td><Badge muted>PROVIDER-DEPENDENT</Badge></td><td>Requires an external provider, credentials, eligibility, venue or jurisdiction-specific flow.</td></tr>
+                <tr><td><Badge muted>PLANNED</Badge></td><td>Designed or documented, but no usable implementation path is currently available.</td></tr>
+              </tbody>
+            </table>
+          </section>
+
           <section id="roadmap" className="docs-section">
-            <span className="docs-section-kicker">15 / ROADMAP</span>
+            <span className="docs-section-kicker">19 / ROADMAP</span>
             <h2>Where ROBANK is going.</h2>
             <div className="docs-grid">
               <div className="docs-card"><b>Foundation</b><span>Email/wallet entry, wallet/vault setup, balance, send, receive and transaction history.</span></div>
@@ -542,7 +598,7 @@ Require approval for any new provider.`}</Code>
           </section>
 
           <section id="faq" className="docs-section">
-            <span className="docs-section-kicker">16 / FAQ</span>
+            <span className="docs-section-kicker">20 / FAQ</span>
             <h2>Questions we expect people to ask.</h2>
             <h3>Is ROBANK a traditional bank?</h3>
             <p>No. The product is designed as an on-chain financial interface and routing layer, not as a conventional deposit-taking bank.</p>

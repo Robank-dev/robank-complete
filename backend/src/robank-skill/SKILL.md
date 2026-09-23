@@ -1,6 +1,6 @@
 ---
 name: robank
-description: Give AI agents a financial operating layer for capital, assets, borrowing, payments, cards, wallets, automation, tokenized assets, and multi-network execution through ROBANK.
+description: Give compatible AI agents structured ROBANK context for account state, assets, payments, borrowing, cards, companies, jobs, automation, tokenized assets, x402, APIs, CLI workflows, and production network execution.
 license: MIT
 compatibility: Requires access to ROBANK-compatible wallet, API, CLI, or agent tools depending on the operation.
 ---
@@ -19,18 +19,25 @@ Core loop:
 
 > **OBSERVE → DECIDE → EXECUTE → VERIFY → RECONCILE → REPEAT**
 
-Core product surfaces:
+Current product surfaces:
 
-- Capital
+- Dashboard / account
 - Assets
+- Send / Receive
 - Borrow
-- Payments
-- Cards
-- Vault
+- Card
+- Company
+- Jobs
+- Markets
+- News
 - Agent
-- Activity
+- Vault
+- On-ramp
+- API / CLI
 
-The wallet or vault is infrastructure. **Capital is the primary product object.**
+The wallet or vault is infrastructure. **Capital is the primary operating context.**
+
+The current web account flow is email-first through Privy: email → verification code → authenticated account → associated Privy EVM wallet. Do not describe the current product as requiring an external wallet connection.
 
 ## 2. Capital as the Core Object
 
@@ -57,19 +64,22 @@ A provider or network is a rail, not the canonical source of truth. ROBANK's int
 
 ## 3. ROBANK Financial Rails
 
-ROBANK can orchestrate multiple financial rails.
+The current production network scope is explicit:
 
-Conceptual rails include:
+- **Base Mainnet** — chain ID `8453`; primary production rail for supported payment and settlement flows
+- **Robinhood Chain Mainnet** — chain ID `4663`; production rail for supported Robinhood Chain assets and tokenized-asset integrations
 
-- **Base** — money movement and settlement
-- **Robinhood Chain** — tokenized stock and asset rail
-- **Buvei** — card and spending rail
-- **Lending providers** — borrowing and collateral rail
-- **RWA providers** — tokenized asset rail
-- **x402** — machine-to-machine payment rail
-- **Wallet / vault infrastructure** — account and signing rails
+Additional financial rails are provider-backed where applicable:
 
-Never assume that a rail is available for every user, asset, network, jurisdiction, or transaction.
+- Card and spending providers
+- Lending providers
+- RWA / tokenized-asset providers
+- x402 machine payments
+- Wallet / vault infrastructure
+
+Never assume a rail is available for every user, asset, network, jurisdiction, or transaction. Runtime configuration and live capability checks remain authoritative.
+
+Base Sepolia (`84532`) and Robinhood Chain Testnet (`46630`) are development/testnet networks and must not be selected by production execution paths.
 
 ## 4. The Agent's Role
 
@@ -462,7 +472,19 @@ The agent should:
 
 Do not jump directly from user intent to execution.
 
-## 23. Reference Files
+## 23. Install the ROBANK Skill
+
+For a skills-compatible agent, install the published Skill repository:
+
+```bash
+npx skills add Robank-dev/robank-skill
+```
+
+Windows PowerShell uses the same command. Installing the Skill gives the agent ROBANK operating rules and reference material. It does **not** create an account, create/fund a wallet, expose private keys, grant signing authority, complete KYC/KYB, or make provider integrations live.
+
+Keep the Skill updated when ROBANK changes its networks, commands, APIs, product surfaces, or execution rules.
+
+## 24. Reference Files
 
 Use the narrowest reference needed for the task:
 
@@ -480,7 +502,7 @@ Use the narrowest reference needed for the task:
 
 Load only the references required for the current task.
 
-## 24. Final Operating Rule
+## 25. Final Operating Rule
 
 ROBANK is an execution system with financial context, not a chatbot that guesses financial state.
 

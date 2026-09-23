@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 const features = [
-  ['01', 'Your money, together', 'See your balance, move funds and keep track of everything from one place.'],
-  ['02', 'A financial agent that listens', 'Just tell ROBANK what you need. It turns your words into a clear action.'],
-  ['03', 'Made for moving globally', 'Move digital dollars across borders while keeping your wallet and your decisions close.'],
+  ['01', 'One financial workspace', 'See account context, assets and activity together in one financial workspace.'],
+  ['02', 'An agent that can operate', 'Turn natural-language intent into structured financial work while keeping policy and execution boundaries visible.'],
+  ['03', 'Built beyond the browser', 'Use the app, ROBANK Skill, CLI and API as different surfaces over the same operating model.'],
 ];
 
 export default function Home() {
@@ -212,8 +212,8 @@ export default function Home() {
         <div className="install-header">
           <div>
             <div className="section-kicker">ROBANK AGENT SKILL</div>
-            <h2>Give your agent <em>ROBANK context.</em></h2>
-            <p>Install the ROBANK Skill and give compatible agents structured context for wallets, payments, treasury, networks, security, x402, APIs, commands and the broader ROBANK system.</p>
+            <h2>Install the Skill.<br /><em>Give your agent ROBANK context.</em></h2>
+            <p>Install the ROBANK Skill to give compatible agents the current operating rules and references for account state, assets, payments, borrowing, cards, company, jobs, networks, security, x402, APIs and CLI workflows.</p>
           </div>
           <a className="install-github-link" href="https://github.com/Robank-dev/robank-skill" target="_blank" rel="noreferrer">VIEW ON GITHUB <span>→</span></a>
         </div>
@@ -236,7 +236,7 @@ export default function Home() {
           <article className="install-card">
             <span className="install-card-kicker">01 / AGENT</span>
             <h3>Built for financial agents.</h3>
-            <p>Structured ROBANK context for agents working with wallets, payments, treasury, networks, security and execution concepts.</p>
+            <p>Structured context for account state, assets, payments, borrowing, company, jobs, policies, networks, security and execution concepts.</p>
             <a href="/docs#agent">READ AGENT DOCS <span>→</span></a>
           </article>
 
@@ -249,23 +249,23 @@ export default function Home() {
 
           <article className="install-card">
             <span className="install-card-kicker">03 / CAPABILITIES</span>
-            <h3>Payments, x402, treasury &amp; more.</h3>
-            <p>Explore documented ROBANK concepts across payments, treasury, RWA, networks, security, APIs, commands and machine payments.</p>
+            <h3>Payments, assets, jobs &amp; more.</h3>
+            <p>Explore the current ROBANK model across payments, assets, borrowing, cards, company, jobs, markets, news, RWA, networks, security, APIs and machine payments.</p>
             <a href="/docs">EXPLORE DOCS <span>→</span></a>
           </article>
 
           <article className="install-card">
             <span className="install-card-kicker">04 / DEVELOPERS</span>
-            <h3>Use ROBANK where you work.</h3>
-            <p>ROBANK is designed beyond one website through agent workflows, terminal usage and API-facing integrations.</p>
+            <h3>App, Skill, CLI &amp; API.</h3>
+            <p>The same operating model is designed to work across the web app, ROBANK Skill, terminal and API instead of locking the agent to one interface.</p>
             <a href="/docs#developer">DEVELOPER DOCS <span>→</span></a>
           </article>
         </div>
       </section>
-      <section className="ticker"><div className="ticker-track"><div className="ticker-set"><span>YOUR MONEY</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>GLOBAL PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>AI FINANCE</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>ARBITRUM</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div><div className="ticker-set" aria-hidden="true"><span>YOUR MONEY</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>GLOBAL PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>AI FINANCE</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>ARBITRUM</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div></div></section>
+      <section className="ticker"><div className="ticker-track"><div className="ticker-set"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div><div className="ticker-set" aria-hidden="true"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div></div></section>
 
       <section id="product" className="section product-section">
-        <div className="section-intro"><div className="section-kicker">THE PRODUCT</div><h2>Money, payments,<br /><em>all in one place.</em></h2><p>Everything stays simple when you use it. Underneath, ROBANK connects your wallet, payments and financial tools into one experience.</p></div>
+        <div className="section-intro"><div className="section-kicker">THE PRODUCT</div><h2>Financial context,<br /><em>ready to act.</em></h2><p>ROBANK brings account state, assets, payments and financial workflows into one interface — then exposes the same operating model to agents.</p></div>
         <div className="feature-grid">{features.map(([n,t,d]) => <article className="feature-card" key={n}><span className="feature-number">{n}</span><div className="feature-image-wrap"><img src={n === '01' ? '/robank-wallet.png' : n === '02' ? '/robank-ai.png' : '/robank-global.png'} alt="" className="product-image" /></div><h3>{t}</h3><p>{d}</p><a href="#agent">Explore <span>?</span></a></article>)}</div>
       </section>      <section id="agent" className="section agent-section">
 
