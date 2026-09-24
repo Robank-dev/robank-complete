@@ -22,7 +22,7 @@ router.get('/status', (_req, res) => {
     agent: { status: 'available', chat: { status: config.robankLlmApiKey ? 'llm-configured' : 'local-fallback', model: config.robankLlmModel, baseUrl: config.robankLlmBaseUrl }, execution: { status: 'executor-required', foundation: 'available', autonomous: false } },
     policy: { autoExecute: policy.autoExecute, revoked: policy.revoked, expired: isPolicyExpired(policy), perTransactionLimitUsd: policy.perTransactionLimitUsd, dailyLimitUsd: policy.dailyLimitUsd, monthlyLimitUsd: policy.monthlyLimitUsd, liquidityFloorUsd: policy.liquidityFloorUsd, maxLtv: policy.maxLtv, approvalThresholdUsd: policy.approvalThresholdUsd, allowedAssets: policy.allowedAssets, allowedNetworks: policy.allowedNetworks, approvedProviders: policy.approvedProviders },
     scheduler: { status: scheduledJobs.length > 0 ? 'running' : 'stopped', registeredJobCount: jobs.length, scheduledJobCount: scheduledJobs.length, jobs },
-    providers: { execution: 'not-connected', card: 'provider-dependent', rwa: 'provider-dependent', credit: 'morpho' }
+    providers: { execution: 'not-connected', card: 'provider-dependent', rwa: 'provider-dependent', credit: 'not-connected' }
   });
 });
 router.post('/prepare', async (req, res) => {
