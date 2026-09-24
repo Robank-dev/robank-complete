@@ -1,6 +1,24 @@
 # ROBANK API Reference
 
-**Base URL (placeholder — no production domain exists yet):**
+**Base URL:** runtime-specific. Do not hard-code a production API domain in clients unless the deployment environment provides it.
+
+## Current web Agent Market route
+
+### GET /api/agent-market
+
+**Purpose:** Return x402 service discovery data and open bounties for the ROBANK Agent Market.
+
+**Status:** LIVE for the current web runtime through the frontend proxy, backed by the external x402-list directory and the configured Jobs API where available.
+
+**Important:** This is discovery, not execution. A listed service is not automatically safe, eligible, or purchased. The agent must inspect the provider's actual HTTP 402 requirement before paying.
+
+### GET /api/markets
+
+**Purpose:** Legacy market-data endpoint retained for compatibility; it is no longer the primary web Markets surface.
+
+**Status:** LEGACY / NOT USED BY THE CURRENT WEB MARKETS UI.
+
+**Important:** Do not present its stock/crypto data as the Agent Market.
 
 ```
 https://api.robank.example

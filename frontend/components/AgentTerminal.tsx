@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import { formatUnits, isAddress } from 'viem';
 import { useAccount, useBalance, useReadContract, useSendTransaction } from 'wagmi';
@@ -15,6 +16,7 @@ type Asset = 'USDC' | 'USDG';
 type Pending = { amount: string; destination: string; asset?: Asset };
 
 export default function AgentTerminal() {
+  const searchParams = useSearchParams();
   const { authenticated } = usePrivy();
   const { address, chainId } = useAccount();
   const { sendTransactionAsync } = useSendTransaction();
@@ -27,6 +29,19 @@ export default function AgentTerminal() {
   const [history, setHistory] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
   const [pending, setPending] = useState<Pending | null>(null);
   const [tx, setTx] = useState<{ to: string; data: `0x${string}`; value?: string; destination: string; amount: string; network: 'base' | 'robinhood'; asset: Asset } | null>(null);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [riskAcknowledged, setRiskAcknowledged] = useState(false);
+
+  useEffect(() => {
+    const service = searchParams.get('service');
+    if (!service) return;
+    setInput(`Use x402 service ${service}`);
+    api.agentMarket(`q=${encodeURIComponent(service)}&limit=10`).then((data) => {
+      const match = (data.services || []).find((item: any) => item.slug === service) || null;
+      setSelectedService(match);
+      setRiskAcknowledged(false);
+    }).catch(() => setSelectedService(null));
+  }, [searchParams]);
 
   const walletBalances = {
     USDC: baseUsdc.data === undefined ? null : Number(formatUnits(baseUsdc.data, 6)),
@@ -94,6 +109,20 @@ export default function AgentTerminal() {
         return;
       }
 
+      const marketIntent = /\b(buy|purchase|get|rent|book|find|belikan|carikan|cari|sewa|pesan)\b/i.test(message) && /\b(gpu|compute|inference|browser|scrape|data|api|service|agent)\b/i.test(message);
+      if (marketIntent) {
+        const q = message.replace(/\b(buy|purchase|get|rent|book|find|belikan|carikan|cari|sewa|pesan)\b/gi, ' ').trim();
+        const market = await api.agentMarket(new URLSearchParams({ q: q.slice(0, 80), limit: '5' }).toString());
+        const found = Array.isArray(market.services) ? market.services.slice(0, 5) : [];
+        if (!found.length) {
+          setOutput((prev) => [...prev, '**Agent Market:** I could not find a matching provider. Try a more specific capability.']);
+        } else {
+          const lines = found.map((s: any, i: number) => `${i + 1}. **${s.name}** · ${s.category} · from $${s.minPriceUsd ?? '—'} · ${s.paymentReady ? 'x402 ready' : 'listed'} · ${Array.isArray(s.networks) ? s.networks.map((n: string) => n === 'eip155:8453' ? 'Base' : n === 'eip155:4663' ? 'Robinhood Chain' : n).join(', ') : 'network pending'}`);
+          setOutput((prev) => [...prev, `**Agent Market found ${found.length} provider(s).**\n${lines.join('\n')}\n\nI have not paid anyone yet. Next step is to inspect the provider's actual HTTP 402 terms, check your mandate, and only then request approval/signing when required.`]);
+        }
+        return;
+      }
+
       if (/\b(balance|saldo)\b/i.test(message)) {
         const c = balanceContext();
         const b = c.wallet.balances;
@@ -118,8 +147,19 @@ export default function AgentTerminal() {
     }
   }
 
+  const serviceBlocked = selectedService && ['high', 'critical', 'blocked'].includes(String(selectedService.riskLevel).toLowerCase());
+  const serviceNeedsWarning = Boolean(selectedService && (!selectedService.verified || !['clean'].includes(String(selectedService.riskLevel).toLowerCase())));
+
   async function signAndSend() {
     if (!tx || !address) return;
+    if (serviceBlocked) {
+      setOutput((prev) => [...prev, '**Blocked by ROBANK safety policy.** This service is marked high-risk/critical by the discovery source. The transaction will not be signed, even if the user requests it.']);
+      return;
+    }
+    if (serviceNeedsWarning && !riskAcknowledged) {
+      setOutput((prev) => [...prev, '**Safety warning:** this provider is not independently verified or is not marked clean by the discovery source. Review the provider, amount, network, and recipient before continuing.']);
+      return;
+    }
     try {
       const hash = await sendTransactionAsync({ to: tx.to as `0x${string}`, data: tx.data, value: BigInt(tx.value || '0') });
       const confirmation = await api.agentConfirm({ walletAddress: address, destination: tx.destination, amount: tx.amount, txHash: hash, network: tx.network, asset: tx.asset });
@@ -140,7 +180,9 @@ export default function AgentTerminal() {
         {output.map((line, index) => line.startsWith('> ') ? <div key={index} className="whitespace-pre-wrap text-white">{line}</div> : <div key={index} className="prose prose-invert prose-sm max-w-none"><ReactMarkdown remarkPlugins={[remarkGfm]}>{line}</ReactMarkdown></div>)}
       </div>
       {pending && !pending.asset && <div className="flex flex-wrap gap-2 border-t border-ro-line p-3"><span className="agent-choice-label">Choose asset</span><button onClick={() => chooseAsset('USDC')} className="agent-choice agent-choice-primary">USDC · Base</button><button onClick={() => chooseAsset('USDG')} className="agent-choice">USDG · Robinhood Chain</button></div>}
-      {tx && <div className="border-t border-ro-line p-3"><button onClick={signAndSend} className="rounded-xl bg-white px-4 py-3 text-xs font-semibold text-black">Review & Sign in Wallet</button></div>}
+      {tx && <div className="border-t border-ro-line p-3">
+        {serviceBlocked ? <div className="rounded-xl border border-white/15 bg-white/[.03] p-3 text-xs leading-5 text-white/60"><b>ROBANK safety block.</b> This service cannot be paid through the agent because its market risk level is {String(selectedService.riskLevel).toUpperCase()}.</div> : serviceNeedsWarning && !riskAcknowledged ? <div className="rounded-xl border border-white/10 bg-white/[.03] p-3"><div className="text-xs leading-5 text-white/55"><b>Review before signing.</b> {selectedService?.verified ? 'The discovery source reports this provider as clean, but it is not independently verified.' : 'The provider is not independently verified by the discovery source.'} Check provider, amount, network and recipient.</div><button onClick={() => setRiskAcknowledged(true)} className="mt-3 rounded-lg border border-white/15 px-3 py-2 text-[10px] text-white/70 hover:bg-white/5">I reviewed this — continue</button></div> : <button onClick={signAndSend} className="rounded-xl bg-white px-4 py-3 text-xs font-semibold text-black">Review & Sign in Wallet</button>}
+      </div>}
       <div className="flex border-t border-ro-line p-3"><input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') run(); }} placeholder="send 50 USDC to 0x..." className="flex-1 bg-transparent px-2 font-mono text-sm outline-none" /><button onClick={run} className="rounded-lg border border-white/10 px-3 py-2 text-xs hover:bg-white/5">Run</button></div>
     </div>
   );

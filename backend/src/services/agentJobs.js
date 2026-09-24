@@ -55,7 +55,7 @@ registerJob({
 registerJob({
   id: 'asset-monitor',
   name: 'Asset Monitor',
-  description: 'Monitor supported RWA and stock-token positions and asset state.',
+  description: 'Monitor supported tokenized-asset positions and asset state; public-stock prices remain market-data context unless a separate brokerage execution integration is verified.',
   intervalMs: 300_000,
   handler: async (context = {}) => ({
     job: 'asset-monitor',

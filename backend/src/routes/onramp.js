@@ -1,15 +1,17 @@
 import { Router } from 'express';
 import { getOnrampUrl } from '../services/onramp.js';
+import { requirePrivyWallet } from '../middleware/privyAuth.js';
 
 const router = Router();
 
-router.get('/url', (req, res) => {
+router.get('/url', async (req, res) => {
   const walletAddress = String(req.query.walletAddress || '').trim();
   const amount = req.query.amount ? String(req.query.amount) : undefined;
-  if (!walletAddress) return res.status(400).json({ error: 'walletAddress is required' });
+  const ownedWallet = await requirePrivyWallet(req, res, walletAddress);
+  if (!ownedWallet) return;
 
   try {
-    res.json({ url: getOnrampUrl(walletAddress, amount) });
+    res.json({ url: getOnrampUrl(ownedWallet, amount) });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

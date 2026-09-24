@@ -13,6 +13,7 @@ type BankFundingMode = 'bank' | 'crypto';
 function FundWalletPanel() {
   const { address } = useAccount();
   const [qr, setQr] = useState('');
+  const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (!address) { setQr(''); return; }
     QRCode.toDataURL(address, { width: 260, margin: 2, color: { dark: '#050607', light: '#f4f5f7' } }).then(setQr).catch(() => setQr(''));
@@ -22,8 +23,31 @@ function FundWalletPanel() {
     <div className="money-wallet-grid">
       <div className="money-qr">{qr ? <img src={qr} alt="Wallet QR code" /> : <div className="money-qr-empty">Sign in to generate your wallet QR</div>}</div>
       <div className="money-wallet-details">
-        <div><span>WALLET ADDRESS</span><b>{address || 'Wallet preparing…'}</b></div>
-        <button type="button" onClick={() => address && navigator.clipboard?.writeText(address)} disabled={!address}>Copy address</button>
+        <div className="money-address-block">
+          <span>WALLET ADDRESS</span>
+          <div className="money-address-row">
+            <b>{address || 'Wallet preparing…'}</b>
+            <button
+              type="button"
+              className={copied ? 'money-copy-icon copied' : 'money-copy-icon'}
+              onClick={async () => {
+                if (!address) return;
+                try {
+                  await navigator.clipboard.writeText(address);
+                  setCopied(true);
+                  window.setTimeout(() => setCopied(false), 1400);
+                } catch {}
+              }}
+              disabled={!address}
+              aria-label={copied ? 'Address copied' : 'Copy wallet address'}
+              title={copied ? 'Copied' : 'Copy address'}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                {copied ? <path d="m5 12 4 4L19 6" /> : <><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></>}
+              </svg>
+            </button>
+          </div>
+        </div>
         <div className="money-note-block"><b>Top up with your bank</b><p>Use the supported bank funding rail to add value to your ROBANK wallet.</p></div>
       </div>
     </div>

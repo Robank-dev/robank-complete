@@ -50,6 +50,12 @@ Resource returned
 6. **Verify** — confirm the resource was actually returned before reporting success
 7. **Report** — log the payment and resource outcome, including failures
 
+## Discovery and Agent Market
+
+ROBANK Agent Market can use an external x402 service directory for discovery. The current web implementation queries x402-list for online services and keeps services compatible with ROBANK production networks in scope, primarily Base (`eip155:8453`) and Robinhood Chain (`eip155:4663`). Directory metadata can include category, price, payment readiness, endpoint count, uptime and supported networks.
+
+Discovery is not a payment. Before paying, the agent should inspect the actual service and its HTTP 402 payment requirements.
+
 ## Mandate Considerations Specific to x402
 
 Because x402 payments can happen at high frequency with no per-call human approval,

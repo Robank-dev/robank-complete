@@ -5,11 +5,15 @@ import { buildUsdcTransfer, buildTokenTransfer } from '../services/payment.js';
 import { beginTransaction, markSubmitted, confirmTransaction, failTransaction } from '../services/reconciliation.js';
 import { getLedgerTransactionByIdempotencyKey } from '../services/database.js';
 import { verifyMainnetTransaction } from '../services/transactionVerification.js';
+import { requirePrivyWallet } from '../middleware/privyAuth.js';
 import { BASE_MAINNET_CHAIN_ID, ROBINHOOD_CHAIN_ID } from '../constants.js';
 
 const router = Router();
 
-router.post('/route', (req, res) => {
+router.post('/route', async (req, res) => {
+  const from = String(req.body?.from || '').trim();
+  const ownedFrom = await requirePrivyWallet(req, res, from);
+  if (!ownedFrom) return;
   const to = String(req.body?.to || '').trim();
   const amount = String(req.body?.amount || '').trim();
   const network = String(req.body?.network || 'base').toLowerCase();
@@ -55,9 +59,8 @@ router.post('/intent', async (req, res) => {
   const idempotencyKey =
     String(req.headers['x-idempotency-key'] || '').trim() || randomUUID();
 
-  if (!walletAddress || !isAddress(walletAddress)) {
-    return res.status(400).json({ error: 'Valid walletAddress is required.' });
-  }
+  const ownedWallet = await requirePrivyWallet(req, res, walletAddress);
+  if (!ownedWallet) return;
 
   if (!isAddress(to)) {
     return res.status(400).json({ error: 'Invalid recipient address.' });
@@ -76,7 +79,7 @@ router.post('/intent', async (req, res) => {
 
   try {
     const transaction = await beginTransaction({
-      walletAddress,
+      walletAddress: ownedWallet,
       kind: 'payment',
       asset: token,
       amountDelta: `-${amount}`,
@@ -116,9 +119,8 @@ router.post('/confirm', async (req, res) => {
   const asset = String(req.body?.asset || (network === 'robinhood' ? 'USDG' : 'USDC')).toUpperCase();
   const txHash = String(req.body?.txHash || '').trim();
 
-  if (!isAddress(walletAddress)) {
-    return res.status(400).json({ error: 'Valid walletAddress is required.' });
-  }
+  const ownedWallet = await requirePrivyWallet(req, res, walletAddress);
+  if (!ownedWallet) return;
   if (!isAddress(destination)) {
     return res.status(400).json({ error: 'Valid destination is required.' });
   }
@@ -147,7 +149,7 @@ router.post('/confirm', async (req, res) => {
     }
 
     const ledger = existing || await beginTransaction({
-      walletAddress,
+      walletAddress: ownedWallet,
       kind: 'payment',
       asset,
       amountDelta: `-${amount}`,
@@ -165,7 +167,7 @@ router.post('/confirm', async (req, res) => {
     let verification;
     try {
       verification = await verifyMainnetTransaction(txHash, {
-        walletAddress,
+        walletAddress: ownedWallet,
         destination,
         amount,
         network,

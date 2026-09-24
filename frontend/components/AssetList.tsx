@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useAccount, useBalance, useReadContract } from 'wagmi';
+import { useAccount, useBalance, useReadContract, usePublicClient } from 'wagmi';
 import { isAddress, formatUnits } from 'viem';
 import { BASE_MAINNET_CHAIN_ID, ROBINHOOD_CHAIN_ID } from '@/lib/constants';
 
@@ -21,7 +21,7 @@ const DEFAULT_TOKENS: Token[] = [
   { id: 'rh-usdg', chainId: ROBINHOOD_CHAIN_ID, chain: 'Robinhood Chain', symbol: 'USDG', name: 'Global Dollar', address: '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168', image: '/token-icons/usdg.png', chainImage: '/chain-icons/robinhood.svg' }
 ];
 
-function TokenRow({ token, owner }: { token: Token; owner: `0x${string}` }) {
+function TokenRow({ token, owner, ethPrice }: { token: Token; owner: `0x${string}`; ethPrice: number | null }) {
   const native = !token.address;
   const chainImage = token.chainImage || (token.chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg');
   const nativeBalance = useBalance({ address: owner, chainId: token.chainId, query: { enabled: native } });
@@ -55,24 +55,29 @@ function TokenRow({ token, owner }: { token: Token; owner: `0x${string}` }) {
     query: { enabled: Boolean(token.address) }
   });
   const raw = native ? nativeBalance.data?.value : tokenBalance.data as bigint | undefined;
+  const loading = native ? nativeBalance.isLoading : tokenBalance.isLoading;
   const tokenDecimals = native ? 18 : Number(decimals.data ?? 6);
+  if (raw == null) {
+    if (!loading) return null;
+    return <div className="asset-row"><div className="asset-symbol-wrap"><div className="asset-symbol bg-white/5" /><div className="asset-chain-icon asset-chain-badge bg-white/5" /></div><div className="asset-name"><b>Loading asset</b><span>Checking balance…</span></div><div className="asset-quantity"><b>—</b><span>Quantity</span></div><div className="asset-value"><b>—</b><span>Value</span></div></div>;
+  }
+  if (raw === BigInt(0)) return null;
   const displaySymbol = native ? token.symbol : String(symbolRead.data ?? (token.symbol || 'TOKEN'));
   const displayName = native ? token.name : String(nameRead.data ?? (token.name || 'Token'));
-  const amount = raw === undefined ? '—' : Number(formatUnits(raw, tokenDecimals)).toLocaleString(undefined, { maximumFractionDigits: 6 });
+  const numericAmount = raw === undefined ? null : Number(formatUnits(raw, tokenDecimals));
+  const quantity = numericAmount == null ? '—' : numericAmount.toLocaleString(undefined, { maximumFractionDigits: 6 });
+  const valueUsd = numericAmount == null ? null : native ? (ethPrice ? numericAmount * ethPrice : null) : ['USDC', 'USDG'].includes(displaySymbol.toUpperCase()) ? numericAmount : null;
+  const value = valueUsd == null ? '—' : `$${valueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <div className="asset-row">
-      <div className="asset-symbol overflow-hidden bg-white/5 p-0.5">
-        <img src={token.image} alt="" className="h-full w-full rounded-full object-cover" />
+      <div className="asset-symbol-wrap">
+        <div className="asset-symbol overflow-hidden bg-white/5 p-1.5"><img src={token.image} alt="" className="h-full w-full rounded-full object-contain" /></div>
+        <img src={chainImage} alt="" className="asset-chain-icon asset-chain-badge" />
       </div>
-      <div className="asset-name">
-        <b>{displaySymbol}</b>
-        <span><img src={chainImage} alt="" className="asset-chain-icon" />{displayName} · {token.chain}</span>
-      </div>
-      <div className="asset-value">
-        <b>{amount} {displaySymbol}</b>
-        <span>{token.address ? 'ERC-20' : 'Native asset'}</span>
-      </div>
+      <div className="asset-name"><b>{displayName}</b><span>{displaySymbol}</span></div>
+      <div className="asset-quantity"><b>{quantity}</b><span>Quantity</span></div>
+      <div className="asset-value"><b>{value}</b><span>Value</span></div>
     </div>
   );
 }
@@ -81,7 +86,10 @@ export default function AssetList() {
   const { address } = useAccount();
   const [custom, setCustom] = useState<Token[]>([]);
   const [open, setOpen] = useState(false);
+  const [tokenError, setTokenError] = useState('');
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [form, setForm] = useState({ chainId: String(BASE_MAINNET_CHAIN_ID), address: '' });
+  const publicClient = usePublicClient({ chainId: Number(form.chainId) });
 
   useEffect(() => {
     if (!address) return;
@@ -93,28 +101,65 @@ export default function AssetList() {
     }
   }, [address]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const response = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { cache: 'no-store' });
+        const payload = await response.json();
+        const price = Number(payload?.data?.amount);
+        if (!cancelled && Number.isFinite(price) && price > 0) setEthPrice(price);
+      } catch {
+        if (!cancelled) setEthPrice(null);
+      }
+    };
+    load();
+    const timer = window.setInterval(load, 30_000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, []);
+
   const tokens = useMemo(() => [...DEFAULT_TOKENS, ...custom], [custom]);
   const visibleTokens = tokens.filter((token) => token.chainId === BASE_MAINNET_CHAIN_ID || token.chainId === ROBINHOOD_CHAIN_ID);
 
-  const addToken = () => {
-    if (!address || !isAddress(form.address)) return;
+  const addToken = async () => {
+    setTokenError('');
+    if (!address || !isAddress(form.address)) {
+      setTokenError('Enter a valid contract address.');
+      return;
+    }
+    if (!publicClient) {
+      setTokenError('Network client is unavailable.');
+      return;
+    }
     const chainId = Number(form.chainId);
     if (![BASE_MAINNET_CHAIN_ID, ROBINHOOD_CHAIN_ID].includes(chainId)) return;
-    const token: Token = {
-      id: `${chainId}-${form.address.toLowerCase()}`,
-      chainId,
-      chain: chainId === BASE_MAINNET_CHAIN_ID ? 'Base' : 'Robinhood Chain',
-      symbol: '',
-      name: '',
-      address: form.address as `0x${string}`,
-      image: chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg',
-      chainImage: chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg'
-    };
-    const next = [...custom.filter((item) => item.id !== token.id), token];
-    setCustom(next);
-    localStorage.setItem(`robank.tokens.${address.toLowerCase()}`, JSON.stringify(next));
-    setForm({ chainId: String(BASE_MAINNET_CHAIN_ID), address: '' });
-    setOpen(false);
+    try {
+      const contractAddress = form.address as `0x${string}`;
+      const [symbol, name, decimals] = await Promise.all([
+        publicClient.readContract({ address: contractAddress, abi: ERC20_ABI, functionName: 'symbol' }),
+        publicClient.readContract({ address: contractAddress, abi: ERC20_ABI, functionName: 'name' }),
+        publicClient.readContract({ address: contractAddress, abi: ERC20_ABI, functionName: 'decimals' })
+      ]);
+      if (!symbol || !name || Number(decimals) < 0 || Number(decimals) > 255) throw new Error('Invalid token metadata');
+      const token: Token = {
+        id: `${chainId}-${form.address.toLowerCase()}`,
+        chainId,
+        chain: chainId === BASE_MAINNET_CHAIN_ID ? 'Base' : 'Robinhood Chain',
+        symbol: String(symbol),
+        name: String(name),
+        address: contractAddress,
+        image: '/token-icons/asset.svg',
+        chainImage: chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg'
+      };
+      const next = [...custom.filter((item) => item.id !== token.id), token];
+      setCustom(next);
+      localStorage.setItem(`robank.tokens.${address.toLowerCase()}`, JSON.stringify(next));
+      setForm({ chainId: String(BASE_MAINNET_CHAIN_ID), address: '' });
+      setOpen(false);
+    } catch {
+      setTokenError('Contract metadata could not be read on the selected network. Check the chain and address.');
+      setOpen(true);
+    }
   };
 
   if (!address) return null;
@@ -122,7 +167,7 @@ export default function AssetList() {
   return (
     <div>
       <div className="asset-list">
-        {visibleTokens.map((token) => <TokenRow key={token.id} token={token} owner={address} />)}
+        {visibleTokens.map((token) => <TokenRow key={token.id} token={token} owner={address} ethPrice={ethPrice} />)}
       </div>
       <button type="button" onClick={() => setOpen((value) => !value)} className="asset-add-trigger">
         {open ? 'Cancel' : '+ Add token'}
@@ -141,6 +186,7 @@ export default function AssetList() {
             <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="0x…" />
           </div>
           <button type="button" onClick={addToken} className="asset-add-submit">Add token</button>
+          {tokenError && <p className="asset-add-hint text-white/60">{tokenError}</p>}
           <p className="asset-add-hint">Token name, ticker and balance are read from the contract automatically.</p>
         </div>
       )}

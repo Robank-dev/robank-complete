@@ -1,43 +1,29 @@
-# ROBANK — On-chain Neobank MVP
+# ROBANK
 
-ROBANK is an on-chain, non-custodial financial interface. The frontend connects to a user's wallet, creates/loads a Safe vault, reads USDC balances, and provides send/receive/agent/on-ramp surfaces. The backend provides a small Express API for registration, vault helpers, payment routing metadata, and AI agent parsing.
+ROBANK is an agent-first financial operating layer. Current product surfaces: Dashboard, Assets, Send/Receive, Payments, Agent Market, Jobs/Bounties, Cards, Company, Xstocks, On-ramp, ROBANK Agent, API/CLI and Updates.
 
-## Current scope
+## Current production direction
+- Base Mainnet is the primary supported payment and settlement network.
+- Robinhood Chain Mainnet is used for supported Robinhood asset integrations.
+- Privy provides email-first authentication and the associated EVM wallet.
+- The frontend is Next.js + TypeScript + Tailwind and deploys to Cloudflare through OpenNext.
+- Provider-backed capabilities stay provider-dependent until a live integration is verified.
+- Loan and Xstocks are coming soon and must not be represented as live execution.
 
-- Base Sepolia first
-- Next.js + TypeScript + Tailwind
-- wagmi + viem + React Query
-- Safe Protocol Kit for predicted Safe/deployment transaction generation
-- Express backend
-- Optional PostgreSQL persistence
-- Optional Anthropic agent integration
-- Optional MoonPay on-ramp URL passthrough
+## Security
+ROBANK never asks for private keys or seed phrases. Protected APIs verify Privy access tokens before protected operations. Wallet/resource ownership is checked against the authenticated account. State-changing operations use idempotency where supported, and execution results are verified before being reported as successful.
 
-## Important
+Keep provider/API secrets in deployment secrets or local environment files. Never commit secrets.
 
-No real private keys are stored by ROBANK. Wallet signatures happen in the connected wallet. Keep all provider/API secrets in `.env` files and never commit them.
-
-The current UI is an MVP scaffold. Productionizing custody, fiat rails, compliance, rate limits, logging, analytics, security reviews, and exact legal/regulatory treatment is separate work.
-
-## PowerShell setup
-
-From the extracted `robank` folder:
-
-```powershell
+## Local development
 npm install
 npm run install:all
-Copy-Item frontend\.env.example frontend\.env.local
-Copy-Item backend\.env.example backend\.env
 npm run dev
-```
 
 Frontend: http://localhost:3000
 Backend: http://localhost:3001
 
-## WalletConnect
-
-Set `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` if you want the WalletConnect connector enabled. Injected wallets (MetaMask/other browser wallets) work without it.
-
-## Base Sepolia
-
-Use a wallet on Base Sepolia for development. You need test ETH for gas and test USDC for token operations.
+## Production deployment
+Frontend deployment is configured in frontend/wrangler.jsonc.
+cd frontend
+npm run deploy

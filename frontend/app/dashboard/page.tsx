@@ -5,7 +5,14 @@ import { useEffect, useMemo, useState } from 'react';
 import AppShell from '@/components/AppShell';
 import AssetList from '@/components/AssetList';
 import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { useAccount, useBalance, useReadContract } from 'wagmi';
+import { formatUnits } from 'viem';
 import { api } from '@/lib/api';
+import { BASE_MAINNET_CHAIN_ID, ROBINHOOD_CHAIN_ID } from '@/lib/constants';
+
+const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const;
+const USDG_ROBINHOOD = '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168' as const;
+const ERC20_BALANCE_ABI = [{ type: 'function', name: 'balanceOf', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ type: 'uint256' }] }] as const;
 
 function short(value?: string) { return value ? `${value.slice(0, 6)}…${value.slice(-4)}` : ''; }
 
@@ -19,6 +26,12 @@ export default function Dashboard() {
   const { wallets } = useWallets();
   const wallet = wallets.find((item) => item.walletClientType === 'privy');
   const address = wallet?.address;
+  const { address: accountAddress } = useAccount();
+  const baseEth = useBalance({ address: accountAddress, chainId: BASE_MAINNET_CHAIN_ID, query: { enabled: Boolean(accountAddress) } });
+  const robinhoodEth = useBalance({ address: accountAddress, chainId: ROBINHOOD_CHAIN_ID, query: { enabled: Boolean(accountAddress) } });
+  const baseUsdc = useReadContract({ address: USDC_BASE, abi: ERC20_BALANCE_ABI, functionName: 'balanceOf', args: accountAddress ? [accountAddress] : undefined, chainId: BASE_MAINNET_CHAIN_ID, query: { enabled: Boolean(accountAddress) } });
+  const robinhoodUsdg = useReadContract({ address: USDG_ROBINHOOD, abi: ERC20_BALANCE_ABI, functionName: 'balanceOf', args: accountAddress ? [accountAddress] : undefined, chainId: ROBINHOOD_CHAIN_ID, query: { enabled: Boolean(accountAddress) } });
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [name, setName] = useState('');
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -26,6 +39,34 @@ export default function Dashboard() {
 
   const profileKey = useMemo(() => user?.id ? `robank.profile.${user.id}` : '', [user?.id]);
   const fallbackName = user?.email?.address?.split('@')[0] || 'there';
+  const walletBalanceReady = Boolean(
+    baseEth.data || robinhoodEth.data || baseUsdc.data !== undefined || robinhoodUsdg.data !== undefined
+  );
+  const totalWalletUsd = useMemo(() => {
+    const ethBase = baseEth.data ? Number(formatUnits(baseEth.data.value, baseEth.data.decimals)) : 0;
+    const ethRobinhood = robinhoodEth.data ? Number(formatUnits(robinhoodEth.data.value, robinhoodEth.data.decimals)) : 0;
+    const usdc = baseUsdc.data !== undefined ? Number(formatUnits(baseUsdc.data as bigint, 6)) : 0;
+    const usdg = robinhoodUsdg.data !== undefined ? Number(formatUnits(robinhoodUsdg.data as bigint, 18)) : 0;
+    return (ethBase + ethRobinhood) * (ethPrice || 0) + usdc + usdg;
+  }, [baseEth.data, robinhoodEth.data, baseUsdc.data, robinhoodUsdg.data, ethPrice]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadEthPrice = async () => {
+      try {
+        const response = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { cache: 'no-store' });
+        if (!response.ok) throw new Error('ETH price unavailable');
+        const payload = await response.json();
+        const price = Number(payload?.data?.amount);
+        if (!cancelled && Number.isFinite(price) && price > 0) setEthPrice(price);
+      } catch {
+        if (!cancelled) setEthPrice(null);
+      }
+    };
+    loadEthPrice();
+    const timer = window.setInterval(loadEthPrice, 30_000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, []);
 
   useEffect(() => {
     if (!profileKey) return;
@@ -69,7 +110,11 @@ export default function Dashboard() {
       </div>}
 
       <section className="ro-balance-strip">
-        <div><span className="ro-kicker">TOTAL BALANCE</span><strong>—</strong><small>Live portfolio value will appear as pricing is connected.</small></div>
+        <div>
+          <span className="ro-kicker">TOTAL BALANCE</span>
+          <strong>{walletBalanceReady ? String.raw`$${totalWalletUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Loading…'}</strong>
+          <small>{walletBalanceReady ? 'Live on-chain wallet assets priced in USD. Card balance is added when the card provider exposes a live balance.' : 'Reading your live wallet balances…'}</small>
+        </div>
         <div className="ro-balance-network"><span className="ro-network-badge"><img src="/chain-icons/base.svg" alt="" /> Base</span><span className="ro-network-badge"><img src="/chain-icons/robinhood.svg" alt="" /> Robinhood Chain</span></div>
       </section>
 

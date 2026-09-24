@@ -84,7 +84,7 @@ robank agent status`}</code></pre>
         <section className="cli-section">
           <span className="cli-kicker">COMMAND SURFACE</span>
           <h2>Everything important, one command away.</h2>
-          <pre className="cli-code"><code>{`capital     assets       borrow       payments
+          <pre className="cli-code"><code>{`capital     assets       loan         payments
 card        agent        company      jobs
 wallet      users        autopilot    onramp
 swap        x402         rwa          networks

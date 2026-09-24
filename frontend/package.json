@@ -16,6 +16,7 @@
     "@farcaster/mini-app-solana": "^2.0.0",
     "@farcaster/miniapp-sdk": "^0.3.0",
     "@opennextjs/cloudflare": "^1.20.6",
+    "@privy-io/node": "^0.35.0",
     "@privy-io/react-auth": "^3.45.0",
     "@privy-io/wagmi": "^4.0.17",
     "@react-native-async-storage/async-storage": "^3.1.1",

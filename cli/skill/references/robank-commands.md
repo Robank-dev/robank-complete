@@ -29,14 +29,9 @@ robank assets inspect <symbol>
 
 Discover or inspect supported asset metadata through the configured runtime.
 
-## Borrow
+## Loan (coming soon)
 
-```text
-robank borrow status
-robank borrow quote
-```
-
-Read borrow context or prepare a borrowing quote where the configured lending path supports it.
+Loan command operations will be added only when the provider-backed rail is enabled.
 ## Payments
 
 ```text
@@ -103,15 +98,26 @@ robank autopilot status
 ```
 
 Inspect runtime status/configuration and the current autopilot status.
+## Agent Market
+
+The current web Agent Market discovers x402-compatible services and exposes bounties created through Jobs. The CLI does not yet expose a dedicated `agent-market` command family, so do not invent one.
+
+For x402 CLI actions:
+
+```text
+robank x402 inspect <url>
+robank x402 pay <url>
+robank x402 retry <url>
+```
+
+Inspect the actual 402 requirement before paying. Payment remains subject to mandate, network, asset and execution availability.
+
 ## Other command families
 
 ```text
 robank onramp url [--amount <amount>]
 robank swap quote
 robank swap execute
-robank x402 inspect <url>
-robank x402 pay <url>
-robank x402 retry <url>
 robank rwa discover
 robank rwa eligibility
 robank rwa quote <product-or-basket>
@@ -120,7 +126,7 @@ robank networks list
 robank networks inspect <network>
 ```
 
-These commands expose the current CLI surface for funding entry points, swaps, x402, tokenized assets and network inspection. Actual provider availability and state-changing execution remain runtime-dependent.
+These commands expose funding entry points, swaps, tokenized assets and network inspection. Actual provider availability and state-changing execution remain runtime-dependent.
 
 ## Authentication note
 

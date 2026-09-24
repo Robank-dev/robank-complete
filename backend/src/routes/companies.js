@@ -2,31 +2,39 @@ import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { config } from '../config.js';
 import { createCompany, listCompanies, getCompany, updateCompany } from '../services/database.js';
+import { requirePrivyWallet } from '../middleware/privyAuth.js';
 
 const router = Router();
 const requireWallet = (req) => String(req.body?.walletAddress || req.query?.walletAddress || '').trim().toLowerCase();
 
 router.get('/', async (req, res) => {
   try {
-    const wallet = requireWallet(req);
-    if (!wallet) return res.status(400).json({ error: 'walletAddress is required' });
+    const requestedWallet = requireWallet(req);
+    const wallet = await requirePrivyWallet(req, res, requestedWallet);
+    if (!wallet) return;
     res.json({ companies: await listCompanies(wallet) });
   } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 router.post('/', async (req, res) => {
   try {
-    const wallet = requireWallet(req);
+    const requestedWallet = requireWallet(req);
+    const wallet = await requirePrivyWallet(req, res, requestedWallet);
+    if (!wallet) return;
     const legalName = String(req.body?.legalName || '').trim();
-    if (!wallet || !legalName) return res.status(400).json({ error: 'walletAddress and legalName are required' });
-    const company = await createCompany({ ownerWallet: wallet, legalName, registrationNumber: req.body?.registrationNumber || null, countryCode: req.body?.countryCode || 'ID' });
+    const countryCode = String(req.body?.countryCode || 'ID').trim().toUpperCase();
+    const metadata = req.body?.metadata && typeof req.body.metadata === 'object' ? req.body.metadata : {};
+    if (!wallet || !legalName || !countryCode) return res.status(400).json({ error: 'walletAddress, legalName and countryCode are required' });
+    const company = await createCompany({ ownerWallet: wallet, legalName, registrationNumber: req.body?.registrationNumber || null, countryCode, metadata });
     res.status(201).json({ company });
   } catch (error) { res.status(400).json({ error: error.message }); }
 });
 
 router.post('/:id/verify', async (req, res) => {
   try {
-    const wallet = requireWallet(req);
+    const requestedWallet = requireWallet(req);
+    const wallet = await requirePrivyWallet(req, res, requestedWallet);
+    if (!wallet) return;
     const company = await getCompany(req.params.id);
     if (!company) return res.status(404).json({ error: 'Company not found' });
     if (company.owner_wallet !== wallet) return res.status(403).json({ error: 'Company access denied' });
@@ -40,8 +48,16 @@ router.post('/:id/verify', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  try { const company = await getCompany(req.params.id); if (!company) return res.status(404).json({ error:'Company not found' }); res.json({ company }); }
-  catch (error) { res.status(500).json({ error:error.message }); }
+  try {
+    const requestedWallet = requireWallet(req);
+    const wallet = await requirePrivyWallet(req, res, requestedWallet);
+    if (!wallet) return;
+    const company = await getCompany(req.params.id);
+    if (!company) return res.status(404).json({ error:'Company not found' });
+    const owner = String(company.owner_wallet || company.ownerWallet || '').toLowerCase();
+    if (owner !== wallet) return res.status(403).json({ error:'Company access denied' });
+    res.json({ company });
+  } catch (error) { res.status(500).json({ error:error.message }); }
 });
 
 export default router;

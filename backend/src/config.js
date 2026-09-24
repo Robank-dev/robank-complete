@@ -15,5 +15,6 @@ export const config = {
   diditKycWorkflowId: process.env.DIDIT_KYC_WORKFLOW_ID || '',
   tiingoApiKey: process.env.TIINGO_API_KEY || '',
   privyAppId: process.env.PRIVY_APP_ID || '',
-  privyAppSecret: process.env.PRIVY_APP_SECRET || ''
+  privyAppSecret: process.env.PRIVY_APP_SECRET || '',
+  robankOwnerWallet: (process.env.ROBANK_OWNER_WALLET || '').trim().toLowerCase()
 };

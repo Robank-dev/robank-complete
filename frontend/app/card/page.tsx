@@ -4,97 +4,108 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppShell from '@/components/AppShell';
 import { api } from '@/lib/api';
+import { useAccount } from 'wagmi';
 
 type CardState = Awaited<ReturnType<typeof api.cardStatus>>['card'];
 
 export default function CardPage() {
   const [card, setCard] = useState<CardState | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [kycLoading, setKycLoading] = useState(false);
+  const [kycError, setKycError] = useState('');
+  const [kycStarted, setKycStarted] = useState(false);
+  const { address } = useAccount();
 
-  useEffect(() => {
-    api.cardStatus()
-      .then((data) => setCard(data.card))
-      .catch(() => setCard(null))
-      .finally(() => setLoading(false));
-  }, []);
+  useEffect(() => { api.cardStatus().then((data) => setCard(data.card)).catch(() => setCard(null)); }, []);
 
-  const status = card?.status ?? (loading ? 'loading' : 'unavailable');
-  const active = status === 'active' || status === 'issued';
+  const active = card?.status === 'active' || card?.status === 'issued';
+
+  async function apply() {
+    if (!address) { setKycError('Connect your ROBANK account first.'); return; }
+    setKycLoading(true); setKycError('');
+    try {
+      const result = await api.kycSession(address);
+      setKycStarted(true);
+      window.open(result.url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      setKycError(err instanceof Error ? err.message : 'Identity verification could not be started.');
+    } finally { setKycLoading(false); }
+  }
 
   return (
     <AppShell>
       <div className="card-page">
         <div className="ro-page-head card-page-head">
-          <div>
-            <div className="ro-kicker">ROBANK / CARD</div>
-            <h1>Spending rail.</h1>
-            <p>A clean card surface for spending from your ROBANK capital when the provider rail is connected.</p>
-          </div>
+          <div><div className="ro-kicker">ROBANK / CARD</div><h1>ROBANK Card.</h1><p>One card for your spending rail, with the important terms shown up front.</p></div>
           <Link href="/money" className="card-back-link">Move money <span>→</span></Link>
         </div>
 
         <section className="card-hero-grid">
           <div className="card-showcase">
-            <div className="card-showcase-top">
-              <span>ROBANK VIRTUAL</span>
-              <span>{active ? 'ACTIVE' : 'PROVIDER RAIL'}</span>
-            </div>
+            <div className="card-showcase-top"><span>ROBANK CARD</span><span>{active ? 'ACTIVE' : 'VISA'}</span></div>
             <div className="card-stage">
-              <div className="card-3d-wrap">
-                <div className="card-glow" />
-                <div className="virtual-card">
-                  <div className="card-surface">
-                    <div className="card-top"><span>ROBANK</span><span>FINANCIAL CARD</span></div>
-                    <div className="card-chip"><span /><span /></div>
-                    <div className="card-logo"><img src="/robank-mark.png" alt="ROBANK" /></div>
-                    <div className="card-number">•••• &nbsp; •••• &nbsp; •••• &nbsp; 4821</div>
-                    <div className="card-meta">
-                      <div><small>CARDHOLDER</small><strong>ROBANK ACCOUNT</strong></div>
-                      <div><small>EXPIRES</small><strong>12/28</strong></div>
-                      <div><small>TYPE</small><strong>DIGITAL</strong></div>
-                    </div>
-                    <div className="card-bottom"><span>ROBANK</span><span>PRIVATE · DIGITAL</span></div>
-                    <div className="card-shine" />
-                  </div>
-                </div>
-              </div>
+              <div className="card-3d-wrap"><div className="card-glow" /><div className="virtual-card"><div className="card-surface">
+                <div className="card-top"><span>ROBANK</span><span>VISA</span></div>
+                <div className="card-chip"><span /><span /></div>
+                <div className="card-logo"><img src="/robank-mark.png" alt="ROBANK" /></div>
+                <div className="card-number">•••• &nbsp; •••• &nbsp; •••• &nbsp; ••••</div>
+                <div className="card-meta"><div><small>CARDHOLDER</small><strong>ROBANK ACCOUNT</strong></div><div><small>EXPIRES</small><strong>PROVIDER</strong></div><div><small>CATEGORY</small><strong>ROBANK</strong></div></div>
+                <div className="card-bottom"><span>ROBANK</span><span>VISA · DIGITAL</span></div><div className="card-shine" />
+              </div></div></div>
             </div>
-            <div className="card-showcase-note">
-              <span className={active ? 'card-live-dot active' : 'card-live-dot'} />
-              <div><b>{active ? 'Card rail active' : 'Card rail not active'}</b><small>{card?.providerName || 'Provider connection required for live issuance.'}</small></div>
-            </div>
+            <div className="card-showcase-note"><span className={active ? 'card-live-dot active' : 'card-live-dot'} /><div><b>{active ? 'Card active' : 'Ready to apply'}</b><small>{card?.providerName || 'Buvei card rail'}</small></div></div>
           </div>
 
           <div className="card-status-panel">
-            <div className="ro-kicker">CARD STATUS</div>
-            <h2>{active ? 'Ready to spend.' : 'Not issued yet.'}</h2>
-            <p>{active ? 'Your card provider is reporting an active card rail.' : 'The UI is ready, but issuance and funding remain provider-dependent. ROBANK does not expose fake card actions.'}</p>
+            <div className="ro-kicker">CARD DETAILS</div>
+            <h2>Visa spending card.</h2>
             <div className="card-status-list">
-              <div><span>Status</span><b>{String(status).toUpperCase()}</b></div>
-              <div><span>Card type</span><b>Virtual</b></div>
-              <div><span>Provider</span><b>{card?.providerName || 'Not connected'}</b></div>
-              <div><span>Issuance</span><b>{card?.operations?.issue ? 'Available' : 'Provider-dependent'}</b></div>
-              <div><span>Funding</span><b>{card?.operations?.fund ? 'Available' : 'Provider-dependent'}</b></div>
+              <div><span>Card type</span><b>{card?.brand ? `${card.brand} Card` : 'Visa Card'}</b></div>
+              <div><span>Fiat currency</span><b>{card?.currency || 'USD'}</b></div>
+              <div><span>Issuing country</span><b>{card?.issuingCountry || 'Not available yet'}</b></div>
+              <div><span>BIN series</span><b>{card?.bin || 'Not available yet'}</b></div>
+              <div><span>KYC cardholder</span><b>{card?.requireKycCardholder == null ? 'Provider-dependent' : card.requireKycCardholder ? 'Required' : 'Not required'}</b></div>
+              <div><span>Activation fee</span><b>$5.00</b></div>
+              <div><span>KYC fee</span><b>$0.50</b></div>
+              <div><span>Card category</span><b>ROBANK Card</b></div>
             </div>
-            <Link href="/agent" className="card-policy-link">Open Agent policy <span>→</span></Link>
+
+            <details className="card-disclosure">
+              <summary>Fees intro <span>⌄</span></summary>
+              <div className="card-disclosure-body">
+                <div><span>Card activation / creation</span><b>$5.00</b></div>
+                <div><span>KYC verification</span><b>$0.50</b></div>
+                <div><span>Successful card transaction</span><b>$0.50</b></div>
+                <div><span>Declined authorization</span><b>$0.50</b></div>
+                <p>Any additional provider fee is shown before the relevant action. Fraud-related charges, where applicable, are only imposed under the provider's rules.</p>
+              </div>
+            </details>
+
+            <details className="card-disclosure">
+              <summary>Card usage guide <span>⌄</span></summary>
+              <div className="card-disclosure-body">
+                <div><span>Daily usage / spending limit</span><b>Not available yet</b></div>
+                <div><span>Top-up / funding</span><b>Provider-dependent</b></div>
+                <div><span>Card payment</span><b>Visa merchant rail</b></div>
+                <div><span>Refund / reversal</span><b>Provider lifecycle</b></div>
+                <p>Actual limits and top-up fees are returned by the connected card program. ROBANK does not invent a limit when the provider has not supplied one.</p>
+              </div>
+            </details>
+
+            <div className="mt-5 rounded-xl border border-white/8 bg-white/[.02] p-4">
+              <div className="text-[9px] font-mono uppercase tracking-[.14em] text-white/25">CARD CATEGORY</div>
+              <div className="mt-2 text-sm font-medium">ROBANK Card</div>
+              <div className="mt-1 text-xs leading-5 text-white/30">Network brand: Visa · Product label: ROBANK · Provider: {card?.providerName || 'Buvei'}</div>
+            </div>
+
+            <button onClick={apply} disabled={kycLoading || !address || kycStarted} className="mt-5 w-full rounded-xl bg-white px-5 py-3.5 text-xs font-semibold text-black disabled:cursor-not-allowed disabled:opacity-35">
+              {kycLoading ? 'Opening verification…' : kycStarted ? 'Verification opened' : 'Apply Now →'}
+            </button>
+            {!address && <div className="mt-2 text-center text-[9px] text-white/25">Connect your ROBANK account to apply.</div>}
+            {kycError && <div className="mt-3 rounded-xl border border-white/10 p-3 text-xs text-white/45">{kycError}</div>}
           </div>
         </section>
 
-        <section className="card-lower-grid">
-          <div className="card-info-panel">
-            <div className="ro-kicker">SPENDING CONTROL</div>
-            <h3>One rail, clear controls.</h3>
-            <p>When a supported provider is connected, card status, funding and spending policy can live here without mixing provider state with your onchain wallet.</p>
-            <div className="card-feature-row"><span>01</span><div><b>Provider status</b><small>See whether issuance and funding are available.</small></div></div>
-            <div className="card-feature-row"><span>02</span><div><b>Agent policy</b><small>Review spending intent before execution.</small></div></div>
-            <div className="card-feature-row"><span>03</span><div><b>Money rail</b><small>Move between supported bank and crypto rails from one place.</small></div></div>
-          </div>
-
-          <div className="card-activity-panel">
-            <div className="card-panel-head"><div><div className="ro-kicker">ACTIVITY</div><h3>Recent card activity</h3></div><span>NO LIVE ACTIVITY</span></div>
-            <div className="card-empty-activity">Live card activity will appear here when the card provider connection is configured.</div>
-          </div>
-        </section>
+        <div className="rounded-xl border border-white/8 bg-white/[.02] px-4 py-3 text-xs leading-5 text-white/30"><span className="font-medium text-white/55">Important:</span> card issuance is still subject to provider availability, jurisdiction, KYC approval and the live BIN returned for the ROBANK program.</div>
       </div>
     </AppShell>
   );

@@ -11,7 +11,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   const pathname = usePathname();
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
-  const appRoutes = ['/login', '/dashboard', '/send', '/receive', '/vault', '/agent', '/onramp', '/borrow', '/card', '/assets', '/company', '/jobs', '/markets', '/news'];
+  const appRoutes = ['/login', '/dashboard', '/send', '/receive', '/agent', '/onramp', '/loan', '/card', '/assets', '/company', '/jobs', '/markets', '/updates'];
 
   if (!appId) {
     const requiresPrivy = appRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));

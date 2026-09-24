@@ -20,21 +20,6 @@ const providers = [
     ]
   }),
   new ProviderAdapter({
-    id: 'morpho',
-    name: 'Morpho',
-    category: 'lending',
-    network: 'base',
-    status: 'provider-dependent',
-    capabilities: [
-      'credit.markets',
-      'credit.positions',
-      'borrow',
-      'repay',
-      'collateral',
-      'risk'
-    ]
-  }),
-  new ProviderAdapter({
     id: 'centrifuge',
     name: 'Centrifuge',
     category: 'rwa',
@@ -71,7 +56,6 @@ const providers = [
       'usdc',
       'swaps',
       'x402',
-      'lending',
       'rwa'
     ]
   })

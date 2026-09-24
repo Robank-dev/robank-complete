@@ -3,25 +3,32 @@
 import { useEffect, useState } from 'react';
 
 const slides = [
-  { eyebrow: 'ROBANK / FINANCIAL OPERATING LAYER', title: 'Your account. Assets. Payments. One system.', detail: 'A single operating surface for capital and agent-assisted actions.' },
-  { eyebrow: 'ROBANK / MONEY RAILS', title: 'Move between bank and crypto rails.', detail: 'Fund a wallet, fund a bank, or send value from one place.' },
-  { eyebrow: 'ROBANK / AGENT', title: 'Intent in. Controlled execution out.', detail: 'Ask ROBANK to prepare actions, review them, then approve.' },
+  { eyebrow: 'ROBANK / GLOBAL RAILS', title: 'Financial infrastructure, one surface.', detail: 'Bank rails, stablecoins and digital assets.', image: '/banners/global-financial-network.svg' },
+  { eyebrow: 'ROBANK / MONEY RAILS', title: 'Move between bank and crypto rails.', detail: 'Fund a wallet, fund a bank, or send value.', image: '/banners/bank-crypto-rails.svg' },
+  { eyebrow: 'ROBANK / AGENT OPERATIONS', title: 'Intent in. Controlled execution out.', detail: 'Prepare, review, approve, execute.', image: '/banners/agent-financial-ops.svg' },
 ];
 
 export default function SystemBanner() {
   const [index, setIndex] = useState(0);
+  const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     const timer = window.setInterval(() => setIndex((value) => (value + 1) % slides.length), 6500);
     return () => window.clearInterval(timer);
   }, []);
 
-  const move = (direction: number) => setIndex((value) => (value + direction + slides.length) % slides.length);
+  useEffect(() => setImageFailed(false), [index]);
 
+  const move = (direction: number) => setIndex((value) => (value + direction + slides.length) % slides.length);
   const slide = slides[index];
+
   return (
     <div className="ro-banner-carousel" aria-label="ROBANK highlights">
-      <img src="/robank-banner-hero.svg" alt="" className="ro-banner-image active" />
+      {!imageFailed ? (
+        <img key={slide.image} src={slide.image} alt="" className="ro-banner-image active" onError={() => setImageFailed(true)} />
+      ) : (
+        <div className="ro-banner-image ro-banner-fallback" aria-hidden="true" />
+      )}
       <div className="ro-banner-shade" />
       <div className="ro-banner-copy">
         <span>{slide.eyebrow}</span>

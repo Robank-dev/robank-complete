@@ -8769,6 +8769,22 @@
   object-fit:contain;
   flex:none;
 }
+.asset-symbol-wrap{position:relative;width:40px;height:40px;flex:none}
+.asset-symbol-wrap .asset-symbol{width:40px!important;height:40px!important;border-radius:50%;border:1px solid rgba(255,255,255,.10)}
+.asset-chain-badge{position:absolute;right:-3px;bottom:-3px;width:15px;height:15px;padding:2px;border-radius:50%;background:#0b0c0e;border:1px solid rgba(255,255,255,.13)}
+.asset-quantity{text-align:right;min-width:85px}
+.asset-quantity b{display:block;font:10px ui-monospace;color:#dfe1e4}
+.asset-quantity span{display:block;margin-top:4px;font:7px ui-monospace;color:#555b64}
+.asset-list .asset-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.055)}
+.asset-list .asset-row:last-child{border-bottom:0}
+.asset-list .asset-name{min-width:0;flex:1}
+.asset-list .asset-name b{display:block;font-size:12px;font-weight:500;color:#eef0f2}
+.asset-list .asset-name span{display:block;margin-top:4px;font:8px ui-monospace;color:#666d76}
+.asset-list .asset-value{min-width:95px}
+.asset-virtual-card{width:min(100%,330px);aspect-ratio:1.586;transform:none!important}
+.asset-virtual-card .card-surface{inset:0}
+.ro-nav-soon{display:flex;width:100%;align-items:center;gap:12px;padding:10px 12px;border:0;background:transparent;color:#6b717a;cursor:not-allowed;font:inherit;opacity:.62}
+.ro-nav-soon svg{flex:none}.ro-nav-soon span{min-width:0}
 .ro-assets-card .asset-value b{
   font-size:12px!important;
 }
@@ -9259,3 +9275,80 @@
 .money-qr{min-height:280px!important}
 .money-qr img{width:260px!important;height:260px!important;display:block!important}
 .money-qr-empty{font-size:12px!important}
+
+/* ROBANK APP FINAL PASS */
+.ro-app-topbar{height:118px!important;display:block!important;padding:12px 30px!important;background:#070809!important;overflow:hidden!important}
+.ro-app-topbar>.ro-banner-carousel{width:100%;height:94px!important}
+.ro-app-body{min-height:calc(100vh - 118px)!important}
+.ro-app-sidebar{padding:20px 14px 16px!important}
+.ro-app-sidebar>.ro-system-brand-logo{display:flex!important;align-items:center!important;gap:12px!important;padding:4px 10px 18px!important;margin-bottom:6px!important}
+.ro-app-sidebar>.ro-system-brand-logo img{width:40px!important;height:40px!important;object-fit:contain!important;background:transparent!important;border-radius:0!important}
+.ro-app-sidebar>.ro-system-brand-logo span{font:700 17px ui-monospace,SFMono-Regular,Menlo,monospace!important;letter-spacing:.18em!important;color:#f4f5f7!important}
+.ro-app-sidebar>.ro-system-brand-logo:hover{opacity:.88}
+.ro-banner-image{object-fit:cover!important;object-position:center!important}
+.ro-banner-fallback{background:radial-gradient(circle at 72% 50%,rgba(76,151,255,.18),transparent 32%),linear-gradient(135deg,#05070a,#10151c)!important}
+.ro-banner-copy{max-width:62%!important}
+.ro-banner-copy strong{font-size:16px!important;line-height:1.2!important}
+.ro-banner-copy small{font-size:11px!important}
+@media(max-width:900px){.ro-app-topbar{height:92px!important;padding:8px 14px!important}.ro-app-topbar>.ro-banner-carousel{height:76px!important}.ro-app-body{min-height:calc(100vh - 92px)!important}}
+@media(max-width:760px){.ro-app-sidebar>.ro-system-brand-logo span{font-size:15px!important}.ro-app-sidebar>.ro-system-brand-logo img{width:34px!important;height:34px!important}.ro-banner-copy{max-width:72%!important}.ro-banner-copy strong{font-size:13px!important}.ro-banner-copy small{font-size:9px!important}}
+
+/* FINAL POLISH: full-bleed visual banner + wallet copy interaction */
+.ro-banner-carousel{height:102px!important}
+/* Banner is intentionally visual-only: the artwork owns the full surface. */
+.ro-banner-copy{display:none!important}
+.ro-banner-image{left:0!important;right:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;transform:none!important;background:#050607}
+.ro-banner-shade{display:none!important}
+/* Keep the virtual card inside its showcase column instead of escaping the grid. */
+.card-showcase .card-stage{position:relative!important;min-height:430px!important;display:grid!important;place-items:center!important;overflow:hidden!important}
+.card-showcase .virtual-card{position:relative!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;width:min(560px,94%)!important;margin:0 auto!important}
+.card-showcase .card-3d-wrap{position:relative!important;width:100%!important;height:100%!important;display:grid!important;place-items:center!important}
+.card-showcase .card-glow{position:absolute!important;inset:12% 8%!important;pointer-events:none!important}
+
+/* FINAL POLISH: compact wide banners + wallet copy interaction */
+.ro-banner-carousel{height:102px!important}
+.ro-app-topbar{height:126px!important;padding:12px 30px!important}
+.ro-app-topbar>.ro-banner-carousel{height:102px!important}
+.ro-banner-image{left:auto!important;right:0!important;width:52%!important;height:100%!important;object-fit:contain!important;object-position:right center!important;transform:none!important;background:#050607}
+.ro-banner-image.active{transform:none!important}
+.ro-banner-shade{background:linear-gradient(90deg,#050607 0%,rgba(5,6,7,.96) 24%,rgba(5,6,7,.55) 52%,rgba(5,6,7,.08) 100%)!important}
+.ro-banner-copy{left:32px!important;max-width:52%!important}
+.ro-banner-copy strong{font-size:18px!important;line-height:1.12!important}
+.ro-banner-copy small{font-size:10px!important;max-width:420px!important}
+.ro-banner-arrow{width:28px!important;height:28px!important;margin-top:-14px!important;font-size:20px!important}
+.ro-banner-prev{left:10px!important}.ro-banner-next{right:10px!important}
+.ro-banner-dots{right:12px!important;bottom:8px!important}
+.ro-banner-dots button{width:16px!important;height:3px!important}
+
+.money-address-row{display:flex;align-items:center;gap:10px;margin-top:9px}
+.money-address-row b{flex:1!important;margin-top:0!important;min-width:0}
+.money-copy-icon{width:38px!important;height:38px!important;min-width:38px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:9px!important;background:rgba(255,255,255,.035)!important;color:#cbd0d6!important;transition:transform .18s ease,background .18s ease,border-color .18s ease,color .18s ease!important}
+.money-copy-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.money-copy-icon:hover:not(:disabled){background:rgba(255,255,255,.09)!important;border-color:rgba(255,255,255,.22)!important}
+.money-copy-icon:active:not(:disabled){transform:scale(.88)}
+.money-copy-icon.copied{color:#cffff0!important;border-color:rgba(155,255,210,.35)!important;background:rgba(100,255,170,.09)!important;animation:ro-copy-pop .24s ease-out}
+@keyframes ro-copy-pop{0%{transform:scale(.82)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+@media(max-width:900px){
+  .ro-app-topbar{height:108px!important;padding:8px 14px!important}
+  .ro-app-topbar>.ro-banner-carousel{height:92px!important}
+  .ro-banner-image{width:50%!important}
+}
+@media(max-width:760px){
+  .ro-banner-carousel{height:82px!important}
+  .ro-app-topbar{height:98px!important}
+  .ro-app-topbar>.ro-banner-carousel{height:82px!important}
+  .ro-banner-copy{left:24px!important;max-width:60%!important}
+  .ro-banner-copy strong{font-size:14px!important}
+  .ro-banner-copy small{display:none!important}
+  .ro-banner-image{width:48%!important}
+}
+
+/* V12 — final visual overrides */
+.ro-banner-copy,.ro-banner-shade{display:none!important}
+.ro-banner-carousel .ro-banner-image,.ro-app-topbar .ro-banner-image{left:0!important;right:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;transform:none!important}
+.card-page .card-showcase .card-stage{position:relative!important;min-height:430px!important;display:grid!important;place-items:center!important;overflow:hidden!important}
+.card-page .card-showcase .card-3d-wrap{position:relative!important;width:100%!important;height:100%!important;display:grid!important;place-items:center!important}
+.card-page .card-showcase .virtual-card{position:relative!important;inset:auto!important;width:min(560px,94%)!important;margin:0 auto!important}
+@media(max-width:900px){.ro-banner-carousel .ro-banner-image,.ro-app-topbar .ro-banner-image{width:100%!important}.card-page .card-showcase .card-stage{min-height:390px!important}}
+@media(max-width:760px){.ro-banner-carousel .ro-banner-image,.ro-app-topbar .ro-banner-image{width:100%!important}.card-page .card-showcase .card-stage{min-height:330px!important}}

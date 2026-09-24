@@ -92,6 +92,19 @@ function printJson(data) {
   console.log(JSON.stringify(data, null, 2));
 }
 
+async function printWalletBalance(walletAddress) {
+  const address = getAddress(walletAddress);
+  const rpcUrl = process.env.ROBANK_RPC_URL || 'https://mainnet.base.org';
+  const client = createPublicClient({ chain: base, transport: http(rpcUrl) });
+  const balance = await client.readContract({
+    address: USDC_BASE_MAINNET,
+    abi: [parseAbiItem('function balanceOf(address owner) view returns (uint256)')],
+    functionName: 'balanceOf',
+    args: [address]
+  });
+  printJson({ address, network: 'base', asset: 'USDC', balance: formatUnits(balance, 6), decimals: 6 });
+}
+
 async function printWalletTransactions(walletAddress, args) {
   const address = getAddress(walletAddress);
 
@@ -204,17 +217,14 @@ Usage:
   robank <command> [options]
 
 CAPITAL:
-  capital status
   capital activity
-  capital power
 
 ASSETS:
   assets discover
   assets inspect <symbol>
 
-BORROW:
-  borrow status
-  borrow quote
+LOAN:
+  loan (coming soon)
 
 PAYMENTS:
   payments route --to <address> --amount <amount> --token USDC
@@ -348,12 +358,7 @@ async function run(args) {
         );
       }
 
-      const data = await apiRequest(
-        baseUrl,
-        `/api/vault/${encodeURIComponent(walletAddress)}`
-      );
-
-      printJson(data);
+      await printWalletBalance(walletAddress);
       return;
     }
 
@@ -406,22 +411,6 @@ async function run(args) {
       );
     }
 
-    if (
-      subcommand === "status" ||
-      subcommand === "power"
-    ) {
-      const data = await apiRequest(
-        baseUrl,
-        `/api/vault/${encodeURIComponent(walletAddress)}`
-      );
-
-      printJson({
-        surface: "capital",
-        walletAddress,
-        data,
-      });
-      return;
-    }
 
     if (subcommand === "activity") {
       await printWalletTransactions(walletAddress, rest);
@@ -429,7 +418,7 @@ async function run(args) {
     }
 
     throw new Error(
-      "Use: robank capital status | robank capital activity | robank capital power"
+      "Use: robank capital activity"
     );
   }
 
@@ -537,7 +526,7 @@ async function run(args) {
           method: "POST",
           body: JSON.stringify({
             message,
-            vaultAddress: walletAddress || null,
+            walletAddress: walletAddress || null,
           }),
         }
       );
@@ -631,38 +620,6 @@ async function run(args) {
 
     throw new Error(
       "Use: robank assets discover | robank assets inspect <symbol> | robank assets quote <symbol>"
-    );
-  }
-
-  if (command === "borrow") {
-    if (subcommand === "status") {
-      if (!walletAddress) {
-        throw new Error(
-          "Set a wallet first: robank wallet set <address>"
-        );
-      }
-
-      const data = await apiRequest(
-        baseUrl,
-        `/api/borrow/status/${encodeURIComponent(walletAddress)}`
-      );
-
-      printJson(data);
-      return;
-    }
-
-    if (subcommand === "quote") {
-      const data = await apiRequest(
-        baseUrl,
-        "/api/borrow/quote"
-      );
-
-      printJson(data);
-      return;
-    }
-
-    throw new Error(
-      "Use: robank borrow status | robank borrow quote"
     );
   }
 

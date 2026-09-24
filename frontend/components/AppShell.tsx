@@ -8,9 +8,9 @@ import SystemBanner from './SystemBanner';
 
 const groups = [
   { label: 'ROBANK', links: [['/dashboard', 'Overview', 'grid'], ['/agent', 'AI Agent', 'spark']] },
-  { label: 'CAPITAL', links: [['/vault', 'Vault', 'lock'], ['/money', 'Money', 'arrow-up'], ['/borrow', 'Borrow', 'credit'], ['/assets', 'Assets', 'layers']] },
+  { label: 'CAPITAL', links: [['/money', 'Money', 'arrow-up'], ['/loan', 'Loan', 'credit'], ['/assets', 'Assets', 'layers'], ['/xstocks', 'Xstocks', 'stocks']] },
   { label: 'OPERATE', links: [['/card', 'Card', 'card']] },
-  { label: 'NETWORK', links: [['/company', 'Company', 'building'], ['/markets', 'Markets', 'chart'], ['/news', 'News', 'news'], ['/jobs', 'Jobs', 'briefcase']] }
+  { label: 'NETWORK', links: [['/company', 'Company', 'building'], ['/markets', 'Markets', 'chart'], ['/updates', 'Updates', 'feed'], ['/jobs', 'Jobs', 'briefcase']] }
 ] as const;
 
 function Icon({ name }: { name: string }) {
@@ -27,7 +27,8 @@ function Icon({ name }: { name: string }) {
     card: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h5"/></>,
     building: <><path d="M4 21V4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v17"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2M10 21v-3h4v3"/></>,
     chart: <><path d="M4 19V10M10 19V5M16 19v-8M22 19H2"/></>,
-    news: <><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></>,
+    stocks: <><path d="M4 19V5h16v14H4z"/><path d="M8 16v-4M12 16V8M16 16v-6"/></>,
+    feed: <><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/></>,
     briefcase: <><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5h8v2M3 12h18"/></>,
   };
   return <svg {...common}>{paths[name]}</svg>;
@@ -61,17 +62,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="ro-app-shell">
       <header className="ro-app-topbar">
-        <Link href="/dashboard" className="ro-system-brand ro-system-brand-logo">
-          <img src="/robank-mark.png" alt="ROBANK" />
-          <span>ROBANK</span>
-        </Link>
         <SystemBanner />
       </header>
       <div className="ro-app-body">
         <aside className="ro-app-sidebar">
+          <Link href="/dashboard" className="ro-system-brand ro-system-brand-logo" aria-label="ROBANK dashboard">
+            <img src="/robank-mark.png" alt="ROBANK" />
+            <span>ROBANK</span>
+          </Link>
           {groups.map((group) => <div className="ro-nav-group" key={group.label}>
             <div className="ro-nav-label">{group.label}</div>
-            {group.links.map(([href, label, icon]) => <Link key={href} href={href} className={pathname === href ? 'active' : ''}><Icon name={icon} /><span>{label}</span></Link>)}
+            {group.links.map(([href, label, icon]) => (href === '/loan' || href === '/xstocks') ? <Link key={href} href={href} aria-label={`${label} coming soon`} className={pathname === href ? 'active ro-nav-soon' : 'ro-nav-soon'}><Icon name={icon} /><span className="flex-1 text-left">{label}</span><span className="rounded-full border border-white/10 px-1.5 py-0.5 text-[7px] font-mono tracking-[.12em] text-white/25">COMING SOON</span></Link> : <Link key={href} href={href} className={pathname === href ? 'active' : ''}><Icon name={icon} /><span className="flex-1">{label}</span></Link>)}
           </div>)}
           <div className="ro-sidebar-account">
             <button type="button" className="ro-sidebar-account-trigger" onClick={() => setAccountOpen((value) => !value)}>

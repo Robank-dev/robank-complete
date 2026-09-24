@@ -125,8 +125,19 @@ environment confirms it is wired to a live backend.
 - **Confirmation:** required unless within an explicit machine-payment mandate
   (e.g., per-call cap, approved resource/provider list)
 
+## Market data vs tokenized assets
+
+The agent must distinguish read-only public-market data from tokenized products.
+
+- Public stock market data such as **AAPL, NVDA, GOOGL, MSFT and AMZN** is a market-data
+  surface and should be labeled **public equity** / **stock**.
+- Tokenized stock products belong to the RWA/tokenized-asset surface and must be labeled
+  separately. A tokenized product is not interchangeable with its underlying ticker.
+- The current web market-data path does not provide stock brokerage order execution.
+  Do not turn a price lookup into a claim that a stock order was submitted or filled.
+
 ## rwa.discover
-- **Does:** Lists available tokenized asset products (provider-dependent)
+- **Does:** Lists available tokenized asset products (provider-dependent; currently treated as a future/coming-soon ROBANK product surface)
 - **Inputs:** category/filter (e.g. "technology basket")
 - **Output:** list of assets/products with provider/venue metadata
 - **Permission:** read-only

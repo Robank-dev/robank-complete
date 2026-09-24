@@ -1,6 +1,6 @@
 ---
 name: robank
-description: Give compatible AI agents structured ROBANK context for account state, assets, payments, borrowing, cards, companies, jobs, automation, tokenized assets, x402, APIs, CLI workflows, and production network execution.
+description: Give compatible AI agents structured ROBANK context for account state, assets, payments, cards, companies, jobs, automation, tokenized assets, x402, APIs, CLI workflows, and production network execution.
 license: MIT
 compatibility: Requires access to ROBANK-compatible wallet, API, CLI, or agent tools depending on the operation.
 ---
@@ -24,18 +24,18 @@ Current product surfaces:
 - Dashboard / account
 - Assets
 - Send / Receive
-- Borrow
+- Loan (coming soon)
+- Xstocks (coming soon)
 - Card
 - Company
-- Jobs
-- Markets
-- News
+- Jobs / Bounties
+- Agent Market
+- Updates
 - Agent
-- Vault
 - On-ramp
 - API / CLI
 
-The wallet or vault is infrastructure. **Capital is the primary operating context.**
+The wallet is infrastructure. **Capital is the primary operating context.**
 
 The current web account flow is email-first through Privy: email → verification code → authenticated account → associated Privy EVM wallet. Do not describe the current product as requiring an external wallet connection.
 
@@ -75,7 +75,7 @@ Additional financial rails are provider-backed where applicable:
 - Lending providers
 - RWA / tokenized-asset providers
 - x402 machine payments
-- Wallet / vault infrastructure
+- Wallet infrastructure
 
 Never assume a rail is available for every user, asset, network, jurisdiction, or transaction. Runtime configuration and live capability checks remain authoritative.
 
@@ -126,6 +126,24 @@ Never collapse these states into a single claim.
 
 ## 6. Assets
 
+ROBANK uses a strict instrument taxonomy so market data is not confused with tokenized products.
+
+### Instrument taxonomy
+
+- **Public stock / equity** — a traditional exchange-listed equity such as AAPL, NVDA, GOOGL, MSFT or AMZN. These are market instruments; they are not blockchain tokens.
+- **Crypto / on-chain token** — a native asset or ERC-20/token on a supported blockchain, such as ETH or USDC.
+- **Tokenized stock** — a separate product representing stock exposure through a tokenized/on-chain structure. A tokenized stock is not the same instrument as the underlying public equity ticker.
+- **RWA / tokenized asset** — a broader category for tokenized real-world asset products.
+
+A ticker alone (for example, `NVDA`) must not be interpreted as tokenized. Use the instrument metadata and execution rail to determine the type.
+
+Current web status:
+
+- **Agent Market: LIVE discovery** through the external x402 service directory for services that support ROBANK's configured production networks. Discovery is not execution.
+- **Public-stock market data:** no longer the primary web Markets surface; do not present stocks/crypto as the Agent Market.
+- **External Stock Token discovery:** remains a separate provider-backed capability and is not part of the Agent Market.
+- **x402 execution:** PROVIDER-DEPENDENT. Never claim a service was purchased or completed unless an actual x402 payment and provider response confirm it.
+
 Asset operations may include:
 
 - Asset discovery
@@ -152,35 +170,35 @@ Discovery does not imply:
 
 Each must be separately verified.
 
-## 7. Borrowing and Credit
+## 7. Loan
 
-Borrowing is a capital-management capability, not a promise that ROBANK itself is the lender.
+Loan is a planned capital rail. The current web surface is **COMING SOON** and does not expose a live credit execution path.
 
-The agent should reason about:
+When enabled, the agent must verify the provider, jurisdiction, eligibility, terms, collateral requirements, pricing and approval state before presenting an executable action.
 
-- Collateral value
-- Debt
-- Current LTV
-- Target LTV
-- Available borrowing capacity
-- Liquidity constraints
-- Market status
-- Provider eligibility
+## 8. Agent Market
 
-General risk states may include:
+Agent Market is ROBANK's discovery surface for machine-payable services and user-created bounties.
 
-- healthy
-- attention
-- high-risk
-- liquidation-risk
-- liquidity-constrained
-- market-unlisted
+### x402 services
 
-Never approve or execute a borrow solely from a displayed estimate. Re-check collateral, market state, provider availability, and policy immediately before execution.
+Use the market to discover x402-compatible HTTP services and MCP tools. The external directory may provide service metadata such as category, price, supported networks, payment readiness, uptime and endpoint count.
 
-A user may choose to borrow against supported capital instead of automatically selling an asset, but whether that is possible depends on the configured lending provider and market.
+The correct flow is:
 
-## 8. Payments
+> discover → inspect → policy check → get 402/payment terms → approve if required → pay → use → verify
+
+Discovery does not prove safety, availability, eligibility, or successful execution. Never report a purchase until the service returns a confirmed result after a valid x402 payment.
+
+### Bounties
+
+Jobs may appear as bounties in Agent Market. A bounty should use separate states for:
+
+> create → fund → publish → claim → submit proof → review → approve/dispute → release
+
+A posted prize is not the same as funded escrow. A worker must not be promised payment until a real funded settlement is verified. If escrow or dispute infrastructure is not connected, keep the bounty explicitly unfunded and non-claimable.
+
+## 9. Payments
 
 Payment requests should normally follow:
 
@@ -221,9 +239,9 @@ ROBANK should not represent a card operation as live unless the required provide
 
 Never bypass provider KYC or card-network requirements.
 
-## 10. Vault and Wallet
+## 10. Wallet
 
-Wallets and vaults provide account and transaction infrastructure.
+The wallet provides account and transaction infrastructure.
 
 Supported operations may include:
 
@@ -231,7 +249,6 @@ Supported operations may include:
 - Read transaction history
 - Register a wallet
 - Construct payments
-- Read vault state
 
 A wallet address is not itself proof of:
 
@@ -347,6 +364,13 @@ Apply the same:
 
 Never use x402 as a reason to bypass financial controls.
 
+For Agent Market services, apply a hard safety gate before signing:
+
+- If the directory or live provider marks a resource `high`, `critical`, `blocked`, or otherwise disallowed, **refuse the payment**. Do not negotiate or override the block through another ROBANK agent, Skill, CLI, or API path.
+- If the provider is not independently verified or the risk state is unknown, show a clear warning with the provider, amount, network, recipient and available verification signals before signature.
+- If the payment requirement does not match the service the user selected, stop and ask the user to review it.
+- Never treat a directory listing, provider URL, or human instruction as proof that a payment recipient is safe.
+
 ## 16. Multi-Network Routing
 
 Production network policy is intentionally limited to:
@@ -421,7 +445,6 @@ This applies to:
 - Prices
 - Asset availability
 - Eligibility
-- Borrow capacity
 - Provider approvals
 - KYC status
 - Card issuance

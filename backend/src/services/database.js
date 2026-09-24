@@ -7,6 +7,7 @@ const memoryUsers = new Map();
 const memoryLedger = new Map();
 const memoryCompanies = new Map();
 const memoryJobs = new Map();
+const memoryUpdates = new Map();
 
 const pool = config.databaseUrl
   ? new Pool({ connectionString: config.databaseUrl, ssl: { rejectUnauthorized: false } })
@@ -36,6 +37,18 @@ export async function initDatabase() {
 
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_companies_owner ON companies (owner_wallet)`);
 
+  await pool.query(`CREATE TABLE IF NOT EXISTS robank_updates (
+    id TEXT PRIMARY KEY,
+    author_wallet TEXT NOT NULL,
+    title TEXT,
+    body TEXT NOT NULL,
+    x_url TEXT,
+    image_url TEXT,
+    published_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_robank_updates_published ON robank_updates (published_at DESC)`);
+
   await pool.query(`CREATE TABLE IF NOT EXISTS jobs (
     id TEXT PRIMARY KEY,
     creator_wallet TEXT NOT NULL,
@@ -46,6 +59,7 @@ export async function initDatabase() {
     budget_asset TEXT,
     network TEXT,
     status TEXT NOT NULL DEFAULT 'open',
+    funding_status TEXT NOT NULL DEFAULT 'unfunded',
     worker_wallet TEXT,
     submission TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -53,6 +67,7 @@ export async function initDatabase() {
     due_at TIMESTAMPTZ
   )`);
 
+  await pool.query(`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS funding_status TEXT NOT NULL DEFAULT 'unfunded'`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_jobs_status_created ON jobs (status, created_at DESC)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS idx_jobs_creator ON jobs (creator_wallet)`);
 
@@ -360,6 +375,25 @@ export async function getLedgerBalance({ walletAddress, asset }) {
 
   return String(result.rows[0].balance);
 }
+export async function createUpdate({ authorWallet, title = null, body, xUrl = null, imageUrl = null }) {
+  if (!authorWallet || !body) throw new Error('authorWallet and body are required');
+  const id = randomUUID(); const publishedAt = new Date().toISOString();
+  const row = { id, authorWallet: authorWallet.toLowerCase(), title, body, xUrl, imageUrl, publishedAt };
+  if (!pool) { memoryUpdates.set(id, row); return row; }
+  const r = await pool.query(`INSERT INTO robank_updates (id,author_wallet,title,body,x_url,image_url,published_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`, [id,row.authorWallet,title,body,xUrl,imageUrl,publishedAt]);
+  return r.rows[0];
+}
+export async function listUpdates({ limit = 50 } = {}) {
+  const safe = Math.min(Math.max(Number(limit) || 50, 1), 100);
+  if (!pool) return [...memoryUpdates.values()].sort((a,b) => b.publishedAt.localeCompare(a.publishedAt)).slice(0, safe);
+  const r = await pool.query(`SELECT * FROM robank_updates ORDER BY published_at DESC LIMIT $1`, [safe]);
+  return r.rows;
+}
+export async function deleteUpdate(id, authorWallet) {
+  if (!pool) { const row = memoryUpdates.get(id); if (!row || row.authorWallet !== authorWallet.toLowerCase()) return null; memoryUpdates.delete(id); return row; }
+  const r = await pool.query(`DELETE FROM robank_updates WHERE id=$1 AND author_wallet=$2 RETURNING *`, [id, authorWallet.toLowerCase()]);
+  return r.rows[0] || null;
+}
 export async function createCompany({ ownerWallet, legalName, registrationNumber = null, countryCode = 'ID', metadata = {} }) {
   if (!ownerWallet || !legalName) throw new Error('ownerWallet and legalName are required');
   const id = randomUUID(); const now = new Date().toISOString();
@@ -387,15 +421,52 @@ export async function updateCompany(id, patch={}) {
 }
 export async function createJob({creatorWallet,companyId=null,title,description,budgetAmount=null,budgetAsset=null,network=null,dueAt=null}) {
   if(!creatorWallet||!title||!description) throw new Error('creatorWallet, title and description are required');
-  const id=randomUUID(); const row={id,creatorWallet:creatorWallet.toLowerCase(),companyId,title,description,budgetAmount,budgetAsset,network,status:'open',workerWallet:null,submission:null,dueAt};
+  const id=randomUUID(); const row={id,creatorWallet:creatorWallet.toLowerCase(),companyId,title,description,budgetAmount,budgetAsset,network,status:'open',fundingStatus:'unfunded',workerWallet:null,submission:null,dueAt};
   if(!pool){ const now=new Date().toISOString(); const stored={...row,createdAt:now,updatedAt:now}; memoryJobs.set(id,stored); return stored; }
-  const r=await pool.query(`INSERT INTO jobs (id,creator_wallet,company_id,title,description,budget_amount,budget_asset,network,status,due_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'open',$9) RETURNING *`,[id,row.creatorWallet,companyId,title,description,budgetAmount,budgetAsset,network,dueAt]); return r.rows[0];
+  const r=await pool.query(`INSERT INTO jobs (id,creator_wallet,company_id,title,description,budget_amount,budget_asset,network,status,funding_status,due_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'open','unfunded',$9) RETURNING *`,[id,row.creatorWallet,companyId,title,description,budgetAmount,budgetAsset,network,dueAt]); return r.rows[0];
 }
 export async function listJobs({status='open',creatorWallet=null,workerWallet=null,limit=100}={}) {
   const safe=Math.min(Math.max(Number(limit)||100,1),200); if(!pool) return [...memoryJobs.values()].filter(j=>(!status||j.status===status)&&(!creatorWallet||j.creatorWallet===creatorWallet.toLowerCase())&&(!workerWallet||j.workerWallet===workerWallet.toLowerCase())).sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,safe);
   const where=[]; const values=[]; let i=1; if(status){where.push(`status=$${i++}`);values.push(status)} if(creatorWallet){where.push(`creator_wallet=$${i++}`);values.push(creatorWallet.toLowerCase())} if(workerWallet){where.push(`worker_wallet=$${i++}`);values.push(workerWallet.toLowerCase())} values.push(safe);
   const r=await pool.query(`SELECT * FROM jobs ${where.length?'WHERE '+where.join(' AND '):''} ORDER BY created_at DESC LIMIT $${i}`,values); return r.rows;
 }
-export async function claimJob(id, workerWallet) { if(!pool){ const j=memoryJobs.get(id); if(!j||j.status!=='open') return null; j.workerWallet=workerWallet.toLowerCase(); j.status='claimed'; j.updatedAt=new Date().toISOString(); memoryJobs.set(id,j); return j; } const r=await pool.query(`UPDATE jobs SET worker_wallet=$2,status='claimed',updated_at=NOW() WHERE id=$1 AND status='open' RETURNING *`,[id,workerWallet.toLowerCase()]); return r.rows[0] || null; }
+export async function claimJob(id, workerWallet) { if(!pool){ const j=memoryJobs.get(id); if(!j||j.status!=='open'||j.fundingStatus!=='funded') return null; j.workerWallet=workerWallet.toLowerCase(); j.status='claimed'; j.updatedAt=new Date().toISOString(); memoryJobs.set(id,j); return j; } const r=await pool.query(`UPDATE jobs SET worker_wallet=$2,status='claimed',updated_at=NOW() WHERE id=$1 AND status='open' AND funding_status='funded' RETURNING *`,[id,workerWallet.toLowerCase()]); return r.rows[0] || null; }
 export async function submitJob(id, workerWallet, submission) { if(!pool){ const j=memoryJobs.get(id); if(!j||j.workerWallet!==workerWallet.toLowerCase()||!['claimed','in_progress'].includes(j.status)) return null; j.submission=submission; j.status='submitted'; j.updatedAt=new Date().toISOString(); memoryJobs.set(id,j); return j; } const r=await pool.query(`UPDATE jobs SET submission=$3,status='submitted',updated_at=NOW() WHERE id=$1 AND worker_wallet=$2 AND status IN ('claimed','in_progress') RETURNING *`,[id,workerWallet.toLowerCase(),submission]); return r.rows[0] || null; }
-export async function updateJobStatus(id, status, creatorWallet) { if(!pool){ const allowed=new Set(['open','claimed','in_progress','submitted','approved','cancelled']); const j=memoryJobs.get(id); if(!j||j.creatorWallet!==creatorWallet.toLowerCase()||!allowed.has(status)) return null; j.status=status; j.updatedAt=new Date().toISOString(); memoryJobs.set(id,j); return j; } const allowed=new Set(['open','claimed','in_progress','submitted','approved','cancelled']); if(!allowed.has(status)) throw new Error('Invalid job status'); const r=await pool.query(`UPDATE jobs SET status=$2,updated_at=NOW() WHERE id=$1 AND creator_wallet=$3 RETURNING *`,[id,status,creatorWallet.toLowerCase()]); return r.rows[0] || null; }
+export async function updateJobStatus(id, status, creatorWallet) {
+  const normalized = String(status || '').toLowerCase();
+  const allowed = new Set(['open','claimed','in_progress','submitted','approved','disputed','resolved','released','cancelled']);
+  if (!allowed.has(normalized)) throw new Error('Invalid job status');
+
+  const canTransition = (job) => {
+    const current = job.status;
+    const transitions = {
+      open: new Set(['cancelled']),
+      claimed: new Set(['in_progress','submitted','cancelled','disputed']),
+      in_progress: new Set(['submitted','cancelled','disputed']),
+      submitted: new Set(['approved','disputed']),
+      approved: new Set(['released','disputed']),
+      disputed: new Set(['resolved','cancelled']),
+      resolved: new Set(['released','cancelled']),
+      released: new Set([]),
+      cancelled: new Set([])
+    };
+    return transitions[current]?.has(normalized);
+  };
+
+  if (!pool) {
+    const j = memoryJobs.get(id);
+    if (!j || j.creatorWallet !== creatorWallet.toLowerCase() || !canTransition(j)) return null;
+    if (normalized === 'released' && j.fundingStatus !== 'funded') throw new Error('Cannot release an unfunded bounty');
+    j.status = normalized;
+    j.updatedAt = new Date().toISOString();
+    memoryJobs.set(id, j);
+    return j;
+  }
+
+  const existing = await pool.query('SELECT * FROM jobs WHERE id=$1 LIMIT 1', [id]);
+  const j = existing.rows[0];
+  if (!j || j.creator_wallet !== creatorWallet.toLowerCase() || !canTransition(j)) return null;
+  if (normalized === 'released' && j.funding_status !== 'funded') throw new Error('Cannot release an unfunded bounty');
+  const r = await pool.query('UPDATE jobs SET status=$2,updated_at=NOW() WHERE id=$1 AND creator_wallet=$3 RETURNING *', [id, normalized, creatorWallet.toLowerCase()]);
+  return r.rows[0] || null;
+}

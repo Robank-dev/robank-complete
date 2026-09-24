@@ -6,7 +6,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { IntroLoader } from '@/components/Experience';
 
 const features = [
-  ['01', 'Your financial command center', 'See your account, assets, payments, borrowing and activity together — with the context your agent needs to work.'],
+  ['01', 'Your financial command center', 'See your account, assets, payments and activity together — with the context your agent needs to work.'],
   ['02', 'From intent to execution', 'Give ROBANK a task in natural language or the CLI. It can prepare the workflow, check policy and surface the action before execution.'],
   ['03', 'One ROBANK. Every surface.', 'Use the App, Skill, CLI or API against the same account context, operating rules and execution model.'],
 ];
@@ -127,59 +127,32 @@ export default function Home() {
                   </div>
 
                   <div className="phone-actions">
-                    <div>
-                      <b>?</b>
-                      <span>Send</span>
-                    </div>
-                    <div>
-                      <b>?</b>
-                      <span>Receive</span>
-                    </div>
-                    <div>
-                      <b>?</b>
-                      <span>Swap</span>
-                    </div>
+                    <div><b>↗</b><span>Send</span></div>
+                    <div><b>↓</b><span>Receive</span></div>
+                    <div><b>✦</b><span>Agent</span></div>
                   </div>
 
                   <div className="phone-section-head">
-                    <span>YOUR PORTFOLIO</span>
-                    <small>View all ?</small>
+                    <span>YOUR HOLDINGS</span>
+                    <small>Live balances</small>
                   </div>
 
                   <div className="portfolio-row">
-                    <div className="asset-icon usdt-icon"><img src="https://cdn.simpleicons.org/tether/26A17B" alt="USDT" /></div>
-                    <div className="asset-name">
-                      <b>USDT</b>
-                      <span>Digital Dollar</span>
-                    </div>
-                    <div className="asset-value">
-                      <b>$4,820.00</b>
-                      <span>37.5%</span>
-                    </div>
+                    <div className="asset-icon"><img src="/token-icons/usdg.png" alt="USDG" /></div>
+                    <div className="asset-name"><b>USDG</b><span>Global Dollar</span></div>
+                    <div className="asset-value"><b>$4,820.00</b><span>Value</span></div>
                   </div>
 
                   <div className="portfolio-row">
-                    <div className="asset-icon">U</div>
-                    <div className="asset-name">
-                      <b>USDC</b>
-                      <span>Digital Dollar</span>
-                    </div>
-                    <div className="asset-value">
-                      <b>$3,940.52</b>
-                      <span>30.7%</span>
-                    </div>
+                    <div className="asset-icon"><img src="/token-icons/usdc.svg" alt="USDC" /></div>
+                    <div className="asset-name"><b>USDC</b><span>USD Coin</span></div>
+                    <div className="asset-value"><b>$3,940.52</b><span>Value</span></div>
                   </div>
 
                   <div className="portfolio-row">
-                    <div className="asset-icon">?</div>
-                    <div className="asset-name">
-                      <b>ETH</b>
-                      <span>Ethereum</span>
-                    </div>
-                    <div className="asset-value">
-                      <b>$2,180.00</b>
-                      <span>17.0%</span>
-                    </div>
+                    <div className="asset-icon"><img src="/token-icons/eth.svg" alt="ETH" /></div>
+                    <div className="asset-name"><b>ETH</b><span>Ethereum</span></div>
+                    <div className="asset-value"><b>$2,180.00</b><span>Value</span></div>
                   </div>
 
                   <div className="phone-bottom-nav">
@@ -295,61 +268,61 @@ export default function Home() {
 
                 <div className="terminal-command">
                   <span className="terminal-prompt">ubuntu@robank:~$</span>
-                  <strong>robank assets prepare --symbol xAAPL --amount 1000</strong>
+                  <strong>robank market search "GPU 3 hours"</strong>
                   <i className="terminal-cursor" />
                 </div>
 
                 <div className="terminal-output terminal-output-1">
                   <span className="terminal-arrow">›</span>
-                  <span>resolving tokenized asset...</span>
+                  <span>searching Agent Market...</span>
                 </div>
 
                 <div className="terminal-output terminal-output-2">
                   <span className="terminal-success">✓</span>
-                  <span>asset found: <b>xAAPL</b></span>
+                  <span>capability found: <b>GPU COMPUTE</b></span>
                 </div>
 
                 <div className="terminal-output terminal-output-3">
                   <span className="terminal-success">✓</span>
-                  <span>market context <b>loaded</b></span>
+                  <span>provider <b>available</b></span>
                 </div>
 
                 <div className="terminal-output terminal-output-4">
                   <span className="terminal-arrow">›</span>
-                  <span>preparing allocation...</span>
+                  <span>inspecting payment requirement...</span>
                 </div>
 
                 <div className="terminal-detail terminal-detail-1">
-                  <span>asset</span>
-                  <b>xAAPL · tokenized stock</b>
+                  <span>service</span>
+                  <b>GPU · 3 hours</b>
                 </div>
 
                 <div className="terminal-detail terminal-detail-2">
-                  <span>amount</span>
-                  <b>$1,000 USDG</b>
+                  <span>payment</span>
+                  <b>x402 · USDC</b>
                 </div>
 
                 <div className="terminal-detail terminal-detail-3">
                   <span>network</span>
-                  <b>Robinhood Chain</b>
+                  <b>Base Mainnet</b>
                 </div>
 
                 <div className="terminal-output terminal-output-5">
-                  <span className="terminal-success">✓</span>
-                  <span>policy check <b>passed</b></span>
+                  <span className="terminal-arrow">›</span>
+                  <span>policy check <b>required</b></span>
                 </div>
 
                 <div className="terminal-output terminal-output-6">
-                  <span className="terminal-arrow">›</span>
-                  <span>transaction <b>prepared</b></span>
+                  <span className="terminal-success">✓</span>
+                  <span>service <b>ready for review</b></span>
                 </div>
 
                 <div className="terminal-success-box">
                   <div>
                     <span>✓</span>
-                    <strong>READY FOR REVIEW</strong>
+                    <strong>READY FOR USER APPROVAL</strong>
                   </div>
-                  <small>xAAPL allocation · $1,000 · Robinhood Chain</small>
+                  <small>GPU compute · x402 · not purchased yet</small>
                 </div>
 
                 <div className="terminal-next">
@@ -389,7 +362,7 @@ export default function Home() {
 
                 <div className="ai-step ai-user-step">
                   <small>YOU</small>
-                  <div>Prepare a $1,000 xAAPL allocation</div>
+                  <div>Find me a GPU for 3 hours.</div>
                 </div>
 
                 <div className="ai-step ai-thinking-step">
@@ -400,41 +373,29 @@ export default function Home() {
 
                 <div className="ai-step ai-response-step">
                   <small>ROBANK AI</small>
-                  <strong>Got it. I'll prepare the allocation.</strong>
-                  <p>Checking asset context, available balance and execution rules.</p>
+                  <strong>I’ll search Agent Market.</strong>
+                  <p>First I’ll find a suitable provider, inspect the payment terms, then check whether the purchase is allowed.</p>
                 </div>
 
                 <div className="ai-step ai-transaction-step">
                   <div className="ai-tx-head">
-                    <span>ASSET ACTION READY</span>
-                    <b>xAAPL</b>
+                    <span>AGENT MARKET</span>
+                    <b>GPU COMPUTE</b>
                   </div>
 
-                  <div className="ai-tx-amount">$1,000</div>
+                  <div className="ai-tx-amount">3 HOURS</div>
 
-                  <div className="ai-tx-row">
-                    <span>Asset</span>
-                    <b>xAAPL</b>
-                  </div>
-
-                  <div className="ai-tx-row">
-                    <span>Funding</span>
-                    <b>USDG</b>
-                  </div>
-
-                  <div className="ai-tx-row">
-                    <span>Network</span>
-                    <b>Robinhood Chain</b>
-                  </div>
-
-                  <button>Review action <span>→</span></button>
+                  <div className="ai-tx-row"><span>Capability</span><b>GPU compute</b></div>
+                  <div className="ai-tx-row"><span>Payment</span><b>x402 · USDC</b></div>
+                  <div className="ai-tx-row"><span>Network</span><b>Base Mainnet</b></div>
+                  <button>Inspect provider <span>→</span></button>
                 </div>
 
                 <div className="ai-step ai-success-step">
-                  <span>?</span>
+                  <span>✓</span>
                   <div>
-                    <strong>Action prepared</strong>
-                    <small>xAAPL · $1,000 USDG · ready for review</small>
+                    <strong>Ready for review</strong>
+                    <small>Provider found · payment not sent yet</small>
                   </div>
                 </div>
 
@@ -545,7 +506,7 @@ export default function Home() {
 
       </section>
 
-      <section id="security" className="section security-section"><div className="security-orb" /><div className="section-kicker">CONTROL</div><h2>Quietly powerful.<br /><em>Clearly yours.</em></h2><p>ROBANK is designed around user-controlled wallets and transparent actions. The interface stays simple; the underlying rails do the heavy lifting.</p><div className="robank-auth"><span>Sign in or create your account with your email.</span><Link href="/login" className="button">Continue with email <b>→</b></Link></div><div className="security-links"><a href="https://github.com/Robank-dev/robank-complete" target="_blank" rel="noreferrer" aria-label="GitHub"><img src="https://cdn.simpleicons.org/github/FFFFFF" alt="" /><span>GitHub</span></a><a href="mailto:contact@robank.co" aria-label="Contact"><span className="contact-icon">✉</span><span>Contact</span></a><a href="https://x.com/robank_co" target="_blank" rel="noreferrer" aria-label="X"><img src="https://cdn.simpleicons.org/x/FFFFFF" alt="" /><span>X</span></a><a href="https://t.me/robank_tg" target="_blank" rel="noreferrer" aria-label="Telegram"><img src="https://cdn.simpleicons.org/telegram/FFFFFF" alt="" /><span>Telegram</span></a><a href="#" aria-label="Contract"><span className="contract-icon">⌘</span><span>Contract</span></a><a href="#" aria-label="DexScreener"><img src="/dex-screener-logo.png" alt="" /><span>DexScreener</span></a><a href="#" aria-label="Uniswap"><img src="/uniswap_logo.png" alt="" /><span>Uniswap</span></a><a href="#" aria-label="CoinGecko"><img src="/coingecko_logo.png" alt="" /><span>CoinGecko</span></a><a href="/docs" aria-label="Docs"><img src="https://cdn.simpleicons.org/readthedocs/FFFFFF" alt="" /><span>Docs</span></a></div></section>
+      <section id="security" className="section security-section"><div className="security-orb" /><div className="section-kicker">CONTROL</div><h2>Quietly powerful.<br /><em>Clearly yours.</em></h2><p>ROBANK is designed around user-controlled wallets and transparent actions. The interface stays simple; the underlying rails do the heavy lifting.</p><div className="robank-auth"><span>Sign in or create your account with your email.</span><Link href="/login" className="button">Continue with email <b>→</b></Link></div><div className="security-links"><a href="https://github.com/Robank-dev/robank-complete" target="_blank" rel="noreferrer" aria-label="GitHub"><img src="https://cdn.simpleicons.org/github/FFFFFF" alt="" /><span>GitHub</span></a><a href="mailto:contact@robank.co" aria-label="Contact"><span className="contact-icon">✉</span><span>Contact</span></a><a href="https://x.com/robankdev" target="_blank" rel="noreferrer" aria-label="X"><img src="https://cdn.simpleicons.org/x/FFFFFF" alt="" /><span>X</span></a><a href="https://t.me/robank_tg" target="_blank" rel="noreferrer" aria-label="Telegram"><img src="https://cdn.simpleicons.org/telegram/FFFFFF" alt="" /><span>Telegram</span></a><a href="/docs" aria-label="Docs"><img src="https://cdn.simpleicons.org/readthedocs/FFFFFF" alt="" /><span>Docs</span></a></div></section>
     </main>
   );
 }

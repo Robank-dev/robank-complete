@@ -29,3 +29,30 @@ export async function requirePrivyAuth(req, res, next) {
     return res.status(401).json({ error: 'Invalid or expired Privy access token' });
   }
 }
+
+export async function requirePrivyWallet(req, res, walletAddress) {
+  const normalized = String(walletAddress || '').trim().toLowerCase();
+  if (!/^0x[a-f0-9]{40}$/.test(normalized)) {
+    res.status(400).json({ error: 'Valid wallet address is required.' });
+    return null;
+  }
+
+  try {
+    const user = await getPrivyClient().users()._get(req.privy.userId);
+    const ownsWallet = (user.linked_accounts || []).some((account) => {
+      const type = String(account?.type || '').toLowerCase();
+      const address = String(account?.address || '').toLowerCase();
+      return ['wallet', 'smart_wallet'].includes(type) && address === normalized;
+    });
+
+    if (!ownsWallet) {
+      res.status(403).json({ error: 'Wallet is not linked to the authenticated Privy account.' });
+      return null;
+    }
+
+    return normalized;
+  } catch {
+    res.status(401).json({ error: 'Unable to verify wallet ownership.' });
+    return null;
+  }
+}

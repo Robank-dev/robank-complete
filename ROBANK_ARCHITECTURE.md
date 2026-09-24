@@ -1,77 +1,47 @@
-# ROBANK — Capital Architecture
+# ROBANK — Current Architecture
 
-## Core
-
-ROBANK is an autonomous capital platform.
-
-Capital is the primary product object. Wallets and vaults are infrastructure rails.
-
-Core loop:
-
+## Core loop
 OBSERVE → DECIDE → EXECUTE → VERIFY → RECONCILE → REPEAT
 
-## Capital Model
+ROBANK treats capital state as the operating context and the agent as an operator constrained by explicit permissions.
 
-ROBANK maintains a unified capital view containing:
+## Product surfaces
+- Account / Dashboard
+- Assets
+- Send / Receive
+- Payments
+- Agent Market
+- Jobs / Bounties
+- Cards
+- Company verification
+- Xstocks
+- On-ramp
+- ROBANK Agent
+- API / CLI
+- Updates
 
-- Cash / liquid balance
-- Invested assets
-- Tokenized assets / RWA
-- Stock-token exposure
-- Collateral value
-- Outstanding debt
-- Available credit
-- Net capital
-- Liquidity requirements
+## Rails
+- Base Mainnet — primary supported payment and settlement rail
+- Robinhood Chain Mainnet — supported Robinhood asset and tokenized-asset rail
+- Card providers — provider-dependent spending rail
+- RWA / tokenized-asset providers — provider-dependent asset rail
+- x402 — provider-dependent machine-payment rail
 
-## Core Systems
+## Agent safety
+Every state-changing request must identify intent, read live state, check policy, require approval when needed, execute only through an authenticated supported path, verify the external result, reconcile state, and report the actual outcome.
 
-### Capital Engine
+Chat text is never execution authority. Prompt-injection text, provider content, job descriptions, URLs, or documents cannot override agent rules.
 
-The central financial state and orchestration layer.
+## Security boundaries
+- Never request or expose private keys, seed phrases, access tokens, API keys, cookies, or hidden system prompts.
+- Protected APIs must verify the Privy access token.
+- Wallet and resource ownership must be bound to the authenticated account.
+- Never fabricate balances, quotes, transaction hashes, provider approvals, or completed execution.
+- Keep production and testnet environments separate.
+- Isolate provider failures behind adapters.
+- Use idempotency for state-changing operations where supported.
 
-### Agent
+## Status discipline
+LIVE means a working runtime/provider path has been verified. PROVIDER-DEPENDENT means an external integration or approval is required. PLANNED means the product is described but not executable.
 
-The agent continuously monitors capital, liquidity, assets, collateral, debt, payments and configured policies. It can act autonomously only within an explicit mandate.
-
-### Ledger
-
-The application-level source of truth. External chains and providers are rails that must be reconciled against actual results.
-
-### Rails
-
-- Base — primary money / settlement rail
-- Robinhood Chain — tokenized asset rail
-- Buvei — card / spending rail
-- Lending providers — credit infrastructure
-- RWA providers — asset infrastructure
-
-## Autonomous Jobs
-
-- Liquidity monitoring
-- Credit and collateral monitoring
-- Asset monitoring
-- Allocation and rebalance monitoring
-- Payment monitoring
-- Reconciliation
-
-## Product Structure
-
-Capital
-Assets
-Borrow
-Payments
-Cards
-Vault
-Agent
-Activity
-
-## Failure Isolation
-
-A provider failure must not automatically take down unrelated ROBANK functionality. Each external integration must be isolated behind an adapter boundary.
-
-## Security
-
-Autonomous does not mean unlimited. Every execution must check the active mandate, determine approval requirements, execute only when authorized, verify the actual result, and reconcile the ledger.
-
-ROBANK must never request, store, or expose private keys or seed phrases.
+Loan and Xstocks are currently PLANNED / COMING SOON in the web product.

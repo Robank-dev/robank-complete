@@ -21,6 +21,8 @@
 
 ## Example Composition
 
+The following is an illustrative **underlying-equity reference** only:
+
 ```
 NVDA   30%
 AAPL   25%
@@ -28,8 +30,19 @@ MSFT   25%
 TSM    20%
 ```
 
-This is illustrative only — real compositions must come from actual discovery/preview
-results, never invented weights presented as current holdings.
+Those tickers identify public equities in the example. They are **not** evidence that
+ROBANK currently holds or can currently execute tokenized versions of those stocks.
+Real tokenized compositions must come from actual discovery/preview results, never
+invented weights presented as current holdings.
+
+## Current ROBANK Status
+
+**External Stock Token discovery: LIVE.** The current ROBANK web experience can show
+traditional public-stock market data separately and can surface provider-issued Stock
+Tokens discovered through public catalogs. The ROBANK execution rail for those products
+is not currently presented as live. Backend/provider discovery code may exist for future
+integrations; discovery does not imply user eligibility, custody, liquidity, issuance,
+or execution availability.
 
 ## Broader Examples
 

@@ -37,7 +37,7 @@ const steps: Step[] = [
   {
     n: '05',
     title: 'Spend with your card',
-    text: 'Use your ROBANK virtual card for everyday online spending while keeping it connected to your financial stack.',
+    text: 'Use your ROBANK Visa card for everyday online spending once the provider, KYC and issuing requirements are satisfied.',
     visual: 'card',
   },
   {
@@ -54,8 +54,8 @@ const steps: Step[] = [
   },
   {
     n: '08',
-    title: 'Swap assets',
-    text: 'Ask for a swap, review the route and quote, then execute it through connected on-chain liquidity.',
+    title: 'Find a capability',
+    text: 'Tell ROBANK what you need. The agent can route requests for services, compute, data and other supported capabilities into Agent Market.',
     visual: 'swap',
   },
   {
@@ -84,8 +84,8 @@ const steps: Step[] = [
   },
   {
     n: '13',
-    title: 'Understand markets and assets',
-    text: 'Use the Assets, Markets and News surfaces for discovery and context. Information is kept separate from authoritative wallet state and execution confirmation.',
+    title: 'Let the agent choose the rail',
+    text: 'ROBANK keeps wallet holdings, provider services, Xstocks and official updates separate, so the agent knows which surface to use for the requested outcome.',
     visual: 'routing',
   },
   {
@@ -96,14 +96,14 @@ const steps: Step[] = [
   },
   {
     n: '15',
-    title: 'Turn work into a job',
-    text: 'Create work with a clear budget and lifecycle, then let a worker or agent claim, work and submit it through explicit states.',
-    visual: 'automation',
+    title: 'Post a bounty',
+    text: 'Turn a task into a market opportunity with a clear deliverable, prize and deadline. Funding, proof, review and payout stay separate.',
+    visual: 'bounty',
   },
   {
     n: '16',
-    title: 'Access tokenized assets',
-    text: 'Discover supported tokenized products through connected providers, check eligibility and review the product before any provider-backed execution.',
+    title: 'Explore Xstocks',
+    text: 'A separate provider-issued tokenized-equity surface. ROBANK shows it as coming soon until eligibility and execution are actually connected.',
     visual: 'rwa',
   },
   {
@@ -155,7 +155,7 @@ function Visual({ kind }: { kind: string }) {
     return (
       <div className="hw-visual">
         <div className="hw-wallet">
-          <div className="hw-row hw-muted"><span>{kind === 'wallet' ? 'PERSONAL WALLET' : 'OVERVIEW'}</span><span>•••</span></div>
+          <div className="hw-row hw-muted"><span>{kind === 'wallet' ? 'PERSONAL WALLET' : 'OVERVIEW'}</span><span>â€¢â€¢â€¢</span></div>
           <div className="hw-label">TOTAL BALANCE</div>
           <div className="hw-balance">$12,840.52</div>
           <div className="hw-green">+8.42%</div>
@@ -163,10 +163,10 @@ function Visual({ kind }: { kind: string }) {
             {['28%','41%','34%','58%','52%','73%','67%','88%'].map((h, i) => <i key={i} style={{height:h}} />)}
           </div>
           <div className="hw-action-grid">
-            <span><b>↗</b>Send</span>
+            <span><b>â†—</b>Send</span>
             <span><b>↓</b>Receive</span>
-            <span><b>↔</b>Swap</span>
-            <span><b>＋</b>Buy</span>
+            <span><b>✦</b>Agent</span>
+            <span><b>◈</b>Market</span>
           </div>
           <div className="hw-asset"><span><b>USDC</b><small>Stablecoin</small></span><strong>$12,240.20</strong></div>
           <div className="hw-asset"><span><b>ETH</b><small>Ethereum</small></span><strong>$600.32</strong></div>
@@ -187,7 +187,7 @@ function Visual({ kind }: { kind: string }) {
           </div>
           <div className="hw-progress"><i style={{width:`${55 + progress * .45}%`}} /></div>
           <div className="hw-status"><span>Funding route</span><b>READY</b></div>
-          <div className="hw-status"><span>Destination</span><b>ROBANK VAULT</b></div>
+          <div className="hw-status"><span>Destination</span><b>ROBANK ACCOUNT</b></div>
         </div>
       </div>
     );
@@ -200,8 +200,8 @@ function Visual({ kind }: { kind: string }) {
           <div className="hw-card-top"><span>ROBANK</span><span>VIRTUAL</span></div>
           <div className="hw-chip" />
           <div className="hw-card-r"><img src="/robank-mark.png" alt="" /></div>
-          <div className="hw-card-number">•••• •••• •••• 4821</div>
-          <div className="hw-card-bottom"><span>ROBANK MEMBER</span><span>PRIVATE Â· DIGITAL</span></div>
+          <div className="hw-card-number">â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ 4821</div>
+          <div className="hw-card-bottom"><span>ROBANK MEMBER</span><span>PRIVATE Ã‚Â· DIGITAL</span></div>
         </div>
       </div>
     );
@@ -211,14 +211,14 @@ function Visual({ kind }: { kind: string }) {
     return (
       <div className="hw-visual">
         <div className="hw-agent-card">
-          <div className="hw-row"><b>ROBANK AI</b><span className="hw-online">● Online</span></div>
+          <div className="hw-row"><b>ROBANK AI</b><span className="hw-online">â— Online</span></div>
           <div className="hw-message">Pay <strong>$20 USDC</strong> to Alice.</div>
           <div className="hw-preview">
             <span>Recipient <b>alice.robinhood</b></span>
             <span>Network <b>Robinhood Chain</b></span>
             <span>Amount <b>20 USDC</b></span>
           </div>
-          <div className="hw-success">✓ Example result · verified</div>
+          <div className="hw-success">âœ“ Example result Â· verified</div>
         </div>
       </div>
     );
@@ -250,7 +250,7 @@ function Visual({ kind }: { kind: string }) {
             <div className="hw-receive-detail">
               <small>RECEIVE ADDRESS</small>
               <strong>0x7A91...F21C</strong>
-              <span>Robinhood Chain · USDC</span>
+              <span>Robinhood Chain Â· USDC</span>
               <div className="hw-receive-amount"><small>REQUESTED</small><b>250.00 USDC</b></div>
             </div>
           </div>
@@ -265,12 +265,26 @@ function Visual({ kind }: { kind: string }) {
     return (
       <div className="hw-visual">
         <div className="hw-swap">
-          <div className="hw-row hw-muted"><span>SWAP</span><span>UNISWAP</span></div>
-          <div className="hw-token-box"><span>Pay</span><strong>500 USDC</strong></div>
-          <div className="hw-swap-icon">↕</div>
-          <div className="hw-token-box"><span>Receive</span><strong>0.137 ETH</strong></div>
-          <div className="hw-status"><span>Route</span><b>OPTIMIZED</b></div>
-          <div className="hw-light-button">Review swap <b>→</b></div>
+          <div className="hw-row hw-muted"><span>AGENT MARKET</span><span>X402</span></div>
+          <div className="hw-token-box"><span>Need</span><strong>GPU COMPUTE</strong></div>
+          <div className="hw-swap-icon">→</div>
+          <div className="hw-token-box"><span>Provider</span><strong>LIVE SERVICE</strong></div>
+          <div className="hw-status"><span>Payment rail</span><b>X402 READY</b></div>
+          <div className="hw-light-button">Inspect service <b>→</b></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (kind === 'bounty') {
+    return (
+      <div className="hw-visual">
+        <div className="hw-automation">
+          <div className="hw-row hw-muted"><span>BOUNTY</span><span>MARKET</span></div>
+          <div className="hw-rule"><small>TASK</small><b>Analyze this dataset</b></div>
+          <div className="hw-rule"><small>PRIZE</small><b>$50 USDC Â· BASE</b></div>
+          <div className="hw-rule"><small>STATE</small><b>FUND → CLAIM → PROOF</b></div>
+          <div className="hw-live-line"><i /> REVIEW BEFORE RELEASE</div>
         </div>
       </div>
     );
@@ -280,10 +294,10 @@ function Visual({ kind }: { kind: string }) {
     return (
       <div className="hw-visual">
         <div className="hw-agent-stack">
-          <div className="hw-agent-head"><span className="hw-avatar"><img src="/robank-mark.png" alt="" /></span><div><b>ROBANK AI</b><small>Financial agent</small></div><span className="hw-online">● Online</span></div>
+          <div className="hw-agent-head"><span className="hw-avatar"><img src="/robank-mark.png" alt="" /></span><div><b>ROBANK AI</b><small>Financial agent</small></div><span className="hw-online">â— Online</span></div>
           <div className="hw-command">“What can you do with my wallet?”</div>
           <div className="hw-agent-reply">I can read your balance, payments and transaction history, and act on approved financial instructions.</div>
-          <div className="hw-agent-tags"><span>PAYMENTS</span><span>SWAPS</span><span>TREASURY</span><span>ON-CHAIN</span></div>
+          <div className="hw-agent-tags"><span>PAYMENTS</span><span>X402</span><span>BOUNTIES</span><span>ON-CHAIN</span></div>
         </div>
       </div>
     );
@@ -296,7 +310,7 @@ function Visual({ kind }: { kind: string }) {
           <div className="hw-row"><b>AGENT MANDATE</b><span>ACTIVE</span></div>
           {[
             ['Payments', 'Up to $2,000'],
-            ['Approved assets', 'USDC · ETH'],
+            ['Approved assets', 'USDC Â· ETH'],
             ['Destinations', 'Whitelist'],
             ['Auto execute', 'Enabled'],
           ].map(([a,b]) => (
@@ -341,9 +355,9 @@ function Visual({ kind }: { kind: string }) {
         <div className="hw-routing">
           <div className="hw-route-center"><img src="/robank-mark.png" alt="" /></div>
           {[
-            ['ROBINHOOD CHAIN', 'SUPPORTED'],
-            ['BASE MAINNET', 'SUPPORTED'],
-            ['PROVIDER RAIL', 'CHECK AVAILABILITY'],
+            ['WALLET HOLDINGS', 'ASSETS'],
+            ['X402 SERVICES', 'AGENT MARKET'],
+            ['BOUNTIES', 'JOBS'],
           ].map(([a,b], i) => (
             <div className={`hw-chain c${i+1}`} key={a}><b>{a}</b><small>{b}</small></div>
           ))}
@@ -359,19 +373,19 @@ function Visual({ kind }: { kind: string }) {
     return (
       <div className="hw-visual">
         <div className="hw-rwa">
-          <div className="hw-row hw-muted"><span>TOKENIZED ASSETS</span><span>PROVIDER RAIL</span></div>
+          <div className="hw-row hw-muted"><span>XSTOCKS</span><span>COMING SOON</span></div>
           <div className="hw-rwa-main">
-            <div><small>AI BASKET</small><strong>GLOBAL TECH</strong><span>ERC-20 basket</span></div>
-            <b className="hw-basket">R</b>
+            <div><small>SEPARATE ASSET RAIL</small><strong>PROVIDER PRODUCT</strong><span>Tokenized equity / ETF product</span></div>
+            <b className="hw-basket">X</b>
           </div>
           <div className="hw-rwa-holdings">
-            <span>NVDA <b>30%</b></span>
-            <span>AAPL <b>25%</b></span>
-            <span>MSFT <b>25%</b></span>
-            <span>TSM <b>20%</b></span>
+            <span>ELIGIBILITY <b>CHECK</b></span>
+            <span>ISSUER <b>VERIFY</b></span>
+            <span>NETWORK <b>VERIFY</b></span>
+            <span>EXECUTION <b>SOON</b></span>
           </div>
-          <div className="hw-light-button">Review basket <b>→</b></div>
-          <small className="hw-disclaimer">Provider-dependent access &amp; eligibility apply.</small>
+          <div className="hw-light-button">View Xstocks <b>→</b></div>
+          <small className="hw-disclaimer">Xstocks is a separate provider-issued product surface. No ROBANK trade or issuance is live yet.</small>
         </div>
       </div>
     );
@@ -390,7 +404,7 @@ function Visual({ kind }: { kind: string }) {
           <div className="hw-treasury-chart">
             {[45,61,52,73,66,82,76,90].map((h, i) => <i key={i} style={{height:`${h}%`}} />)}
           </div>
-          <div className="hw-success">✓ Next rebalance within policy</div>
+          <div className="hw-success">âœ“ Next rebalance within policy</div>
         </div>
       </div>
     );
@@ -399,13 +413,13 @@ function Visual({ kind }: { kind: string }) {
   return (
     <div className="hw-visual">
       <div className="hw-terminal">
-        <div className="hw-terminal-top"><span>● ● ●</span><b>ubuntu@robank</b><small>bash</small></div>
+        <div className="hw-terminal-top"><span>â— â— â—</span><b>ubuntu@robank</b><small>bash</small></div>
         <div className="hw-terminal-body">
           <p><span>ubuntu@robank:~$</span> robank agent status</p>
           <p className="muted">loading financial context...</p>
-          <p className="ok">✓ wallet connected</p>
-          <p className="ok">✓ policy loaded</p>
-          <p className="ok">✓ tools available: payments swaps treasury</p>
+          <p className="ok">âœ“ wallet connected</p>
+          <p className="ok">âœ“ policy loaded</p>
+          <p className="ok">âœ“ tools available: payments x402 bounties</p>
           <p className="muted">waiting for instruction...</p>
           <p className="cursor"><span>ubuntu@robank:~$</span> <i /></p>
         </div>

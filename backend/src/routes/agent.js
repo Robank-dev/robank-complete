@@ -10,6 +10,7 @@ import { buildTokenTransfer } from '../services/payment.js';
 import { beginTransaction, markSubmitted, confirmTransaction, failTransaction } from '../services/reconciliation.js';
 import { getLedgerTransactionByIdempotencyKey } from '../services/database.js';
 import { verifyMainnetTransaction } from '../services/transactionVerification.js';
+import { requirePrivyWallet } from '../middleware/privyAuth.js';
 
 const router = Router();
 
@@ -31,7 +32,8 @@ router.post('/prepare', async (req, res) => {
   const asset = String(req.body?.asset || 'USDC').toUpperCase();
   const network = String(req.body?.network || '').toLowerCase();
 
-  if (!isAddress(walletAddress)) return res.status(400).json({ error: 'Valid walletAddress is required.' });
+  const ownedWallet = await requirePrivyWallet(req, res, walletAddress);
+  if (!ownedWallet) return;
   if (!isAddress(destination)) return res.status(400).json({ error: 'Valid destination is required.' });
   if (!['USDC', 'USDG'].includes(asset)) return res.status(400).json({ error: 'Unsupported execution asset.' });
   if (!['base', 'robinhood'].includes(network)) return res.status(400).json({ error: 'Unsupported execution network.' });
@@ -39,7 +41,7 @@ router.post('/prepare', async (req, res) => {
   if (!amount || !Number.isFinite(Number(amount)) || Number(amount) <= 0) return res.status(400).json({ error: 'Invalid amount.' });
 
   try {
-    const prepared = await prepareAgentAction({ walletAddress, actionType: 'transfer', amountUsd: Number(amount), asset, network, provider: 'onchain', metadata: { destination, direction: 'outgoing' } });
+    const prepared = await prepareAgentAction({ walletAddress: ownedWallet, actionType: 'transfer', amountUsd: Number(amount), asset, network, provider: 'onchain', metadata: { destination, direction: 'outgoing' } });
     const response = { stage: prepared.stage, prepared, transaction: null };
     if (prepared.policy.allowed) {
       response.stage = prepared.policy.requiresApproval ? 'awaiting-user-confirmation' : 'prepared-for-wallet-signing';
@@ -58,7 +60,8 @@ router.post('/confirm', async (req, res) => {
   const asset = String(req.body?.asset || (network === 'robinhood' ? 'USDG' : 'USDC')).toUpperCase();
   const txHash = String(req.body?.txHash || '').trim();
 
-  if (!isAddress(walletAddress)) return res.status(400).json({ error: 'Valid walletAddress is required.' });
+  const ownedWallet = await requirePrivyWallet(req, res, walletAddress);
+  if (!ownedWallet) return;
   if (!isAddress(destination)) return res.status(400).json({ error: 'Valid destination is required.' });
   if (!['base', 'robinhood'].includes(network)) return res.status(400).json({ error: 'Unsupported network.' });
   if ((network === 'base' && asset !== 'USDC') || (network === 'robinhood' && asset !== 'USDG')) return res.status(400).json({ error: `${asset} is not enabled on ${network}.` });
@@ -71,11 +74,11 @@ router.post('/confirm', async (req, res) => {
     if (existing?.status === 'confirmed') return res.json({ stage: 'completed', ledger: existing, verified: true, idempotent: true });
     if (existing?.status === 'failed') return res.status(409).json({ stage: 'failed', ledger: existing, verified: false, idempotent: true });
 
-    const ledger = existing || await beginTransaction({ walletAddress, kind: 'transfer', asset, amountDelta: `-${Number(amount)}`, network, provider: 'onchain', idempotencyKey, metadata: { agent: true, destination, direction: 'outgoing', execution: 'wallet-signed' } });
+    const ledger = existing || await beginTransaction({ walletAddress: ownedWallet, kind: 'transfer', asset, amountDelta: `-${Number(amount)}`, network, provider: 'onchain', idempotencyKey, metadata: { agent: true, destination, direction: 'outgoing', execution: 'wallet-signed' } });
     const submitted = await markSubmitted(ledger.id, { externalId: txHash, metadata: { agent: true, destination, direction: 'outgoing', execution: 'wallet-signed', txHash } });
     let verification;
     try {
-      verification = await verifyMainnetTransaction(txHash, { walletAddress, destination, amount, network, asset });
+      verification = await verifyMainnetTransaction(txHash, { walletAddress: ownedWallet, destination, amount, network, asset });
     } catch (error) {
       return res.status(202).json({ stage: 'submitted', ledger: submitted, verified: false, requiresReconciliation: true, verificationError: error.message });
     }
@@ -97,13 +100,16 @@ router.post('/confirm', async (req, res) => {
 router.post('/chat', async (req, res) => {
   const message = String(req.body?.message || '').trim();
   const history = Array.isArray(req.body?.history) ? req.body.history.slice(-20) : [];
-  const vaultAddress = req.body?.vaultAddress || null;
   const walletAddress = req.body?.walletAddress || null;
   const context = req.body?.context && typeof req.body.context === 'object' ? req.body.context : null;
+  if (walletAddress) {
+    const ownedWallet = await requirePrivyWallet(req, res, walletAddress);
+    if (!ownedWallet) return;
+  }
   if (!message) return res.status(400).json({ error: 'message is required' });
 
   try {
-    res.json(await chat({ message, history, vaultAddress, walletAddress, context }));
+    res.json(await chat({ message, history, walletAddress, context }));
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }
