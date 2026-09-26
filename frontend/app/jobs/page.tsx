@@ -46,7 +46,7 @@ export default function JobsPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl space-y-6">
+      <div className="mx-auto max-w-5xl space-y-6 ro-jobs-premium">
         <div>
           <div className="text-xs uppercase tracking-[.2em] text-white/35">ROBANK / JOBS</div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">Post a bounty.</h1>

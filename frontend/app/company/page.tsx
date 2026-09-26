@@ -91,7 +91,7 @@ export default function CompanyPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-4xl space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6 ro-company-premium">
         <div>
           <div className="text-xs uppercase tracking-[.2em] text-white/35">ROBANK / COMPANY</div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">Company verification.</h1>

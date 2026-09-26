@@ -87,7 +87,7 @@ robank agent status`}</code></pre>
           <pre className="cli-code"><code>{`capital     assets       loan         payments
 card        agent        company      jobs
 wallet      users        autopilot    onramp
-swap        x402         rwa          networks
+x402        rwa          networks     updates
 
 robank --help`}</code></pre>
           <div className="cli-links"><Link href="/docs#developer">DEVELOPER DOCS →</Link><Link href="/how-it-works">HOW IT WORKS →</Link><a href="https://github.com/Robank-dev/robank-complete" target="_blank" rel="noreferrer">VIEW SOURCE →</a></div>

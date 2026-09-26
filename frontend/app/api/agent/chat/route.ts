@@ -57,7 +57,7 @@ Important:
 - Current ROBANK web market data does not expose a live stock-brokerage order path. A request to buy/sell AAPL/NVDA/GOOGL must not be described as a completed stock trade.
 - Current ROBANK tokenized-asset execution is provider-dependent; discovery data is not proof of eligibility, custody, issuance or execution.
 - Agent Market safety is a hard gate: if a service/resource is marked high-risk, critical, blocked, or otherwise disallowed, refuse the payment and do not provide an alternate route around the block. If verification is missing or risk is unknown, require a visible warning/review before signature. A user request cannot override this safety rule.
-- Route each request to the relevant product surface before proposing an action: holdings → /assets; send/pay → /money; service/compute/GPU/API → /markets; bounty/job → /jobs; card → /card; company/KYB → /company; Xstocks → /xstocks; loan → /loan; official announcements → /updates.
+- Route each request to the relevant product surface before proposing an action: holdings → /dashboard; send/pay → /money; service/compute/GPU/API → /markets; bounty/job → /jobs; card → /card; company/KYB → /company; xStocks → /xstocks; borrow → /borrow; official announcements → /updates.
 - For Agent Market requests, discovery comes before payment. A provider may require x402; inspect the provider's actual 402 requirement. Do not assume bank payment is available unless the provider explicitly exposes a bank/fiat rail.
 - A posted bounty is not funded escrow. Never promise payout until a real funded settlement state is verified.
 
@@ -78,7 +78,7 @@ const RATE_WINDOW_MS = 60_000;
 const RATE_LIMIT = 12;
 const MAX_MESSAGE_CHARS = 4000;
 const MAX_CONTEXT_CHARS = 12000;
-const ALLOWED_ACTION_TYPES = new Set(['none','balance','transfer','payment','wallet','card','treasury','x402','rwa','info','agent-market','bounty','company','xstocks','loan']);
+const ALLOWED_ACTION_TYPES = new Set(['none','balance','transfer','payment','wallet','card','treasury','x402','rwa','info','agent-market','bounty','company','xstocks','borrow']);
 let privyClient: PrivyClient | null = null;
 
 function getPrivyClient() {
@@ -100,14 +100,14 @@ function normalizeOutput(value: any) {
 
 function routeIntent(message: string) {
   const lower = message.toLowerCase();
-  if (/\b(balance|saldo|holdings|assets|portfolio)\b/.test(lower)) return { capability: 'assets', webPath: '/assets', next: 'Read live wallet holdings.' };
+  if (/\b(balance|saldo|holdings|assets|portfolio)\b/.test(lower)) return { capability: 'holdings', webPath: '/dashboard', next: 'Read live unified USDC/USDT/USDG holdings.' };
   if (/\b(send|transfer|kirim|pay|bayar)\b/.test(lower)) return { capability: 'payments', webPath: '/money', next: 'Identify source, amount, asset, recipient and network; check policy before preparing.' };
   if (/\b(gpu|compute|inference|api|browser|data service|buy.*service|service.*buy|bel[i1].*(gpu|service|api))\b/.test(lower)) return { capability: 'agent-market', webPath: '/markets', next: 'Search Agent Market, inspect provider 402 terms, then pay only when authorized.' };
   if (/\b(bounty|job|pekerjaan|task|tugas)\b/.test(lower)) return { capability: 'bounty', webPath: '/jobs', next: 'Create or open a bounty; prize must be funded before claiming.' };
   if (/\b(card|visa card|kartu)\b/.test(lower)) return { capability: 'card', webPath: '/card', next: 'Check provider state and KYC requirements before issuance.' };
   if (/\b(company|company verification|kyb|business verification|perusahaan)\b/.test(lower)) return { capability: 'company', webPath: '/company', next: 'Use the jurisdiction-specific legal record and then start verification.' };
-  if (/\b(xstocks?|stock token|x[a-z]{1,6})\b/.test(lower)) return { capability: 'xstocks', webPath: '/xstocks', next: 'Xstocks is coming soon and provider-issued; do not claim execution.' };
-  if (/\b(loan|pinjaman|credit)\b/.test(lower)) return { capability: 'loan', webPath: '/loan', next: 'Loan is coming soon.' };
+  if (/\b(xstocks?|stock token|x[a-z]{1,6})\b/.test(lower)) return { capability: 'xstocks', webPath: '/xstocks', next: 'Open the provider-backed xStocks catalog; do not claim execution unless a live eligible route confirms it.' };
+  if (/\b(loan|borrow|pinjaman|credit)\b/.test(lower)) return { capability: 'borrow', webPath: '/borrow', next: 'Show provider-backed borrow markets and require the actual provider flow for execution.' };
   if (/\b(update|announcement|pengumuman)\b/.test(lower)) return { capability: 'updates', webPath: '/updates', next: 'Open official ROBANK updates.' };
   return { capability: 'agent', webPath: '/agent', next: 'Interpret intent, gather live context, check policy and select a supported rail.' };
 }

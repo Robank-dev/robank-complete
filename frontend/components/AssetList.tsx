@@ -1,195 +1,207 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useAccount, useBalance, useReadContract, usePublicClient } from 'wagmi';
-import { isAddress, formatUnits } from 'viem';
-import { BASE_MAINNET_CHAIN_ID, ROBINHOOD_CHAIN_ID } from '@/lib/constants';
+import { useEffect, useState } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
+import { api } from '@/lib/api';
+import { loadDirectPortfolio } from '@/lib/portfolioClient';
 
-const ERC20_ABI = [
-  { type: 'function', name: 'balanceOf', stateMutability: 'view', inputs: [{ name: 'account', type: 'address' }], outputs: [{ type: 'uint256' }] },
-  { type: 'function', name: 'decimals', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint8' }] },
-  { type: 'function', name: 'symbol', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
-  { type: 'function', name: 'name', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] }
-] as const;
+type PortfolioAsset = {
+  symbol: string;
+  name: string;
+  logo: string;
+  quantity: number;
+  valueUsd: number;
+  assetType?: 'stablecoin' | 'xstock';
+  network?: string;
+  chainId?: number;
+  contractAddress?: string;
+  decimals?: number;
+};
 
-type Token = { id: string; chainId: number; chain: string; symbol: string; name: string; address?: `0x${string}`; image: string; chainImage?: string };
+const SUPPORTED = ['USDC', 'USDT', 'USDG'] as const;
 
-const DEFAULT_TOKENS: Token[] = [
-  { id: 'base-eth', chainId: BASE_MAINNET_CHAIN_ID, chain: 'Base', symbol: 'ETH', name: 'Ethereum', image: '/token-icons/eth.svg', chainImage: '/chain-icons/base.svg' },
-  { id: 'base-usdc', chainId: BASE_MAINNET_CHAIN_ID, chain: 'Base', symbol: 'USDC', name: 'USD Coin', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', image: '/token-icons/usdc.svg', chainImage: '/chain-icons/base.svg' },
-  { id: 'rh-eth', chainId: ROBINHOOD_CHAIN_ID, chain: 'Robinhood Chain', symbol: 'ETH', name: 'Ethereum', image: '/token-icons/eth.svg', chainImage: '/chain-icons/robinhood.svg' },
-  { id: 'rh-usdg', chainId: ROBINHOOD_CHAIN_ID, chain: 'Robinhood Chain', symbol: 'USDG', name: 'Global Dollar', address: '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168', image: '/token-icons/usdg.png', chainImage: '/chain-icons/robinhood.svg' }
+const STABLE_SYMBOLS = new Set(['USDC', 'USDT', 'USDG']);
+const DEFAULT_ASSETS: PortfolioAsset[] = [
+  { symbol: 'USDC', name: 'USDC', logo: '/token-icons/usdc.svg', quantity: 0, valueUsd: 0, assetType: 'stablecoin' },
+  { symbol: 'USDT', name: 'USDT', logo: '/token-icons/usdt.svg', quantity: 0, valueUsd: 0, assetType: 'stablecoin' },
+  { symbol: 'USDG', name: 'USDG', logo: '/token-icons/usdg.png', quantity: 0, valueUsd: 0, assetType: 'stablecoin' }
 ];
 
-function TokenRow({ token, owner, ethPrice }: { token: Token; owner: `0x${string}`; ethPrice: number | null }) {
-  const native = !token.address;
-  const chainImage = token.chainImage || (token.chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg');
-  const nativeBalance = useBalance({ address: owner, chainId: token.chainId, query: { enabled: native } });
-  const tokenBalance = useReadContract({
-    address: token.address,
-    abi: ERC20_ABI,
-    functionName: 'balanceOf',
-    args: [owner],
-    chainId: token.chainId,
-    query: { enabled: Boolean(token.address) }
+function formatAmount(value: number) {
+  return value.toLocaleString(undefined, {
+    maximumFractionDigits: 6
   });
-  const symbolRead = useReadContract({
-    address: token.address,
-    abi: ERC20_ABI,
-    functionName: 'symbol',
-    chainId: token.chainId,
-    query: { enabled: Boolean(token.address) }
-  });
-  const nameRead = useReadContract({
-    address: token.address,
-    abi: ERC20_ABI,
-    functionName: 'name',
-    chainId: token.chainId,
-    query: { enabled: Boolean(token.address) }
-  });
-  const decimals = useReadContract({
-    address: token.address,
-    abi: ERC20_ABI,
-    functionName: 'decimals',
-    chainId: token.chainId,
-    query: { enabled: Boolean(token.address) }
-  });
-  const raw = native ? nativeBalance.data?.value : tokenBalance.data as bigint | undefined;
-  const loading = native ? nativeBalance.isLoading : tokenBalance.isLoading;
-  const tokenDecimals = native ? 18 : Number(decimals.data ?? 6);
-  if (raw == null) {
-    if (!loading) return null;
-    return <div className="asset-row"><div className="asset-symbol-wrap"><div className="asset-symbol bg-white/5" /><div className="asset-chain-icon asset-chain-badge bg-white/5" /></div><div className="asset-name"><b>Loading asset</b><span>Checking balance…</span></div><div className="asset-quantity"><b>—</b><span>Quantity</span></div><div className="asset-value"><b>—</b><span>Value</span></div></div>;
-  }
-  if (raw === BigInt(0)) return null;
-  const displaySymbol = native ? token.symbol : String(symbolRead.data ?? (token.symbol || 'TOKEN'));
-  const displayName = native ? token.name : String(nameRead.data ?? (token.name || 'Token'));
-  const numericAmount = raw === undefined ? null : Number(formatUnits(raw, tokenDecimals));
-  const quantity = numericAmount == null ? '—' : numericAmount.toLocaleString(undefined, { maximumFractionDigits: 6 });
-  const valueUsd = numericAmount == null ? null : native ? (ethPrice ? numericAmount * ethPrice : null) : ['USDC', 'USDG'].includes(displaySymbol.toUpperCase()) ? numericAmount : null;
-  const value = valueUsd == null ? '—' : `$${valueUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
+function formatUsd(value: number) {
+  return '$' + value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function AssetRow({ asset }: { asset: PortfolioAsset }) {
   return (
-    <div className="asset-row">
+    <div className="asset-row asset-row-unified">
       <div className="asset-symbol-wrap">
-        <div className="asset-symbol overflow-hidden bg-white/5 p-1.5"><img src={token.image} alt="" className="h-full w-full rounded-full object-contain" /></div>
-        <img src={chainImage} alt="" className="asset-chain-icon asset-chain-badge" />
+        <div className="asset-symbol overflow-hidden bg-white/5 p-1.5">
+          <img
+            src={asset.logo}
+            alt=""
+            className="h-full w-full rounded-full object-contain"
+            onError={(event) => {
+              event.currentTarget.style.display = 'none';
+            }}
+          />
+        </div>
       </div>
-      <div className="asset-name"><b>{displayName}</b><span>{displaySymbol}</span></div>
-      <div className="asset-quantity"><b>{quantity}</b><span>Quantity</span></div>
-      <div className="asset-value"><b>{value}</b><span>Value</span></div>
+
+      <div className="asset-name">
+        <b>{asset.symbol}</b>
+        {asset.assetType === 'xstock' && (
+          <span>{asset.name}{asset.network ? ' · ' + asset.network : ''}</span>
+        )}
+      </div>
+      <div className="asset-quantity">
+        <b>{formatAmount(asset.quantity)}</b>
+        <span>Quantity</span>
+      </div>
+      <div className="asset-value">
+        <b>{formatUsd(asset.valueUsd)}</b>
+        <span>Value</span>
+      </div>
     </div>
   );
 }
 
 export default function AssetList() {
-  const { address } = useAccount();
-  const [custom, setCustom] = useState<Token[]>([]);
-  const [open, setOpen] = useState(false);
-  const [tokenError, setTokenError] = useState('');
-  const [ethPrice, setEthPrice] = useState<number | null>(null);
-  const [form, setForm] = useState({ chainId: String(BASE_MAINNET_CHAIN_ID), address: '' });
-  const publicClient = usePublicClient({ chainId: Number(form.chainId) });
-
-  useEffect(() => {
-    if (!address) return;
-    try {
-      const saved = JSON.parse(localStorage.getItem(`robank.tokens.${address.toLowerCase()}`) ?? '[]');
-      setCustom(Array.isArray(saved) ? saved : []);
-    } catch {
-      setCustom([]);
-    }
-  }, [address]);
+  const { user } = usePrivy();
+  const linkedAccounts = (Array.isArray(user?.linkedAccounts) ? user.linkedAccounts : []) as Array<{
+    type?: string;
+    walletClientType?: string;
+    chainType?: string;
+    address?: string;
+  }>;
+  const evmAddress = linkedAccounts.find(
+    (account) =>
+      account.type === 'wallet' &&
+      account.walletClientType === 'privy' &&
+      account.chainType === 'ethereum' &&
+      Boolean(account.address)
+  )?.address || '';
+  const solanaAddress = linkedAccounts.find(
+    (account) =>
+      account.type === 'wallet' &&
+      account.walletClientType === 'privy' &&
+      account.chainType === 'solana' &&
+      Boolean(account.address)
+  )?.address || '';
+  const [assets, setAssets] = useState<PortfolioAsset[]>(DEFAULT_ASSETS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let cancelled = false;
-    const load = async () => {
-      try {
-        const response = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { cache: 'no-store' });
-        const payload = await response.json();
-        const price = Number(payload?.data?.amount);
-        if (!cancelled && Number.isFinite(price) && price > 0) setEthPrice(price);
-      } catch {
-        if (!cancelled) setEthPrice(null);
+
+    async function load() {
+      if (!evmAddress && !solanaAddress) {
+        setAssets([]);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError('');
+
+      let serverAssets: PortfolioAsset[] = [];
+      let directAssets: PortfolioAsset[] = [];
+      let settled = 0;
+      let rejected = 0;
+
+      const finish = () => {
+        settled += 1;
+        if (cancelled) return;
+
+        const stableMap = new Map<string, PortfolioAsset>();
+        for (const asset of DEFAULT_ASSETS) stableMap.set(asset.symbol, asset);
+
+        for (const asset of [...serverAssets, ...directAssets]) {
+          if (!STABLE_SYMBOLS.has(asset.symbol)) continue;
+          const current = stableMap.get(asset.symbol);
+          if (!current || asset.quantity > current.quantity) {
+            stableMap.set(asset.symbol, asset);
+          }
+        }
+
+        const stableAssets = [...stableMap.values()];
+        const xstockMap = new Map<string, PortfolioAsset>();
+        for (const asset of serverAssets) {
+          if (asset.assetType !== 'xstock' || asset.quantity <= 0) continue;
+          const key = asset.symbol + ':' + String(asset.chainId || '') + ':' + String(asset.contractAddress || asset.network || '');
+          const current = xstockMap.get(key);
+          if (!current || asset.quantity > current.quantity) xstockMap.set(key, asset);
+        }
+        const merged = [...stableAssets, ...xstockMap.values()]
+          .sort((a, b) => b.valueUsd - a.valueUsd);
+
+        // Paint immediately as each source resolves, without dropping back to zero.
+        setAssets(merged);
+        setLoading(settled < 2);
+        if (settled === 2 && rejected === 2) {
+          setError('Portfolio data unavailable');
+        }
+      };
+
+      void api.portfolio(evmAddress, solanaAddress)
+        .then((data) => {
+          if (cancelled) return;
+          serverAssets = (data.assets || [])
+            .map((asset) => ({
+              ...asset,
+              symbol: String(asset.symbol)
+            }))
+            .filter((asset) => asset.assetType === 'xstock' || STABLE_SYMBOLS.has(asset.symbol));
+          finish();
+        })
+        .catch(() => {
+          rejected += 1;
+          finish();
+        });
+
+      void loadDirectPortfolio(evmAddress, solanaAddress)
+        .then((data) => {
+          if (cancelled) return;
+          directAssets = data.assets
+            .map((asset) => ({ ...asset, symbol: String(asset.symbol) }))
+            .filter((asset) => STABLE_SYMBOLS.has(asset.symbol));
+          finish();
+        })
+        .catch(() => {
+          rejected += 1;
+          finish();
+        });
+    }
+
+    // Load once when the address becomes available. No background polling:
+    // repeated RPC reads can race and briefly replace a real balance with zero.
+    void load();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && document.hidden === false) {
+        void load();
       }
     };
-    load();
-    const timer = window.setInterval(load, 30_000);
-    return () => { cancelled = true; window.clearInterval(timer); };
-  }, []);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [evmAddress, solanaAddress]);
 
-  const tokens = useMemo(() => [...DEFAULT_TOKENS, ...custom], [custom]);
-  const visibleTokens = tokens.filter((token) => token.chainId === BASE_MAINNET_CHAIN_ID || token.chainId === ROBINHOOD_CHAIN_ID);
-
-  const addToken = async () => {
-    setTokenError('');
-    if (!address || !isAddress(form.address)) {
-      setTokenError('Enter a valid contract address.');
-      return;
-    }
-    if (!publicClient) {
-      setTokenError('Network client is unavailable.');
-      return;
-    }
-    const chainId = Number(form.chainId);
-    if (![BASE_MAINNET_CHAIN_ID, ROBINHOOD_CHAIN_ID].includes(chainId)) return;
-    try {
-      const contractAddress = form.address as `0x${string}`;
-      const [symbol, name, decimals] = await Promise.all([
-        publicClient.readContract({ address: contractAddress, abi: ERC20_ABI, functionName: 'symbol' }),
-        publicClient.readContract({ address: contractAddress, abi: ERC20_ABI, functionName: 'name' }),
-        publicClient.readContract({ address: contractAddress, abi: ERC20_ABI, functionName: 'decimals' })
-      ]);
-      if (!symbol || !name || Number(decimals) < 0 || Number(decimals) > 255) throw new Error('Invalid token metadata');
-      const token: Token = {
-        id: `${chainId}-${form.address.toLowerCase()}`,
-        chainId,
-        chain: chainId === BASE_MAINNET_CHAIN_ID ? 'Base' : 'Robinhood Chain',
-        symbol: String(symbol),
-        name: String(name),
-        address: contractAddress,
-        image: '/token-icons/asset.svg',
-        chainImage: chainId === BASE_MAINNET_CHAIN_ID ? '/chain-icons/base.svg' : '/chain-icons/robinhood.svg'
-      };
-      const next = [...custom.filter((item) => item.id !== token.id), token];
-      setCustom(next);
-      localStorage.setItem(`robank.tokens.${address.toLowerCase()}`, JSON.stringify(next));
-      setForm({ chainId: String(BASE_MAINNET_CHAIN_ID), address: '' });
-      setOpen(false);
-    } catch {
-      setTokenError('Contract metadata could not be read on the selected network. Check the chain and address.');
-      setOpen(true);
-    }
-  };
-
-  if (!address) return null;
+  if (!evmAddress && !solanaAddress) return null;
 
   return (
-    <div>
-      <div className="asset-list">
-        {visibleTokens.map((token) => <TokenRow key={token.id} token={token} owner={address} ethPrice={ethPrice} />)}
-      </div>
-      <button type="button" onClick={() => setOpen((value) => !value)} className="asset-add-trigger">
-        {open ? 'Cancel' : '+ Add token'}
-      </button>
-      {open && (
-        <div className="asset-add-form">
-          <div className="asset-add-field">
-            <label>NETWORK</label>
-            <select value={form.chainId} onChange={(e) => setForm({ ...form, chainId: e.target.value })}>
-              <option value={BASE_MAINNET_CHAIN_ID}>Base</option>
-              <option value={ROBINHOOD_CHAIN_ID}>Robinhood Chain</option>
-            </select>
-          </div>
-          <div className="asset-add-field">
-            <label>CONTRACT ADDRESS</label>
-            <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="0x…" />
-          </div>
-          <button type="button" onClick={addToken} className="asset-add-submit">Add token</button>
-          {tokenError && <p className="asset-add-hint text-white/60">{tokenError}</p>}
-          <p className="asset-add-hint">Token name, ticker and balance are read from the contract automatically.</p>
-        </div>
-      )}
+    <div className="asset-list">
+      {assets.map((asset) => <AssetRow key={asset.symbol} asset={asset} />)}
     </div>
   );
 }

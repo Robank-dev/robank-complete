@@ -3,13 +3,13 @@ import { getAccessToken } from '@privy-io/react-auth';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const isLocalRoute = path === '/api/agent/chat' || path === '/api/assets/discover' || path.startsWith('/api/updates') || path.startsWith('/api/kyc') || path.startsWith('/api/agent-market');
+  const isLocalRoute = path === '/api/agent/chat' || path === '/api/assets/discover' || path === '/api/stocks' || path === '/api/xstocks' || path.startsWith('/api/portfolio') || path.startsWith('/api/updates') || path.startsWith('/api/kyc') || path.startsWith('/api/agent-market') || path.startsWith('/api/borrow') || path.startsWith('/api/lifi');
   if (!API_URL && !isLocalRoute) {
     throw new Error('ROBANK data service is not connected.');
   }
 
   const accessToken = await getAccessToken().catch(() => null);
-  const isFrontendProxy = path.startsWith('/api/agent-market');
+  const isFrontendProxy = path === '/api/stocks' || path === '/api/xstocks' || path.startsWith('/api/portfolio') || path.startsWith('/api/agent-market') || path.startsWith('/api/borrow') || path.startsWith('/api/lifi');
   const response = await fetch(`${isFrontendProxy ? '' : API_URL}${path}`, {
     ...options,
     headers: {
@@ -153,6 +153,22 @@ export const api = {
   submitJob: (id:string,walletAddress:string,submission:string) => request<any>('/api/jobs/'+encodeURIComponent(id)+'/submit',{method:'POST',body:JSON.stringify({walletAddress,submission})}),
   jobStatus: (id:string,walletAddress:string,status:string) => request<any>('/api/jobs/'+encodeURIComponent(id)+'/status',{method:'POST',body:JSON.stringify({walletAddress,status})}),
   agentMarket: (query = '') => request<any>('/api/agent-market' + (query ? `?${query}` : '')),
+  borrowMarkets: () => request<{ generatedAt: string; networks: any[] }>('/api/borrow'),
+  stocks: () => request<{ generatedAt: string; provider: string; networks: { base: number; solana: number; robinhood: number }; count: number; stocks: any[] }>('/api/stocks'),
+  xstocks: () => request<{ generatedAt: string; count: number; assets: Array<{ id: string; symbol: string; name: string; logo: string; underlyingSymbol: string; deployments: Array<{ chainId: number; network: string; address: string; decimals: number }> }> }>('/api/xstocks'),
+  portfolio: (evmAddress?: string, solanaAddress?: string) => request<{ generatedAt: string; supportedAssets: string[]; assets: Array<{ symbol: string; name: string; logo: string; quantity: number; valueUsd: number; assetType?: 'stablecoin' | 'xstock'; network?: string; chainId?: number; contractAddress?: string; decimals?: number }>; totalUsd: number }>(`/api/portfolio?evmAddress=${encodeURIComponent(evmAddress || '')}&solanaAddress=${encodeURIComponent(solanaAddress || '')}`),
+  lifiChains: () => request<{ chains: any[] }>('/api/lifi/chains'),
+  lifiTokens: () => request<{ tokens: any[] }>('/api/lifi/tokens'),
+  lifiQuote: (body: {
+    fromChain: string | number;
+    toChain: string | number;
+    fromToken: string;
+    toToken: string;
+    fromAddress: string;
+    toAddress: string;
+    amount: string;
+    mode: 'fromAmount' | 'toAmount';
+  }) => request<{ quote: any }>('/api/lifi/quote', { method: 'POST', body: JSON.stringify(body) }),
   updates: () => request<{ updates: any[]; provider: string }>('/api/updates'),
   createUpdate: (body: { walletAddress: string; body: string; title?: string; xUrl?: string; imageUrl?: string }) => request<any>('/api/updates', { method:'POST', body: JSON.stringify(body) }),
   deleteUpdate: (id: string, walletAddress: string) => request<any>('/api/updates/' + encodeURIComponent(id), { method:'DELETE', body: JSON.stringify({ walletAddress }) }),

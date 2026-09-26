@@ -56,7 +56,7 @@ const steps: Step[] = [
     n: '08',
     title: 'Find a capability',
     text: 'Tell ROBANK what you need. The agent can route requests for services, compute, data and other supported capabilities into Agent Market.',
-    visual: 'swap',
+    visual: 'agent-market',
   },
   {
     n: '09',
@@ -261,7 +261,7 @@ function Visual({ kind }: { kind: string }) {
     );
   }
 
-  if (kind === 'swap') {
+  if (kind === 'agent-market') {
     return (
       <div className="hw-visual">
         <div className="hw-swap">

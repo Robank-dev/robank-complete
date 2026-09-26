@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 
 const slides = [
-  { eyebrow: 'ROBANK / GLOBAL RAILS', title: 'Financial infrastructure, one surface.', detail: 'Bank rails, stablecoins and digital assets.', image: '/banners/global-financial-network.svg' },
-  { eyebrow: 'ROBANK / MONEY RAILS', title: 'Move between bank and crypto rails.', detail: 'Fund a wallet, fund a bank, or send value.', image: '/banners/bank-crypto-rails.svg' },
-  { eyebrow: 'ROBANK / AGENT OPERATIONS', title: 'Intent in. Controlled execution out.', detail: 'Prepare, review, approve, execute.', image: '/banners/agent-financial-ops.svg' },
+  { eyebrow: 'ROBANK / GLOBAL RAILS', title: 'Financial infrastructure, one surface.', detail: 'Bank rails, stablecoins and digital assets.', image: '/banners/robank-hero-wide.jpg', mode: 'full' },
+  { eyebrow: 'ROBANK / GLOBAL PAYMENTS', title: 'Move value across borders.', detail: 'Bank rails, wallets and global settlement.', image: '/banners/robank-global-wide.jpg', mode: 'focus' },
+  { eyebrow: 'ROBANK / AI OPERATIONS', title: 'Intent in. Controlled execution out.', detail: 'Prepare, review, approve, execute.', image: '/banners/robank-ai-wide.jpg', mode: 'focus' },
 ];
 
 export default function SystemBanner() {
@@ -25,7 +25,7 @@ export default function SystemBanner() {
   return (
     <div className="ro-banner-carousel" aria-label="ROBANK highlights">
       {!imageFailed ? (
-        <img key={slide.image} src={slide.image} alt="" className="ro-banner-image active" onError={() => setImageFailed(true)} />
+        <img key={slide.image} src={slide.image} alt="" className={`ro-banner-image active ${slide.mode}`} onError={() => setImageFailed(true)} />
       ) : (
         <div className="ro-banner-image ro-banner-fallback" aria-hidden="true" />
       )}

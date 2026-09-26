@@ -76,7 +76,7 @@ export default function MarketsPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-6xl space-y-6">
+      <div className="mx-auto max-w-6xl space-y-6 ro-markets-premium">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="text-xs uppercase tracking-[.2em] text-white/35">ROBANK / AGENT MARKET</div>

@@ -2,6 +2,8 @@ import './globals.css';
 import Providers from '@/components/Providers';
 import { CursorScene } from '@/components/Experience';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'ROBANK — Your money. Your agent. Your bank.',
   description: 'A modern financial interface for your money, payments and personal agent.',

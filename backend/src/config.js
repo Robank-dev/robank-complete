@@ -16,5 +16,7 @@ export const config = {
   tiingoApiKey: process.env.TIINGO_API_KEY || '',
   privyAppId: process.env.PRIVY_APP_ID || '',
   privyAppSecret: process.env.PRIVY_APP_SECRET || '',
+  lifiApiKey: process.env.LIFI_API_KEY || '',
+  robankLifiFeeBps: Number(process.env.ROBANK_LIFI_FEE_BPS || 0),
   robankOwnerWallet: (process.env.ROBANK_OWNER_WALLET || '').trim().toLowerCase()
 };

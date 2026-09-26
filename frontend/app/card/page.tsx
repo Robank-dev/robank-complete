@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AppShell from '@/components/AppShell';
 import { api } from '@/lib/api';
 import { useAccount } from 'wagmi';
+import { useWallets } from '@privy-io/react-auth';
 
 type CardState = Awaited<ReturnType<typeof api.cardStatus>>['card'];
 
@@ -13,7 +14,10 @@ export default function CardPage() {
   const [kycLoading, setKycLoading] = useState(false);
   const [kycError, setKycError] = useState('');
   const [kycStarted, setKycStarted] = useState(false);
-  const { address } = useAccount();
+  const { address: wagmiAddress } = useAccount();
+  const { wallets } = useWallets();
+  const wallet = wallets.find((item) => item.walletClientType === 'privy');
+  const address = wallet?.address || wagmiAddress;
 
   useEffect(() => { api.cardStatus().then((data) => setCard(data.card)).catch(() => setCard(null)); }, []);
 
@@ -39,7 +43,7 @@ export default function CardPage() {
           <Link href="/money" className="card-back-link">Move money <span>→</span></Link>
         </div>
 
-        <section className="card-hero-grid">
+        <section className="card-hero-grid card-premium-hero">
           <div className="card-showcase">
             <div className="card-showcase-top"><span>ROBANK CARD</span><span>{active ? 'ACTIVE' : 'VISA'}</span></div>
             <div className="card-stage">

@@ -30,12 +30,13 @@ async function request(path) {
   return data;
 }
 
-export async function listBaseOracles({ page = 0, pageSize = 100 } = {}) {
+export async function listBaseOracles({ page = 0, pageSize = 100, network = 'Base' } = {}) {
   const safePage = Math.max(Number(page) || 0, 0);
   const safePageSize = Math.min(Math.max(Number(pageSize) || 100, 1), 200);
+  const safeNetwork = ['Base', 'Solana'].includes(network) ? network : 'Base';
 
   return request(
-    `/public/oracles?network=Base&page=${safePage}&pageSize=${safePageSize}`
+    `/public/oracles?network=${encodeURIComponent(safeNetwork)}&page=${safePage}&pageSize=${safePageSize}`
   );
 }
 

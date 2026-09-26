@@ -15,6 +15,8 @@ import markets from './routes/markets.js';
 import kyc from './routes/kyc.js';
 import updates from './routes/updates.js';
 import agentMarket from './routes/agentMarket.js';
+import lifi from './routes/lifi.js';
+import onchainStocks from './routes/onchainStocks.js';
 import { requirePrivyAuth } from './middleware/privyAuth.js';
 
 const app = express();
@@ -58,6 +60,8 @@ app.use('/api/markets', markets);
 app.use('/api/kyc', kyc);
 app.use('/api/updates', updates);
 app.use('/api/agent-market', agentMarket);
+app.use('/api/lifi', lifi);
+app.use('/api/stocks', onchainStocks);
 
 initDatabase()
   .then(() => {
