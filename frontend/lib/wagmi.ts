@@ -1,11 +1,12 @@
-import { http } from 'wagmi';
+import { fallback, http } from 'wagmi';
+import { chainById } from '@/lib/chains';
 import { createConfig } from '@privy-io/wagmi';
 import { base, mainnet, arbitrum, optimism, polygon, bsc } from 'wagmi/chains';
 import { defineChain } from 'viem';
-import { ROBINHOOD_CHAIN_ID } from '@/lib/constants';
+
 
 const robinhood = defineChain({
-  id: ROBINHOOD_CHAIN_ID,
+  id: 4663,
   name: 'Robinhood Chain',
   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   rpcUrls: {
@@ -20,14 +21,6 @@ export const roBankEvmChains = [mainnet, base, arbitrum, optimism, polygon, bsc,
 
 export const config = createConfig({
   chains: roBankEvmChains,
-  transports: {
-    [mainnet.id]: http('https://ethereum-rpc.publicnode.com'),
-    [base.id]: http('https://mainnet.base.org'),
-    [arbitrum.id]: http('https://arb1.arbitrum.io/rpc'),
-    [optimism.id]: http('https://mainnet.optimism.io'),
-    [polygon.id]: http('https://polygon-bor-rpc.publicnode.com'),
-    [bsc.id]: http('https://bsc-dataseed.bnbchain.org'),
-    [robinhood.id]: http('https://rpc.mainnet.chain.robinhood.com')
-  },
+  transports: Object.fromEntries(roBankEvmChains.map((chain) => [chain.id, fallback(chainById(chain.id)!.rpcs.map((url) => http(url)))])) as any,
   ssr: true
 });

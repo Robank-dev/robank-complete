@@ -1,40 +1,25 @@
-# ROBANK Networks
+# Networks and tokens
 
-## Network Abstraction
+| Network | Chain ID | Wallet | Native gas | Stablecoins |
+|---|---|---|---|---|
+| Ethereum | 1 | EVM | ETH | USDC, USDT, USDG |
+| Base | 8453 | EVM | ETH | USDC, USDT |
+| Arbitrum | 42161 | EVM | ETH | USDC, USDT0 (USDT), USDG |
+| Optimism | 10 | EVM | ETH | USDC, USDT |
+| Polygon | 137 | EVM | POL | USDC, USDT0 (USDT) |
+| BNB Chain | 56 | EVM | BNB | USDC, USDT (18 decimals) |
+| Robinhood Chain | 4663 | EVM | ETH | USDG |
+| Solana | 1151111081099710 (LI.FI id) | Solana | SOL | USDC, USDT, USDG (Token-2022) |
 
-ROBANK is designed to operate across multiple networks rather than being tied to a
-single chain. Agents should treat network selection as a routing decision (cost,
-speed, mandate compatibility), not a fixed default.
+Contract addresses (verified on-chain for symbol and decimals):
 
-## Current Design Concepts
+- Ethereum: USDC `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`, USDT `0xdAC17F958D2ee523a2206206994597C13D831ec7`, USDG `0xe343167631d89B6Ffc58B88d6b7fB0228795491D`
+- Base: USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, USDT `0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2`
+- Arbitrum: USDC `0xaf88d065e77c8cC2239327C5EDb3A432268e5831`, USDT0 `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9`, USDG `0x004B506865409877C9fA29bfb1ebA929984B9bbC`
+- Optimism: USDC `0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85`, USDT `0x94b008aA00579c1307B0EF2c499aD98a8ce58e58`
+- Polygon: USDC `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359`, USDT0 `0xc2132D05D31c914a87C6611C10748AEb04B58e8F`
+- BNB Chain: USDC `0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d`, USDT `0x55d398326f99059fF775485246999027B3197955`
+- Robinhood Chain: USDG `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168`
+- Solana: USDC `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`, USDT `Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB`, USDG `2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH`
 
-| Network | Status |
-|---|---|
-| Base Mainnet | MAINNET (chain ID 8453) |
-| Robinhood Chain Mainnet | MAINNET (chain ID 4663) |
-
-Do not present any of the above as currently live in production unless the runtime
-environment explicitly confirms it. Use `network.list` / `GET /v1/networks` to check
-actual current status rather than relying on this table alone — it reflects design
-intent as of this skill's authoring, not a live feed.
-
-## Status Definitions
-
-- **DEV** — available in a development/testnet capacity only
-- **PLANNED** — designed for support, not yet available
-- **LIVE** — confirmed live in production
-- **PROVIDER-DEPENDENT** — availability depends on a third-party provider/venue
-
-## Configuration Dependency
-
-The following must always be treated as environment/configuration-dependent, never
-hardcoded or assumed by the agent:
-
-- RPC URLs
-- Contract addresses
-- Token addresses
-- Supported assets per network
-
-When an action requires one of the above, retrieve it from the live configuration
-(via `network.inspect` / the API) rather than reusing a value from a prior
-conversation or example.
+The same EVM address is used on every EVM network, but balances are separate per network.

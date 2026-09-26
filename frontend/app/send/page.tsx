@@ -1,6 +1,16 @@
+import { Suspense } from 'react';
 import AppShell from '@/components/AppShell';
 import SendForm from '@/components/SendForm';
 
+export const metadata = { title: 'Send' };
+
 export default function SendPage() {
-  return <AppShell><div className="mx-auto max-w-2xl"><div className="mb-6"><div className="text-xs uppercase tracking-[.2em] text-white/40">Payments</div><h2 className="mt-2 text-3xl font-semibold">Send assets</h2></div><SendForm /></div></AppShell>;
+  return (
+    <AppShell>
+      <div className="ui-page narrow">
+        <header className="ui-head"><div><span className="ui-kicker">Send</span><h1>Send assets</h1><p>Send to any address on the same network, or move stablecoins across networks through LI.FI. You review every detail before signing.</p></div></header>
+        <Suspense fallback={null}><SendForm /></Suspense>
+      </div>
+    </AppShell>
+  );
 }

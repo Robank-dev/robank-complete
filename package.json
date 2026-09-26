@@ -1,14 +1,12 @@
 {
   "name": "robank",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "scripts": {
-    "install:all": "npm install --prefix frontend && npm install --prefix backend",
-    "dev": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
-    "dev:front": "npm run dev --prefix frontend",
-    "dev:back": "npm run dev --prefix backend"
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1"
+    "install:all": "npm install --prefix frontend --legacy-peer-deps",
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "deploy": "npm run deploy --prefix frontend",
+    "cli": "node cli/bin/robank.js"
   }
 }

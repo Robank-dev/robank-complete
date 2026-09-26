@@ -1,0 +1,18 @@
+# Copy to .dev.vars for local `npm run preview`. Production values live in Cloudflare Worker secrets.
+PRIVY_APP_ID=
+PRIVY_APP_SECRET=
+ROBANK_LLM_API_KEY=
+ROBANK_LLM_BASE_URL=https://openrouter.ai/api/v1
+ROBANK_LLM_MODEL=
+# Optional providers — features stay "not enabled" until set
+MOONPAY_API_KEY=
+MOONPAY_SECRET_KEY=
+DIDIT_API_KEY=
+DIDIT_KYC_WORKFLOW_ID=
+DIDIT_KYB_WORKFLOW_ID=
+LIFI_API_KEY=
+ROBANK_LIFI_FEE_BPS=
+SOLANA_RPC_URL=
+# Accounts allowed to publish Updates (comma-separated)
+ROBANK_OWNER_EMAIL=
+ROBANK_OWNER_WALLET=

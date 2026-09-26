@@ -19,6 +19,14 @@
   "images": {
     "binding": "IMAGES"
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "robank-db",
+      "database_id": "b90cabdf-2186-41c5-b5b5-f01910812bd6",
+      "migrations_dir": "migrations"
+    }
+  ],
   "observability": {
     "enabled": true
   },

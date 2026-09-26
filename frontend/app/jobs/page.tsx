@@ -1,89 +1,175 @@
 'use client';
 
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
 import AppShell from '@/components/AppShell';
-import { api } from '@/lib/api';
-import { useEffect, useState } from 'react';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { Alert, Badge, Empty, Skeleton, Spinner } from '@/components/ui';
+import { api, type Job } from '@/lib/api';
+import { STABLECOINS, chainById, explorerTx, parseAmount } from '@/lib/chains';
+import { friendlyError } from '@/lib/errors';
+import { relativeTime, short } from '@/lib/format';
 
-export default function JobsPage() {
-  const { authenticated } = usePrivy();
-  const { wallets } = useWallets();
-  const wallet = wallets.find((item) => item.walletClientType === 'privy');
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [externalBounties, setExternalBounties] = useState<any[]>([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [acceptanceCriteria, setAcceptanceCriteria] = useState('');
-  const [proofRequirements, setProofRequirements] = useState('');
-  const [budget, setBudget] = useState('');
-  const [dueAt, setDueAt] = useState('');
+const STATUS: Record<string, { tone: 'ok' | 'pending' | 'bad' | 'off' | 'live'; label: string }> = {
+  open: { tone: 'live', label: 'Open' }, claimed: { tone: 'pending', label: 'In progress' }, submitted: { tone: 'pending', label: 'Submitted' },
+  approved: { tone: 'ok', label: 'Approved' }, paid: { tone: 'ok', label: 'Paid' }, cancelled: { tone: 'off', label: 'Cancelled' }
+};
+const REWARD_CHAINS = [...new Set(STABLECOINS.filter((t) => chainById(t.chainId)?.type === 'evm').map((t) => t.chainId))];
+
+function JobCard({ job, onChange }: { job: Job; onChange: (job: Job) => void }) {
+  const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
-  const [creating, setCreating] = useState(false);
+  const [submission, setSubmission] = useState('');
+  const [txHash, setTxHash] = useState('');
+  const status = STATUS[job.status] || { tone: 'off' as const, label: job.status };
 
-  async function load() {
+  async function act(action: Parameters<typeof api.jobAction>[1]['action'], extra: { submission?: string; txHash?: string } = {}) {
+    if (busy) return;
+    if (action === 'cancel' && !window.confirm('Cancel this job? This cannot be undone.')) return;
+    setBusy(action);
+    setError('');
     try {
-      const [result, market] = await Promise.all([api.jobs('?status=open'), api.agentMarket('limit=30')]);
-      setJobs(result.jobs || []);
-      setExternalBounties(market.externalBounties || []);
-    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to load jobs.'); }
-  }
-  useEffect(() => { load(); }, []);
-
-  async function create() {
-    if (!wallet?.address || !title.trim() || !description.trim() || !acceptanceCriteria.trim() || !proofRequirements.trim() || !budget.trim()) {
-      setError('A bounty needs a title, clear deliverable, and prize amount.');
-      return;
+      const { job: next } = await api.jobAction(job.id, { action, ...extra });
+      onChange(next);
+      setSubmission('');
+      setTxHash('');
+    } catch (e) {
+      setError(friendlyError(e, 'That action could not be completed.'));
+    } finally {
+      setBusy('');
     }
-    setCreating(true); setError('');
-    try {
-      await api.createJob({ walletAddress: wallet.address, title: title.trim(), description: `TASK\n${description.trim()}\n\nACCEPTANCE CRITERIA\n${acceptanceCriteria.trim()}\n\nPROOF REQUIREMENTS\n${proofRequirements.trim()}`, budgetAmount: budget.trim(), budgetAsset: 'USDC', network: 'base', dueAt: dueAt || null });
-      setTitle(''); setDescription(''); setAcceptanceCriteria(''); setProofRequirements(''); setBudget(''); setDueAt(''); await load();
-    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to create bounty.'); }
-    finally { setCreating(false); }
   }
 
-  if (!authenticated) return null;
+  const reward = job.rewardAmount ? `${job.rewardAmount} ${job.rewardAsset} on ${chainById(job.rewardChainId)?.label}` : null;
+  const payLink = job.workerWallet && job.rewardAmount ? `/send?asset=${job.rewardAsset}&chain=${job.rewardChainId}&to=${job.workerWallet}&amount=${job.rewardAmount}` : '';
 
   return (
-    <AppShell>
-      <div className="mx-auto max-w-5xl space-y-6 ro-jobs-premium">
-        <div>
-          <div className="text-xs uppercase tracking-[.2em] text-white/35">ROBANK / JOBS</div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Post a bounty.</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/45">Create a task, set a prize, and publish the opportunity into Agent Market. A worker can only claim once the prize is actually funded by the future escrow rail.</p>
-        </div>
+    <article className="ui-panel">
+      <div className="ui-panel-head">
+        <div style={{ minWidth: 0 }}><h3>{job.title}</h3><p className="ui-muted">Posted {relativeTime(job.createdAt)} by <span className="ui-mono">{short(job.creatorWallet)}</span>{job.role ? ` · you are the ${job.role}` : ''}</p></div>
+        <Badge tone={status.tone}>{status.label}</Badge>
+      </div>
+      <p className="ui-text" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{job.description}</p>
+      <div className="ui-kv" style={{ marginTop: 12 }}>
+        <div><span>Reward</span><b>{reward || 'None specified'}</b></div>
+        {reward && <div><span>Payment</span><b>Paid by the poster after approval — not held in escrow</b></div>}
+        {job.dueAt && <div><span>Due</span><b>{new Date(job.dueAt).toLocaleDateString()}</b></div>}
+        {job.workerWallet && <div><span>Worker</span><b className="ui-mono">{short(job.workerWallet)}</b></div>}
+        {job.payoutTxHash && job.rewardChainId && <div><span>Payout</span><b><a className="ui-link" href={explorerTx(job.rewardChainId, job.payoutTxHash)} target="_blank" rel="noreferrer">Verified on-chain ↗</a></b></div>}
+      </div>
+      {job.submission && <div style={{ marginTop: 12 }}><span className="ui-label">Submission</span><p className="ui-text" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', marginTop: 6 }}>{job.submission}</p></div>}
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[['01','Task','Define exactly what must be delivered.'],['02','Prize','Set the reward in USDC on Base.'],['03','Settlement','Funding, proof, review and payout happen as separate states.']].map(([n,t,d]) => <div key={n} className="rounded-xl border border-white/8 bg-ro-panel p-4"><div className="text-[9px] font-mono text-white/25">{n}</div><div className="mt-2 text-sm font-medium">{t}</div><div className="mt-1 text-xs leading-5 text-white/30">{d}</div></div>)}
-        </div>
-
-        <section className="rounded-2xl border border-ro-line bg-ro-panel p-5">
-          <div className="text-[10px] font-mono uppercase tracking-[.16em] text-white/30">NEW BOUNTY</div>
-          <div className="mt-4 grid gap-3">
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What do you need done?" className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none" />
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Task description / deliverable" rows={4} className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 outline-none" />
-            <textarea value={acceptanceCriteria} onChange={(e) => setAcceptanceCriteria(e.target.value)} placeholder="Acceptance criteria" rows={3} className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 outline-none" />
-            <textarea value={proofRequirements} onChange={(e) => setProofRequirements(e.target.value)} placeholder="Proof requirements" rows={3} className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 outline-none" />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <input value={budget} onChange={(e) => setBudget(e.target.value)} inputMode="decimal" placeholder="Prize · USDC" className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none" />
-              <input value={dueAt} onChange={(e) => setDueAt(e.target.value)} type="datetime-local" className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none" />
-            </div>
+      <div className="ui-grid" style={{ gap: 10, marginTop: 14 }}>
+        {job.status === 'open' && job.role !== 'creator' && <button type="button" className="ui-btn primary" disabled={Boolean(busy)} onClick={() => void act('claim')}>{busy === 'claim' ? <Spinner /> : 'Take this job'}</button>}
+        {job.status === 'claimed' && job.role === 'worker' && (
+          <>
+            <textarea className="ui-textarea" value={submission} maxLength={6000} onChange={(e) => setSubmission(e.target.value)} placeholder="Describe what you delivered and link to the proof." />
+            <button type="button" className="ui-btn primary" disabled={Boolean(busy) || submission.trim().length < 5} onClick={() => void act('submit', { submission })}>{busy === 'submit' ? <Spinner /> : 'Submit work'}</button>
+          </>
+        )}
+        {job.status === 'submitted' && job.role === 'creator' && (
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button type="button" className="ui-btn primary" disabled={Boolean(busy)} onClick={() => void act('approve')}>{busy === 'approve' ? <Spinner /> : 'Approve work'}</button>
+            <button type="button" className="ui-btn ghost" disabled={Boolean(busy)} onClick={() => void act('reject')}>Request changes</button>
           </div>
-          {error && <div className="mt-4 rounded-xl border border-white/10 p-3 text-xs text-white/45">{error}</div>}
-          <button onClick={create} disabled={creating || !wallet?.address} className="mt-4 rounded-xl bg-white px-5 py-3 text-xs font-semibold text-black disabled:opacity-35">{creating ? 'Creating…' : 'Create bounty →'}</button>
-        </section>
+        )}
+        {job.status === 'approved' && job.role === 'creator' && payLink && (
+          <>
+            <Alert tone="info">Pay the worker from your wallet, then paste the transaction hash. ROBANK checks the payment on-chain before marking the job paid.</Alert>
+            <Link className="ui-btn secondary" href={payLink as any}>Pay {job.rewardAmount} {job.rewardAsset}</Link>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <input className="ui-input" value={txHash} onChange={(e) => setTxHash(e.target.value.trim())} placeholder="0x… transaction hash" spellCheck={false} />
+              <button type="button" className="ui-btn primary" disabled={Boolean(busy) || !/^0x[a-fA-F0-9]{64}$/.test(txHash)} onClick={() => void act('record-payout', { txHash })}>{busy === 'record-payout' ? <Spinner /> : 'Verify'}</button>
+            </div>
+          </>
+        )}
+        {job.role === 'creator' && ['open', 'claimed'].includes(job.status) && <button type="button" className="ui-btn ghost sm" disabled={Boolean(busy)} onClick={() => void act('cancel')}>Cancel job</button>}
+        {error && <Alert tone="bad">{error}</Alert>}
+      </div>
+    </article>
+  );
+}
 
-        <section className="space-y-3">
-          <div className="flex items-end justify-between"><div><div className="text-[10px] font-mono uppercase tracking-[.16em] text-white/30">AVAILABLE WORK</div><h2 className="mt-2 text-xl font-medium">Jobs available to agents.</h2></div><span className="text-[9px] font-mono text-white/25">ROBANK + EXTERNAL</span></div>
-          {externalBounties.length === 0 ? <div className="rounded-2xl border border-ro-line p-6 text-sm text-white/35">No external claimable bounties are available right now.</div> : externalBounties.map((job) => <div key={`external-${job.id}`} className="rounded-2xl border border-ro-line bg-ro-panel p-5"><div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between"><div><div className="mb-2 text-[8px] font-mono uppercase tracking-[.14em] text-white/25">EXTERNAL · {job.source}</div><h3 className="text-sm font-medium">{job.title}</h3><p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-white/40">{job.description}</p></div><div className="text-right"><div className="text-[9px] font-mono text-white/25">PRIZE</div><div className="mt-1 text-sm">{job.prizeAmount || '—'} USDC</div><a href={job.sourceUrl} target="_blank" rel="noreferrer" className="mt-3 inline-block text-xs text-white/45 hover:text-white">Open provider →</a></div></div></div>)}
-        </section>
+function PostJob({ onCreated }: { onCreated: (job: Job) => void }) {
+  const [form, setForm] = useState({ title: '', description: '', rewardAmount: '', rewardAsset: 'USDC', rewardChainId: 8453, dueAt: '' });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const assets = STABLECOINS.filter((t) => t.chainId === form.rewardChainId).map((t) => t.symbol);
+  const rewardValid = !form.rewardAmount || Boolean(parseAmount(form.rewardAmount, 6));
 
-        <section className="space-y-3">
-          <div className="flex items-end justify-between"><div><div className="text-[10px] font-mono uppercase tracking-[.16em] text-white/30">ROBANK BOUNTIES</div><h2 className="mt-2 text-xl font-medium">Created here.</h2></div><span className="text-[9px] font-mono text-white/25">USDC · BASE</span></div>
-          {jobs.length === 0 ? <div className="rounded-2xl border border-ro-line p-6 text-sm text-white/35">No open ROBANK bounties yet.</div> : jobs.map((job) => <div key={job.id} className="rounded-2xl border border-ro-line bg-ro-panel p-5"><div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between"><div><h3 className="text-sm font-medium">{job.title}</h3><p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-white/40">{job.description}</p></div><div className="text-right"><div className="text-[9px] font-mono text-white/25">PRIZE</div><div className="mt-1 text-sm">{job.budget_amount || job.budgetAmount || '—'} {job.budget_asset || job.budgetAsset || 'USDC'}</div><div className="mt-1 text-[8px] font-mono text-white/25">{job.funding_status || job.fundingStatus || 'unfunded'}</div></div></div></div>)}
-        </section>
+  async function submit() {
+    if (busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const { job } = await api.createJob({ title: form.title.trim(), description: form.description.trim(), rewardAmount: form.rewardAmount || undefined, rewardAsset: form.rewardAmount ? form.rewardAsset : undefined, rewardChainId: form.rewardAmount ? form.rewardChainId : undefined, dueAt: form.dueAt ? new Date(form.dueAt + 'T23:59:00').toISOString() : undefined });
+      onCreated(job);
+      setForm({ ...form, title: '', description: '', rewardAmount: '', dueAt: '' });
+    } catch (e) {
+      setError(friendlyError(e, 'The job could not be posted.'));
+    } finally {
+      setBusy(false);
+    }
+  }
 
-        <div className="rounded-xl border border-white/8 bg-white/[.02] px-4 py-3 text-xs leading-5 text-white/30"><span className="font-medium text-white/55">Anti-fraud rule:</span> a posted prize is not treated as escrowed money. Claiming, proof, creator approval, dispute and payout must remain separate states; no worker should be promised payment until a real funded settlement is verified.</div>
+  return (
+    <section className="ui-panel" style={{ alignSelf: 'start' }}>
+      <span className="ui-kicker">Post a job</span>
+      <div className="ui-grid" style={{ gap: 12, marginTop: 12 }}>
+        <label className="ui-field"><span className="ui-label">Title</span><input className="ui-input" maxLength={120} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Translate our docs to Bahasa Indonesia" /></label>
+        <label className="ui-field"><span className="ui-label">Task & acceptance criteria</span><textarea className="ui-textarea" maxLength={6000} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What needs to be done, and how you will judge it is done." /></label>
+        <div className="ui-grid two" style={{ gap: 10 }}>
+          <label className="ui-field"><span className="ui-label">Reward <em>optional</em></span><input className={`ui-input${rewardValid ? '' : ' invalid'}`} inputMode="decimal" value={form.rewardAmount} onChange={(e) => setForm({ ...form, rewardAmount: e.target.value.replace(/[^0-9.]/g, '').slice(0, 12) })} placeholder="50" /></label>
+          <label className="ui-field"><span className="ui-label">Due date <em>optional</em></span><input className="ui-input" type="date" value={form.dueAt} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setForm({ ...form, dueAt: e.target.value })} /></label>
+        </div>
+        {form.rewardAmount && (
+          <div className="ui-grid two" style={{ gap: 10 }}>
+            <label className="ui-field"><span className="ui-label">Network</span><select className="ui-select" value={form.rewardChainId} onChange={(e) => { const id = Number(e.target.value); setForm({ ...form, rewardChainId: id, rewardAsset: STABLECOINS.find((t) => t.chainId === id)!.symbol }); }}>{REWARD_CHAINS.map((id) => <option key={id} value={id}>{chainById(id)!.label}</option>)}</select></label>
+            <label className="ui-field"><span className="ui-label">Asset</span><select className="ui-select" value={form.rewardAsset} onChange={(e) => setForm({ ...form, rewardAsset: e.target.value })}>{assets.map((s) => <option key={s}>{s}</option>)}</select></label>
+          </div>
+        )}
+        {form.rewardAmount && <p className="ui-muted">Rewards are not escrowed. You pay the worker directly after approving their work, and ROBANK verifies that payment on-chain.</p>}
+        {error && <Alert tone="bad">{error}</Alert>}
+        <button type="button" className="ui-btn primary" disabled={busy || form.title.trim().length < 4 || form.description.trim().length < 20 || !rewardValid} onClick={() => void submit()}>{busy ? <><Spinner /> Posting…</> : 'Post job'}</button>
+      </div>
+    </section>
+  );
+}
+
+function Jobs() {
+  const [scope, setScope] = useState<'open' | 'mine'>('open');
+  const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [error, setError] = useState('');
+  const load = useCallback(() => {
+    setJobs(null);
+    setError('');
+    api.jobs(scope).then((r) => setJobs(r.jobs)).catch((e) => setError(friendlyError(e, 'Jobs could not be loaded.')));
+  }, [scope]);
+  useEffect(load, [load]);
+  const replace = (job: Job) => setJobs((list) => (list || []).map((j) => (j.id === job.id ? job : j)));
+
+  return (
+    <div className="ui-grid aside">
+      <div className="ui-grid" style={{ alignContent: 'start' }}>
+        <div className="ui-seg" role="tablist" aria-label="Jobs">
+          <button type="button" role="tab" aria-selected={scope === 'open'} className={scope === 'open' ? 'active' : ''} onClick={() => setScope('open')}>Open jobs</button>
+          <button type="button" role="tab" aria-selected={scope === 'mine'} className={scope === 'mine' ? 'active' : ''} onClick={() => setScope('mine')}>My jobs</button>
+        </div>
+        {error ? <Alert tone="bad" action={<button className="ui-btn secondary sm" onClick={load}>Retry</button>}>{error}</Alert>
+          : !jobs ? <Skeleton h={160} />
+            : !jobs.length ? <section className="ui-panel"><Empty title={scope === 'open' ? 'No open jobs right now' : 'You have no jobs yet'}>{scope === 'open' ? 'Post the first one — it takes a minute.' : 'Jobs you post or take appear here.'}</Empty></section>
+              : jobs.map((job) => <JobCard key={job.id} job={job} onChange={replace} />)}
+      </div>
+      <PostJob onCreated={(job) => { setScope('mine'); setJobs((list) => [job, ...(list || [])]); }} />
+    </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <AppShell>
+      <div className="ui-page">
+        <header className="ui-head"><div><span className="ui-kicker">Jobs</span><h1>Jobs & bounties</h1><p>Post work, take work, and settle rewards in stablecoins — with the payment verified on-chain.</p></div></header>
+        <Jobs />
       </div>
     </AppShell>
   );

@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-import { run } from '../src/cli.js';
+import { main } from "../src/cli.js";
 
-run(process.argv.slice(2)).catch((error) => {
-  console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
-  process.exitCode = 1;
-});
+await main();

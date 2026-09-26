@@ -36,7 +36,8 @@ export function createRobankLifiClient({
   const solanaProvider = SolanaProvider({
     getWallet: async () => {
       if (!solanaWallet) throw new Error('Solana wallet is not available.');
-      return solanaWallet;
+      // LI.FI expects a wallet-standard wallet; Privy exposes it on the connected wallet.
+      return solanaWallet.standardWallet ?? solanaWallet;
     },
   });
 
@@ -49,6 +50,3 @@ export function createRobankLifiClient({
   });
 }
 
-export function isEvmNetwork(network: string) {
-  return network !== 'solana';
-}

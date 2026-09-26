@@ -1,143 +1,69 @@
-import { NextResponse } from 'next/server';
+import { CHAINS, STABLECOINS, chainById, isAddressFor, stableByAddress } from '@/lib/chains';
+import { requireSession } from '@/lib/server/auth';
+import { env } from '@/lib/server/env';
+import { HttpError, fetchJson, handle, ok, readJson } from '@/lib/server/http';
+import { rateLimit } from '@/lib/server/rateLimit';
+
+export const dynamic = 'force-dynamic';
 
 const LIFI = 'https://li.quest/v1';
-const SUPPORTED_CHAINS = [1, 8453, 42161, 10, 137, 56, 4663, 1151111081099710];
-const RHC_USDG = '0x5fc5360d0400a0fd4f2af552add042d716f1d168';
 
-let stableCache: { expiresAt: number; tokens: any[] } = { expiresAt: 0, tokens: [] };
-
-function headers() {
-  const key = process.env.LIFI_API_KEY?.trim();
-  return {
-    Accept: 'application/json',
-    'User-Agent': 'ROBANK/1.0',
-    ...(key ? { 'x-lifi-api-key': key } : {})
-  };
+function headers(): Record<string, string> {
+  const key = env('LIFI_API_KEY');
+  return key ? { 'x-lifi-api-key': key } : {};
 }
 
-async function lifi(path: string, init?: RequestInit) {
-  const response = await fetch(LIFI + path, {
-    ...init,
-    headers: { ...headers(), ...(init?.headers || {}) }
+export const GET = handle(async (_request: Request, context: { params: Promise<{ path?: string[] }> }) => {
+  const resource = ((await context.params).path || []).join('/');
+  if (resource !== 'tokens') throw new HttpError(404, 'Not found.');
+  // The token list is ROBANK's own verified registry; LI.FI is only used for routing.
+  const tokens = STABLECOINS.map((t) => ({ chainId: t.chainId, address: t.address, symbol: t.symbol, decimals: t.decimals }));
+  return ok({ tokens, chains: CHAINS.map((c) => ({ id: c.id, label: c.label })) }, { headers: { 'Cache-Control': 'public, max-age=3600' } });
+});
+
+export const POST = handle(async (request: Request, context: { params: Promise<{ path?: string[] }> }) => {
+  const resource = ((await context.params).path || []).join('/');
+  if (resource !== 'quote') throw new HttpError(404, 'Not found.');
+  const session = await requireSession(request);
+  await rateLimit(`lifi:${session.userId}`, 40, 60);
+  const body = await readJson(request);
+
+  const fromChain = Number(body.fromChain);
+  const toChain = Number(body.toChain);
+  const from = chainById(fromChain);
+  const to = chainById(toChain);
+  if (!from || !to) throw new HttpError(400, 'Unsupported source or destination network.');
+  if (fromChain === toChain) throw new HttpError(400, 'Same-network transfers do not need a route.');
+  const source = stableByAddress(fromChain, String(body.fromToken || ''));
+  const destination = stableByAddress(toChain, String(body.toToken || ''));
+  if (!source || !destination) throw new HttpError(400, 'Unsupported asset for this network.');
+  const toAddress = String(body.toAddress || '').trim();
+  if (!isAddressFor(toChain, toAddress)) throw new HttpError(400, `Recipient is not a valid ${to.label} address.`);
+  const amount = String(body.amount || '');
+  if (!/^[1-9]\d{0,30}$/.test(amount)) throw new HttpError(400, 'Invalid amount.');
+  const fromAddress = from.type === 'solana' ? session.solanaAddress : session.evmAddress;
+  if (!fromAddress) throw new HttpError(409, `Your ${from.label} wallet is still being prepared.`);
+  const mode = body.mode === 'toAmount' ? 'toAmount' : 'fromAmount';
+
+  const params = new URLSearchParams({
+    fromChain: String(fromChain), toChain: String(toChain), fromToken: source.address, toToken: destination.address,
+    fromAddress, toAddress, [mode]: amount, slippage: '0.005', order: 'CHEAPEST', integrator: 'robank'
   });
-  const text = await response.text();
-  let body: any = null;
-  try { body = text ? JSON.parse(text) : null; } catch { body = { message: text }; }
-  if (!response.ok) {
-    throw new Error(body?.message || body?.error || 'LI.FI request failed: ' + response.status);
-  }
-  return body;
-}
+  const feeBps = Number(env('ROBANK_LIFI_FEE_BPS') || 0);
+  if (Number.isFinite(feeBps) && feeBps > 0 && feeBps <= 100) params.set('fee', String(feeBps / 10000));
 
-async function stableTokens() {
-  if (stableCache.expiresAt > Date.now()) return stableCache.tokens;
-  const body = await lifi('/tokens?chains=' + SUPPORTED_CHAINS.join(',') + '&tags=stablecoin');
-  const tokens: any[] = [];
-  const seen = new Set<string>();
-  for (const list of Object.values(body?.tokens || {})) {
-    for (const token of (list as any[]) || []) {
-      const symbol = String(token?.symbol || '').toUpperCase();
-      const verified = token?.verificationStatus === 'verified';
-      const isRhcUsdg = Number(token?.chainId) === 4663 && symbol === 'USDG' &&
-        String(token?.address || '').toLowerCase() === RHC_USDG;
-      if (!((symbol === 'USDC' || symbol === 'USDT') && verified) && !isRhcUsdg) continue;
-      const key = Number(token.chainId) + ':' + String(token.address).toLowerCase();
-      if (seen.has(key)) continue;
-      seen.add(key);
-      tokens.push(token);
-    }
-  }
-  stableCache = { expiresAt: Date.now() + 300000, tokens };
-  return tokens;
-}
-
-function findToken(tokens: any[], chainId: unknown, address: unknown) {
-  return tokens.find((token) =>
-    Number(token?.chainId) === Number(chainId) &&
-    String(token?.address || '').toLowerCase() === String(address || '').toLowerCase()
-  ) || null;
-}
-
-async function getStableToken(chainId: unknown, address: unknown) {
-  return findToken(await stableTokens(), chainId, address);
-}
-
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ path?: string[] }> }
-) {
-  const parts = (await params).path || [];
-  const resource = parts.join('/');
+  let quote: any;
   try {
-    if (resource === 'chains') {
-      const body = await lifi('/chains');
-      const chains = (body?.chains || []).filter((chain: any) => SUPPORTED_CHAINS.includes(Number(chain.id)));
-      return NextResponse.json({ chains }, { headers: { 'Cache-Control': 'public, max-age=300' } });
-    }
-
-    if (resource === 'tokens') {
-      const tokens = await stableTokens();
-      return NextResponse.json({ tokens }, { headers: { 'Cache-Control': 'public, max-age=300' } });
-    }
-
-    return NextResponse.json({ error: 'Unsupported LI.FI resource.' }, { status: 404 });
+    quote = await fetchJson(`${LIFI}/${mode === 'toAmount' ? 'quote/toAmount' : 'quote'}?${params}`, { headers: headers(), provider: 'LI.FI', timeoutMs: 15000 });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'LI.FI unavailable.' }, { status: 502 });
+    if (error instanceof HttpError && error.status === 502) throw new HttpError(422, 'No route is available for this transfer right now. Try a different amount or network.');
+    throw error;
   }
-}
-
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ path?: string[] }> }
-) {
-  const parts = (await params).path || [];
-  if (parts.join('/') !== 'quote') {
-    return NextResponse.json({ error: 'Unsupported LI.FI resource.' }, { status: 404 });
+  // Refuse any quote that does not match exactly what the user asked for.
+  const action = quote?.action;
+  const sameAddr = (a: unknown, b: string) => String(a || '').toLowerCase() === b.toLowerCase();
+  if (Number(action?.fromChainId) !== fromChain || Number(action?.toChainId) !== toChain || !sameAddr(action?.fromToken?.address, source.address) || !sameAddr(action?.toToken?.address, destination.address) || !sameAddr(action?.toAddress ?? toAddress, toAddress) || !sameAddr(action?.fromAddress ?? fromAddress, fromAddress)) {
+    throw new HttpError(502, 'The routing provider returned a quote that does not match your request. Nothing was sent.');
   }
-
-  try {
-    const body = await request.json();
-    const fromChain = Number(body?.fromChain);
-    const toChain = Number(body?.toChain);
-    const fromAddress = String(body?.fromAddress || '').trim();
-    const toAddress = String(body?.toAddress || '').trim();
-    const amount = String(body?.amount || '').trim();
-    const mode = body?.mode === 'toAmount' ? 'toAmount' : 'fromAmount';
-    if (!SUPPORTED_CHAINS.includes(fromChain) || !SUPPORTED_CHAINS.includes(toChain)) {
-      return NextResponse.json({ error: 'Unsupported source or destination network.' }, { status: 400 });
-    }
-    if (!fromAddress || !toAddress || !amount || Number(amount) <= 0) {
-      return NextResponse.json({ error: 'Missing or invalid quote parameters.' }, { status: 400 });
-    }
-
-    const source = await getStableToken(fromChain, body?.fromToken);
-    const destination = await getStableToken(toChain, body?.toToken);
-
-    if (!source || !destination) {
-      return NextResponse.json({ error: 'Unsupported asset/network combination.' }, { status: 400 });
-    }
-
-    const params = new URLSearchParams({
-      fromChain: String(fromChain),
-      toChain: String(toChain),
-      fromToken: String(source.address),
-      toToken: String(destination.address),
-      fromAddress,
-      toAddress,
-      [mode]: amount,
-      slippage: '0.005',
-      order: 'CHEAPEST',
-      integrator: 'robank'
-    });
-
-    const feeBps = Number(process.env.ROBANK_LIFI_FEE_BPS || 0);
-    if (Number.isFinite(feeBps) && feeBps > 0) params.set('fee', String(feeBps / 10000));
-
-    const quote = await lifi('/' + (mode === 'toAmount' ? 'quote/toAmount' : 'quote') + '?' + params.toString());
-    return NextResponse.json({ quote });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to build LI.FI quote.';
-    const status = /rate limit|too many requests/i.test(message) ? 429 : 502;
-    return NextResponse.json({ error: message }, { status });
-  }
-}
+  return ok({ quote });
+});

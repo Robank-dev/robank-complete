@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 
 const slides = [
-  { eyebrow: 'ROBANK / GLOBAL RAILS', title: 'Financial infrastructure, one surface.', detail: 'Bank rails, stablecoins and digital assets.', image: '/banners/robank-hero-wide.jpg', mode: 'full' },
-  { eyebrow: 'ROBANK / GLOBAL PAYMENTS', title: 'Move value across borders.', detail: 'Bank rails, wallets and global settlement.', image: '/banners/robank-global-wide.jpg', mode: 'focus' },
-  { eyebrow: 'ROBANK / AI OPERATIONS', title: 'Intent in. Controlled execution out.', detail: 'Prepare, review, approve, execute.', image: '/banners/robank-ai-wide.jpg', mode: 'focus' },
+  { eyebrow: 'ROBANK / ONE ACCOUNT', title: 'Your money, on every network.', detail: 'Stablecoins, gas tokens and tokenized stocks in one view.', image: '/banners/robank-hero-wide.jpg', mode: 'full' },
+  { eyebrow: 'ROBANK / GLOBAL TRANSFERS', title: 'Move value across networks.', detail: 'Same-network sends and LI.FI cross-chain routes.', image: '/banners/robank-global-wide.jpg', mode: 'focus' },
+  { eyebrow: 'ROBANK / AI OPERATIONS', title: 'Intent in. Controlled execution out.', detail: 'The agent prepares. You review and sign.', image: '/banners/robank-ai-wide.jpg', mode: 'focus' },
 ];
 
 export default function SystemBanner() {
@@ -13,7 +13,10 @@ export default function SystemBanner() {
   const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
-    const timer = window.setInterval(() => setIndex((value) => (value + 1) % slides.length), 6500);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') setIndex((value) => (value + 1) % slides.length);
+    }, 7000);
     return () => window.clearInterval(timer);
   }, []);
 

@@ -1,278 +1,89 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
 import AppShell from '@/components/AppShell';
-import { useAccount } from 'wagmi';
-import { api } from '@/lib/api';
+import { Alert, Empty, Skeleton, Spinner } from '@/components/ui';
+import { api, type Update } from '@/lib/api';
+import { friendlyError } from '@/lib/errors';
+import { relativeTime } from '@/lib/format';
 
-type Update = {
-  id: string;
-  title?: string | null;
-  body: string;
-  xUrl?: string | null;
-  imageUrl?: string | null;
-  publishedAt?: string;
-  published_at?: string;
-};
-
-const STORAGE_KEY = 'robank.owner.updates';
-const OWNER_WALLET = (process.env.NEXT_PUBLIC_ROBANK_OWNER_WALLET || '').trim().toLowerCase();
-const BACKEND_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_API_URL);
-
-function loadLocal(): Update[] {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveLocal(items: Update[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-}
-
-export default function UpdatesPage() {
-  const { address } = useAccount();
-  const [updates, setUpdates] = useState<Update[]>([]);
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [xUrl, setXUrl] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [publishing, setPublishing] = useState(false);
+function Updates() {
+  const [updates, setUpdates] = useState<Update[] | null>(null);
+  const [canPublish, setCanPublish] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [draft, setDraft] = useState({ title: '', body: '', xUrl: '', imageUrl: '' });
+  const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState('');
 
-  const isOwner = Boolean(
-    address && OWNER_WALLET && address.toLowerCase() === OWNER_WALLET
-  );
-
-  async function load() {
-    setLoading(true);
+  const load = useCallback(() => {
     setError('');
-    try {
-      if (BACKEND_CONFIGURED) {
-        const data = await api.updates();
-        setUpdates(data.updates || []);
-      } else {
-        setUpdates(loadLocal());
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load updates.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-    const timer = window.setInterval(load, 60000);
-    return () => window.clearInterval(timer);
+    api.updatesAsViewer().then((r) => { setUpdates(r.updates); setCanPublish(r.canPublish); }).catch((e) => setError(friendlyError(e, 'Updates could not be loaded.')));
   }, []);
-
-  const sorted = useMemo(
-    () =>
-      [...updates].sort((a, b) => {
-        const da = new Date(a.publishedAt || a.published_at || 0).getTime();
-        const db = new Date(b.publishedAt || b.published_at || 0).getTime();
-        return db - da;
-      }),
-    [updates]
-  );
+  useEffect(load, [load]);
 
   async function publish() {
-    if (!isOwner || !body.trim()) return;
-    setPublishing(true);
-    setError('');
-    setMessage('');
+    setBusy(true);
+    setFormError('');
     try {
-      const payload = {
-        walletAddress: address!,
-        title: title.trim() || undefined,
-        body: body.trim(),
-        xUrl: xUrl.trim() || undefined,
-        imageUrl: imageUrl.trim() || undefined,
-      };
-
-      if (BACKEND_CONFIGURED) {
-        const result = await api.createUpdate(payload);
-        setUpdates((current) => [result.update, ...current]);
-      } else {
-        const update: Update = {
-          id: crypto.randomUUID(),
-          title: payload.title || null,
-          body: payload.body,
-          xUrl: payload.xUrl || null,
-          imageUrl: payload.imageUrl || null,
-          publishedAt: new Date().toISOString(),
-        };
-        const next = [update, ...loadLocal()];
-        saveLocal(next);
-        setUpdates(next);
-      }
-
-      setTitle('');
-      setBody('');
-      setXUrl('');
-      setImageUrl('');
-      setMessage(
-        BACKEND_CONFIGURED
-          ? 'Update published.'
-          : 'Update saved in this browser.'
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to publish update.');
+      const { update } = await api.createUpdate({ title: draft.title || undefined, body: draft.body, xUrl: draft.xUrl || undefined, imageUrl: draft.imageUrl || undefined });
+      setUpdates((list) => [update, ...(list || [])]);
+      setDraft({ title: '', body: '', xUrl: '', imageUrl: '' });
+    } catch (e) {
+      setFormError(friendlyError(e, 'The update could not be published.'));
     } finally {
-      setPublishing(false);
+      setBusy(false);
     }
   }
 
   async function remove(id: string) {
-    if (!isOwner) return;
+    if (!window.confirm('Delete this update?')) return;
     try {
-      if (BACKEND_CONFIGURED) {
-        await api.deleteUpdate(id, address!);
-      } else {
-        saveLocal(loadLocal().filter((item) => item.id !== id));
-      }
-      setUpdates((current) => current.filter((item) => item.id !== id));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to remove update.');
+      await api.deleteUpdate(id);
+      setUpdates((list) => (list || []).filter((u) => u.id !== id));
+    } catch (e) {
+      setError(friendlyError(e, 'The update could not be deleted.'));
     }
   }
 
   return (
-    <AppShell>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="text-xs uppercase tracking-[.2em] text-white/40">
-              ROBANK / UPDATES
+    <div className="ui-grid" style={{ gap: 14 }}>
+      {canPublish && (
+        <section className="ui-panel">
+          <span className="ui-kicker">Publish an update</span>
+          <div className="ui-grid" style={{ gap: 10, marginTop: 12 }}>
+            <input className="ui-input" maxLength={140} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="Title (optional)" />
+            <textarea className="ui-textarea" maxLength={4000} value={draft.body} onChange={(e) => setDraft({ ...draft, body: e.target.value })} placeholder="What changed?" />
+            <div className="ui-grid two" style={{ gap: 10 }}>
+              <input className="ui-input" value={draft.xUrl} onChange={(e) => setDraft({ ...draft, xUrl: e.target.value })} placeholder="https://x.com/… (optional)" />
+              <input className="ui-input" value={draft.imageUrl} onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })} placeholder="https://… image (optional)" />
             </div>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-              ROBANK updates.
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
-              Official product notes, launches and thoughts from ROBANK — written
-              here and optionally linked back to the original post on X.
-            </p>
+            {formError && <Alert tone="bad">{formError}</Alert>}
+            <button type="button" className="ui-btn primary" disabled={busy || !draft.body.trim()} onClick={() => void publish()}>{busy ? <Spinner /> : 'Publish'}</button>
           </div>
-          <Link
-            href="https://x.com/robankdev"
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-xl border border-white/10 px-4 py-2 text-xs text-white/60 hover:bg-white/5"
-          >
-            Follow on X →
-          </Link>
-        </div>
-
-        {isOwner && (
-          <section className="rounded-2xl border border-ro-line bg-ro-panel p-5">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="text-[10px] font-mono uppercase tracking-[.16em] text-white/35">
-                  OWNER / ADMIN
-                </div>
-                <h2 className="mt-2 text-xl font-medium">Publish an update.</h2>
-              </div>
-              <span className="rounded-full border border-white/10 px-2.5 py-1 text-[9px] font-mono text-white/45">
-                {BACKEND_CONFIGURED ? 'LIVE PUBLISH' : 'LOCAL PREVIEW'}
-              </span>
-            </div>
-
-            <div className="mt-5 grid gap-3">
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Headline (optional)"
-                className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none"
-              />
-              <textarea
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                placeholder="Write the update / words you want to publish…"
-                rows={7}
-                className="resize-y rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 outline-none"
-              />
-
-              <div className="grid gap-3 md:grid-cols-2">
-                <input value={xUrl} onChange={(e) => setXUrl(e.target.value)} placeholder="X post URL (optional)" className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none" />
-                <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Image URL (optional)" className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm outline-none" />
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <span className="text-xs text-white/30">
-                {BACKEND_CONFIGURED
-                  ? 'Published updates are stored by the ROBANK backend.'
-                  : 'Backend is not connected; this preview is stored only in this browser.'}
-              </span>
-              <button
-                onClick={publish}
-                disabled={publishing || !body.trim()}
-                className="rounded-xl bg-white px-4 py-3 text-xs font-semibold text-black disabled:cursor-not-allowed disabled:opacity-35"
-              >
-                {publishing ? 'Publishing…' : 'Publish update'}
-              </button>
-            </div>
-            {message && <div className="mt-3 text-xs text-white/50">{message}</div>}
-          </section>
-        )}
-
-        {!OWNER_WALLET && (
-          <div className="rounded-2xl border border-white/10 bg-white/[.02] p-4 text-xs leading-5 text-white/35">
-            Owner publishing is locked until <span className="font-mono text-white/55">NEXT_PUBLIC_ROBANK_OWNER_WALLET</span> is configured.
-          </div>
-        )}
-
-        {error && <div className="rounded-2xl border border-white/10 p-4 text-sm text-white/45">{error}</div>}
-
-        <section className="space-y-3">
-          {loading ? (
-            <div className="rounded-2xl border border-ro-line p-6 text-sm text-white/35">Loading updates…</div>
-          ) : sorted.length === 0 ? (
-            <div className="rounded-2xl border border-ro-line bg-ro-panel p-8">
-              <div className="text-[10px] font-mono uppercase tracking-[.16em] text-white/30">NO UPDATES YET</div>
-              <h2 className="mt-3 text-xl font-medium">This is the official ROBANK update feed.</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/35">
-                New product releases, build notes and announcements can be posted here
-                alongside the original X post.
-              </p>
-            </div>
-          ) : (
-            sorted.map((update) => (
-              <article key={update.id} className="rounded-2xl border border-ro-line bg-ro-panel p-5">
-                <div className="flex flex-wrap items-center gap-2 text-[9px] font-mono uppercase tracking-[.12em] text-white/30">
-                  <span>ROBANK UPDATE</span><span>·</span>
-                  <span>{new Date(update.publishedAt || update.published_at || Date.now()).toLocaleString()}</span>
-                </div>
-                {update.title && <h2 className="mt-3 text-xl font-medium">{update.title}</h2>}
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-white/55">{update.body}</p>
-                {update.imageUrl && (
-                  <img
-                    src={update.imageUrl}
-                    alt=""
-                    className="mt-5 max-h-[520px] w-full rounded-xl border border-white/8 object-cover"
-                  />
-                )}
-                <div className="mt-5 flex flex-wrap items-center gap-3">
-                  {update.xUrl && (
-                    <a href={update.xUrl} target="_blank" rel="noreferrer" className="rounded-lg border border-white/10 px-3 py-2 text-[10px] font-mono text-white/45 hover:bg-white/5">
-                      VIEW ON X →
-                    </a>
-                  )}
-                  {isOwner && (
-                    <button onClick={() => remove(update.id)} className="rounded-lg border border-white/10 px-3 py-2 text-[10px] font-mono text-white/30 hover:bg-white/5">
-                      DELETE
-                    </button>
-                  )}
-                </div>
-              </article>
-            ))
-          )}
         </section>
+      )}
+      {error && <Alert tone="bad" action={<button className="ui-btn secondary sm" onClick={load}>Retry</button>}>{error}</Alert>}
+      {!updates && !error ? <Skeleton h={140} /> : updates && !updates.length ? <section className="ui-panel"><Empty title="No updates yet">Official ROBANK announcements will appear here.</Empty></section> : updates?.map((u) => (
+        <article key={u.id} className="ui-panel">
+          <div className="ui-panel-head">
+            <div><span className="ui-kicker">{relativeTime(u.publishedAt)}</span>{u.title && <h2>{u.title}</h2>}</div>
+            {canPublish && <button type="button" className="ui-btn ghost sm" onClick={() => void remove(u.id)}>Delete</button>}
+          </div>
+          <p className="ui-text" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{u.body}</p>
+          {u.imageUrl && <img src={u.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" style={{ marginTop: 14, maxWidth: '100%', borderRadius: 14, border: '1px solid var(--ui-line)' }} />}
+          {u.xUrl && <a className="ui-link" style={{ display: 'inline-block', marginTop: 12 }} href={u.xUrl} target="_blank" rel="noreferrer noopener">View post ↗</a>}
+        </article>
+      ))}
+    </div>
+  );
+}
+
+export default function UpdatesPage() {
+  return (
+    <AppShell>
+      <div className="ui-page narrow">
+        <header className="ui-head"><div><span className="ui-kicker">Updates</span><h1>What&apos;s new</h1><p>Official announcements from the ROBANK team.</p></div></header>
+        <Updates />
       </div>
     </AppShell>
   );

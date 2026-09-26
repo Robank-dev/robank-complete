@@ -3,12 +3,11 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import { IntroLoader } from '@/components/Experience';
 
 const features = [
-  ['01', 'Your financial command center', 'See your account, assets, payments and activity together — with the context your agent needs to work.'],
-  ['02', 'From intent to execution', 'Give ROBANK a task in natural language or the CLI. It can prepare the workflow, check policy and surface the action before execution.'],
-  ['03', 'One ROBANK. Every surface.', 'Use the App, Skill, CLI or API against the same account context, operating rules and execution model.'],
+  ['01', 'Everything you hold, one view', 'Stablecoins, gas tokens, xStocks and Robinhood Stock Tokens across eight networks — read straight from the chain.'],
+  ['02', 'Ask, review, sign', 'Tell the agent or the CLI what you want. It checks your balance and prepares the transfer; you see the fee and sign.'],
+  ['03', 'App, CLI, API, Skill', 'The same rules everywhere: every surface can read and prepare, and only your wallet can approve.'],
 ];
 
 export default function Home() {
@@ -29,10 +28,9 @@ export default function Home() {
   }, []);
   return (
     <main className="site-shell">
-      <IntroLoader />
       <nav className="top-nav">
         <Link href="/" className="brand"><span className="brand-mark"><img src="/robank-mark.png" alt="" /></span><span>ROBANK</span></Link>
-        <div className={`nav-links ${menu ? "open" : ""}`}><a href="https://x.com/robankdev" target="_blank" rel="noreferrer">X</a><a href="/cli">Skill</a><a href="/how-it-works">How it works</a><a href="/docs">Docs</a></div>
+        <div className={`nav-links ${menu ? "open" : ""}`}><a href="/how-it-works">How it works</a><a href="/docs">Docs</a><a href="/docs#cli">CLI & API</a><a href="https://x.com/robankdev" target="_blank" rel="noreferrer">X</a></div>
         <div className="nav-actions"><Link href={appHref} className="button button-small">App</Link></div>
         <button className="menu-button" onClick={() => setMenu(v => !v)} aria-label={menu ? "Close menu" : "Open menu"}>{menu ? "×" : "☰"}</button>
       </nav>
@@ -47,12 +45,12 @@ export default function Home() {
         <div className="hero-copy">
           <div className="eyebrow hero-reveal">
             <span className="pulse-dot" />
-            THE FINANCIAL OPERATING LAYER FOR AGENTS
+            SELF-CUSTODIAL MONEY · WITH AN AI AGENT
           </div>
 
-          <h1 className="hero-title hero-reveal">Give your agent<br /><span className="hero-word-wrap"><span className="outline-word">financial</span> capability.</span></h1>
+          <h1 className="hero-title hero-reveal">Your money.<br /><span className="hero-word-wrap"><span className="outline-word">Your</span> agent.</span></h1>
 
-          <p className="hero-lead hero-reveal">ROBANK connects your account, assets, payments, cards and financial workflows — giving agents the context and rails to act within your rules.</p>
+          <p className="hero-lead hero-reveal">Sign in with email and get your own EVM and Solana wallets. Hold stablecoins and tokenized stocks, send across networks, borrow against collateral — with an agent that prepares everything and never moves money without your signature.</p>
 
           <div className="hero-actions hero-reveal">
             <Link href={appHref} className="button hero-main-button">
@@ -68,7 +66,7 @@ export default function Home() {
               <div className="floating-card-shine" />
               <div className="floating-card-top">
                 <span>ROBANK</span>
-                <span>VIRTUAL</span>
+                <span>COMING SOON</span>
               </div>
               <div className="floating-card-mark">
                 <img src="/robank-mark.png" alt="" />
@@ -77,7 +75,7 @@ export default function Home() {
                 •••• &nbsp; •••• &nbsp; •••• &nbsp; 4821
               </div>
               <div className="floating-card-bottom">
-                <span>RO BANK MEMBER</span>
+                <span>ROBANK CARD</span>
                 <b>VISA</b>
               </div>
             </div>
@@ -156,10 +154,10 @@ export default function Home() {
                   </div>
 
                   <div className="phone-bottom-nav">
-                    <div className="active"><b>¦</b><span>Home</span></div>
-                    <div><b>?</b><span>Activity</span></div>
-                    <div><b>?</b><span>Agent</span></div>
-                    <div><b>?</b><span>Settings</span></div>
+                    <div className="active"><b>◉</b><span>Home</span></div>
+                    <div><b>↗</b><span>Send</span></div>
+                    <div><b>✦</b><span>Agent</span></div>
+                    <div><b>≡</b><span>More</span></div>
                   </div>
                 </div>
               </div>
@@ -186,10 +184,10 @@ export default function Home() {
         </div>
       </section>
 
-            <section className="ticker"><div className="ticker-track"><div className="ticker-set"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div><div className="ticker-set" aria-hidden="true"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>NON-CUSTODIAL</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>YOUR WORLD</span><b>•</b><span>ROBANK</span><b>•</b></div></div></section>
+            <section className="ticker"><div className="ticker-track"><div className="ticker-set"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>8 NETWORKS</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>XSTOCKS</span><b>•</b><span>ROBANK</span><b>•</b></div><div className="ticker-set" aria-hidden="true"><span>YOUR ACCOUNT</span><b>•</b><span>YOUR AGENT</span><b>•</b><span>PAYMENTS</span><b>•</b><span>USDC</span><b>•</b><span>SELF-CUSTODY</span><b>•</b><span>8 NETWORKS</span><b>•</b><span>API + CLI</span><b>•</b><span>ROBINHOOD CHAIN</span><b>•</b><span>COMPANY · JOBS</span><b>•</b><span>XSTOCKS</span><b>•</b><span>ROBANK</span><b>•</b></div></div></section>
 
       <section id="product" className="section product-section">
-        <div className="section-intro"><div className="section-kicker">THE PRODUCT</div><h2>Financial context,<br /><em>ready to act.</em></h2><p>ROBANK brings account state, assets, payments and financial workflows into one interface — then exposes the same operating model to agents.</p></div>
+        <div className="section-intro"><div className="section-kicker">THE PRODUCT</div><h2>Financial context,<br /><em>ready to act.</em></h2><p>One screen for everything you hold on eight networks, and the same account for the app, the CLI, the API and your AI agent.</p></div>
         <div className="feature-grid">
           {features.map(([n,t,d]) => (
             <article className="feature-card" key={n}>
@@ -207,10 +205,10 @@ export default function Home() {
                   <div className="terminal-card">
                     <div className="terminal-card-head"><span className="terminal-dots"><i/><i/><i/></span><b>robank</b><em>CLI</em></div>
                     <div className="terminal-card-body">
-                      <div className="terminal-line"><span>robank@agent:~$</span> robank send --to alice --amount 20 --token USDC</div>
-                      <div className="terminal-result"><i>✓</i> recipient resolved <b>alice</b></div>
-                      <div className="terminal-result"><i>✓</i> policy check <b>passed</b></div>
-                      <div className="terminal-result"><i>✓</i> transaction <b>prepared</b></div>
+                      <div className="terminal-line"><span>robank@agent:~$</span> robank send 20 USDC 0x9f…a1 --chain base</div>
+                      <div className="terminal-result"><i>✓</i> address valid <b>Base</b></div>
+                      <div className="terminal-result"><i>✓</i> asset supported <b>USDC</b></div>
+                      <div className="terminal-result"><i>✓</i> transfer <b>prepared · not sent</b></div>
                       <div className="terminal-action"><span>READY FOR REVIEW</span><b>→</b></div>
                     </div>
                   </div>
@@ -225,7 +223,7 @@ export default function Home() {
                   <div className="surface-connection connection-one"/><div className="surface-connection connection-two"/><div className="surface-connection connection-three"/>
                 </div>}
               </div>
-              <h3>{t}</h3><p>{d}</p><a href={n === '01' ? '/dashboard' : n === '02' ? '/how-it-works' : '/cli'}>{n === '01' ? 'Explore the workspace' : n === '02' ? 'See how it works' : 'Explore the CLI'} <span>→</span></a>
+              <h3>{t}</h3><p>{d}</p><a href={n === '01' ? appHref : n === '02' ? '/how-it-works' : '/docs#cli'}>{n === '01' ? 'Explore the workspace' : n === '02' ? 'See how it works' : 'Explore the CLI'} <span>→</span></a>
             </article>
           ))}
         </div>
@@ -235,8 +233,7 @@ export default function Home() {
           <div className="section-kicker">ROBANK AI</div>
           <h2>Give ROBANK the intent.<br /><em>Let it handle the work.</em></h2>
           <p>
-            Work with assets, payments and financial operations from the App or CLI.
-            Ask for an action, prepare a tokenized-asset workflow, or manage your account — with the same operating context.
+            Ask in plain language from the app or the CLI. ROBANK reads your balance, prepares the transfer and hands it to you to review and sign.
           </p>
         </div>
 
@@ -263,66 +260,66 @@ export default function Home() {
 
                 <div className="terminal-banner">
                   <span>ROBANK CLI</span>
-                  <small>v0.1.0 · secure wallet interface</small>
+                  <small>v1.0.0 · read · ask · prepare</small>
                 </div>
 
                 <div className="terminal-command">
                   <span className="terminal-prompt">ubuntu@robank:~$</span>
-                  <strong>robank market search "GPU 3 hours"</strong>
+                  <strong>robank ask "send 25 USDC to 0x9f…a1 on base"</strong>
                   <i className="terminal-cursor" />
                 </div>
 
                 <div className="terminal-output terminal-output-1">
                   <span className="terminal-arrow">›</span>
-                  <span>searching Agent Market...</span>
+                  <span>reading your on-chain balances...</span>
                 </div>
 
                 <div className="terminal-output terminal-output-2">
                   <span className="terminal-success">✓</span>
-                  <span>capability found: <b>GPU COMPUTE</b></span>
+                  <span>balance <b>312.40 USDC on Base</b></span>
                 </div>
 
                 <div className="terminal-output terminal-output-3">
                   <span className="terminal-success">✓</span>
-                  <span>provider <b>available</b></span>
+                  <span>recipient <b>valid Base address</b></span>
                 </div>
 
                 <div className="terminal-output terminal-output-4">
                   <span className="terminal-arrow">›</span>
-                  <span>inspecting payment requirement...</span>
+                  <span>preparing transfer...</span>
                 </div>
 
                 <div className="terminal-detail terminal-detail-1">
-                  <span>service</span>
-                  <b>GPU · 3 hours</b>
+                  <span>amount</span>
+                  <b>25 USDC</b>
                 </div>
 
                 <div className="terminal-detail terminal-detail-2">
                   <span>payment</span>
-                  <b>x402 · USDC</b>
+                  <b>USDC · Base</b>
                 </div>
 
                 <div className="terminal-detail terminal-detail-3">
                   <span>network</span>
-                  <b>Base Mainnet</b>
+                  <b>Base</b>
                 </div>
 
                 <div className="terminal-output terminal-output-5">
                   <span className="terminal-arrow">›</span>
-                  <span>policy check <b>required</b></span>
+                  <span>signature <b>required</b></span>
                 </div>
 
                 <div className="terminal-output terminal-output-6">
                   <span className="terminal-success">✓</span>
-                  <span>service <b>ready for review</b></span>
+                  <span>review link <b>ready</b></span>
                 </div>
 
                 <div className="terminal-success-box">
                   <div>
                     <span>✓</span>
-                    <strong>READY FOR USER APPROVAL</strong>
+                    <strong>READY FOR YOUR SIGNATURE</strong>
                   </div>
-                  <small>GPU compute · x402 · not purchased yet</small>
+                  <small>25 USDC · Base · nothing sent yet</small>
                 </div>
 
                 <div className="terminal-next">
@@ -362,7 +359,7 @@ export default function Home() {
 
                 <div className="ai-step ai-user-step">
                   <small>YOU</small>
-                  <div>Find me a GPU for 3 hours.</div>
+                  <div>Send 25 USDC to 0x9f…a1 on Base.</div>
                 </div>
 
                 <div className="ai-step ai-thinking-step">
@@ -373,29 +370,29 @@ export default function Home() {
 
                 <div className="ai-step ai-response-step">
                   <small>ROBANK AI</small>
-                  <strong>I’ll search Agent Market.</strong>
-                  <p>First I’ll find a suitable provider, inspect the payment terms, then check whether the purchase is allowed.</p>
+                  <strong>I prepared that transfer.</strong>
+                  <p>You have 312.40 USDC on Base. Review the fee and sign — I never send anything myself.</p>
                 </div>
 
                 <div className="ai-step ai-transaction-step">
                   <div className="ai-tx-head">
-                    <span>AGENT MARKET</span>
-                    <b>GPU COMPUTE</b>
+                    <span>TRANSFER</span>
+                    <b>USDC → 0x9f…a1</b>
                   </div>
 
-                  <div className="ai-tx-amount">3 HOURS</div>
+                  <div className="ai-tx-amount">25 USDC</div>
 
-                  <div className="ai-tx-row"><span>Capability</span><b>GPU compute</b></div>
-                  <div className="ai-tx-row"><span>Payment</span><b>x402 · USDC</b></div>
-                  <div className="ai-tx-row"><span>Network</span><b>Base Mainnet</b></div>
-                  <button>Inspect provider <span>→</span></button>
+                  <div className="ai-tx-row"><span>Recipient</span><b>0x9f…a1</b></div>
+                  <div className="ai-tx-row"><span>Payment</span><b>USDC · Base</b></div>
+                  <div className="ai-tx-row"><span>Network</span><b>Base</b></div>
+                  <button>Review & sign <span>→</span></button>
                 </div>
 
                 <div className="ai-step ai-success-step">
                   <span>✓</span>
                   <div>
                     <strong>Ready for review</strong>
-                    <small>Provider found · payment not sent yet</small>
+                    <small>Prepared · not sent</small>
                   </div>
                 </div>
 
@@ -403,7 +400,7 @@ export default function Home() {
 
               <div className="ai-input">
                 <span>Ask ROBANK anything...</span>
-                <b>?</b>
+                <b>↑</b>
               </div>
             </div>
           </div>
@@ -424,15 +421,15 @@ export default function Home() {
         <div className="card-copy">
           <div className="section-kicker">THE ROBANK CARD</div>
 
-          <h2>One account.<br /><em>One premium card.</em></h2>
+          <h2>One account.<br /><em>A card is coming.</em></h2>
 
           <p>
-            A premium virtual card designed around your ROBANK account — bringing
-            spending, assets and agent-powered control into one financial layer.
+            A debit card for your stablecoin balance is planned. It is not available yet —
+            ROBANK will show its real status and fees before anyone can order one.
           </p>
 
           <Link href="/card" className="button hero-main-button">
-            Explore the card <span>→</span>
+            See card status <span>→</span>
           </Link>
         </div>
 
@@ -470,7 +467,7 @@ export default function Home() {
 
                   <div>
                     <small>EXPIRES</small>
-                    <strong>12/28</strong>
+                    <strong>—/—</strong>
                   </div>
 
                   <div>
@@ -506,7 +503,7 @@ export default function Home() {
 
       </section>
 
-      <section id="security" className="section security-section"><div className="security-orb" /><div className="section-kicker">CONTROL</div><h2>Quietly powerful.<br /><em>Clearly yours.</em></h2><p>ROBANK is designed around user-controlled wallets and transparent actions. The interface stays simple; the underlying rails do the heavy lifting.</p><div className="robank-auth"><span>Sign in or create your account with your email.</span><Link href="/login" className="button">Continue with email <b>→</b></Link></div><div className="security-links"><a href="https://github.com/Robank-dev/robank-complete" target="_blank" rel="noreferrer" aria-label="GitHub"><img src="https://cdn.simpleicons.org/github/FFFFFF" alt="" /><span>GitHub</span></a><a href="mailto:contact@robank.co" aria-label="Contact"><span className="contact-icon">✉</span><span>Contact</span></a><a href="https://x.com/robankdev" target="_blank" rel="noreferrer" aria-label="X"><img src="https://cdn.simpleicons.org/x/FFFFFF" alt="" /><span>X</span></a><a href="https://t.me/robank_tg" target="_blank" rel="noreferrer" aria-label="Telegram"><img src="https://cdn.simpleicons.org/telegram/FFFFFF" alt="" /><span>Telegram</span></a><a href="/docs" aria-label="Docs"><img src="https://cdn.simpleicons.org/readthedocs/FFFFFF" alt="" /><span>Docs</span></a></div></section>
+      <section id="security" className="section security-section"><div className="security-orb" /><div className="section-kicker">CONTROL</div><h2>Quietly powerful.<br /><em>Clearly yours.</em></h2><p>Your wallets are self-custodial: ROBANK, the agent and the CLI can read and prepare, but only your signature moves funds. Every action shows its network, fee and result.</p><div className="robank-auth"><span>Sign in or create your account with your email.</span><Link href="/login" className="button">Continue with email <b>→</b></Link></div><div className="security-links"><a href="https://github.com/Robank-dev/robank-complete" target="_blank" rel="noreferrer" aria-label="GitHub"><img src="https://cdn.simpleicons.org/github/FFFFFF" alt="" /><span>GitHub</span></a><a href="mailto:contact@robank.co" aria-label="Contact"><span className="contact-icon">✉</span><span>Contact</span></a><a href="https://x.com/robankdev" target="_blank" rel="noreferrer" aria-label="X"><img src="https://cdn.simpleicons.org/x/FFFFFF" alt="" /><span>X</span></a><a href="https://t.me/robank_tg" target="_blank" rel="noreferrer" aria-label="Telegram"><img src="https://cdn.simpleicons.org/telegram/FFFFFF" alt="" /><span>Telegram</span></a><a href="/docs" aria-label="Docs"><img src="https://cdn.simpleicons.org/readthedocs/FFFFFF" alt="" /><span>Docs</span></a></div></section>
     </main>
   );
 }

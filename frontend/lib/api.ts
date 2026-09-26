@@ -1,187 +1,100 @@
 import { getAccessToken } from '@privy-io/react-auth';
+import type { Holding, SourceStatus } from '@/lib/server/portfolio';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const isLocalRoute = path === '/api/agent/chat' || path === '/api/assets/discover' || path === '/api/stocks' || path === '/api/xstocks' || path.startsWith('/api/portfolio') || path.startsWith('/api/updates') || path.startsWith('/api/kyc') || path.startsWith('/api/agent-market') || path.startsWith('/api/borrow') || path.startsWith('/api/lifi');
-  if (!API_URL && !isLocalRoute) {
-    throw new Error('ROBANK data service is not connected.');
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
   }
-
-  const accessToken = await getAccessToken().catch(() => null);
-  const isFrontendProxy = path === '/api/stocks' || path === '/api/xstocks' || path.startsWith('/api/portfolio') || path.startsWith('/api/agent-market') || path.startsWith('/api/borrow') || path.startsWith('/api/lifi');
-  const response = await fetch(`${isFrontendProxy ? '' : API_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      ...(options?.headers || {})
-    }
-  });
-
-  const contentType = response.headers.get('content-type') || '';
-  if (!response.ok) {
-    const body = contentType.includes('application/json') ? await response.json().catch(() => null) : null;
-    const message = body?.message || body?.error || (contentType.includes('text/html') ? 'ROBANK data service is not connected.' : '');
-    throw new Error(message || `API request failed: ${response.status}`);
-  }
-
-  if (!contentType.includes('application/json')) {
-    throw new Error('ROBANK data service returned an invalid response.');
-  }
-
-  return response.json() as Promise<T>;
 }
 
-export const api = {
-  health: () => request<{ ok: boolean; service: string }>('/health'),
-  registerUser: (walletAddress: string) =>
-    request('/api/users/register', {
-      method: 'POST',
-      body: JSON.stringify({ walletAddress })
-    }),
-  routePayment: (body: { from: string; to: string; amount: string; token: string }) =>
-    request<{
-      route: { network: string; asset: string; provider: string; recipient: string; amount: string };
-      transaction: { to: string; data: string; value?: string };
-    }>('/api/payments/route', {
-      method: 'POST',
-      body: JSON.stringify(body)
-    }),
-  paymentIntent: (body: { walletAddress: string; to: string; amount: string; token: 'USDC' | 'USDG'; network: 'base' | 'robinhood' }, idempotencyKey: string) =>
-    request<{ intent: { id: string; status: string; walletAddress: string; recipient: string; amount: string; token: string; network: string; idempotencyKey: string }; transaction: { to: string; data: string; value?: string } }>('/api/payments/intent', {
-      method: 'POST',
-      headers: { 'X-Idempotency-Key': idempotencyKey },
-      body: JSON.stringify(body)
-    }),
-  paymentConfirm: (body: { walletAddress: string; destination: string; amount: string; txHash: string; network: 'base' | 'robinhood'; asset: 'USDC' | 'USDG' }) =>
-    request<any>('/api/payments/confirm', { method: 'POST', body: JSON.stringify(body) }),
-  agentStatus: () => request<any>('/api/agent/status'),
-  agent: (body: { message: string; history?: unknown[]; walletAddress?: string; context?: unknown }) =>
-    request<{ response: string; action?: unknown }>('/api/agent/chat', {
-      method: 'POST',
-      body: JSON.stringify(body)
-    }),
-  agentPrepare: (body: { walletAddress: string; destination: string; amount: string; asset: 'USDC' | 'USDG'; network: 'base' | 'robinhood' }) => request<{ stage: string; prepared: any; transaction: { to: string; data: string; value?: string } | null }>('/api/agent/prepare', { method: 'POST', body: JSON.stringify(body) }),
-  agentConfirm: (body: { walletAddress: string; destination: string; amount: string; txHash: string; network: 'base' | 'robinhood'; asset: 'USDC' | 'USDG' }) => request<any>('/api/agent/confirm', { method: 'POST', body: JSON.stringify(body) }),
-  onramp: (walletAddress: string, amount?: string) => {
-    const params = new URLSearchParams({ walletAddress });
-    if (amount) params.set('amount', amount);
-    return request<{ url: string }>('/api/onramp/url?' + params.toString());
-  },
+async function request<T>(path: string, options: RequestInit & { auth?: boolean; timeoutMs?: number } = {}): Promise<T> {
+  const { auth = false, timeoutMs = 30_000, ...init } = options;
+  const headers: Record<string, string> = { Accept: 'application/json', ...(init.body ? { 'Content-Type': 'application/json' } : {}), ...((init.headers as Record<string, string>) || {}) };
+  if (auth) {
+    const token = await getAccessToken().catch(() => null);
+    if (!token) throw new ApiError(401, 'Sign in to continue.');
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  let response: Response;
+  try {
+    response = await fetch(path, { ...init, headers, signal: init.signal ?? controller.signal, cache: 'no-store' });
+  } catch (error) {
+    if ((error as Error)?.name === 'AbortError') throw new ApiError(0, 'The request took too long. Check your connection and try again.');
+    throw new ApiError(0, 'Network unavailable. Check your connection and try again.');
+  } finally {
+    window.clearTimeout(timer);
+  }
+  const isJson = (response.headers.get('content-type') || '').includes('application/json');
+  const body = isJson ? await response.json().catch(() => null) : null;
+  if (!response.ok) {
+    const message = (body && typeof body.error === 'string' && body.error) || (response.status === 429 ? 'Too many requests. Please wait a moment.' : `Request failed (${response.status}).`);
+    throw new ApiError(response.status, message);
+  }
+  if (!isJson || body === null) throw new ApiError(502, 'The server returned an unexpected response.');
+  return body as T;
+}
 
-  assetsDiscover: () =>
-    request<{
-      generatedAt: string;
-      count: number;
-      providers: {
-        xstocks: {
-          ok: boolean;
-          error: string | null;
-        };
-        centrifuge: {
-          ok: boolean;
-          error: string | null;
-        };
-        robinhood: {
-          ok: boolean;
-          error: string | null;
-        };
-      };
-      assets: Array<{
-        provider: string;
-        type: string;
-        network: string;
-        symbol: string | null;
-        name: string | null;
-        status: string | null;
-        pricing?: {
-          oracle: string | null;
-          quoteAsset: string;
-          feedId: string | null;
-        } | null;
-        collateral?: {
-          symbol: string;
-          priceCurrency: string;
-        } | null;
-        providerRef?: string | null;
-        poolId?: string | null;
-        assetAddress?: string | null;
-        active?: boolean;
-        deployments?: unknown[];
-        multiplier?: number | null;
-      }>;
-    }>('/api/assets/discover'),
-  assetInspect: (symbol: string) =>
-    request('/api/assets/inspect/' + encodeURIComponent(symbol)),
-  cardStatus: () =>
-    request<{
-      card: {
-        status: string;
-        provider: string;
-        providerName: string;
-        bin?: string;
-        balance?: string | number;
-        availableBalance?: string | number;
-        brand?: string;
-        currency?: string;
-        issuingCountry?: string;
-        requireKycCardholder?: boolean;
-        liveOperations: boolean;
-        providerActivation: string;
-        credentials: {
-          apiKey: boolean;
-          apiSecret: boolean;
-        };
-        capabilities: string[];
-        operations: {
-          issue: boolean;
-          manage: boolean;
-          freeze: boolean;
-          unfreeze: boolean;
-          fund: boolean;
-          transactions: boolean;
-        };
-      };
-    }>('/api/card/status'),
-  companies: (walletAddress: string) => request<any>('/api/companies?walletAddress=' + encodeURIComponent(walletAddress)),
-  createCompany: (body: { walletAddress:string; legalName:string; registrationNumber?:string; countryCode?:string }) => request<any>('/api/companies',{method:'POST',body:JSON.stringify(body)}),
-  verifyCompany: (id:string,walletAddress:string) => request<any>('/api/companies/'+encodeURIComponent(id)+'/verify',{method:'POST',body:JSON.stringify({walletAddress})}),
-  jobs: (params='') => request<any>('/api/jobs' + params),
-  createJob: (body:any) => request<any>('/api/jobs',{method:'POST',body:JSON.stringify(body)}),
-  claimJob: (id:string,walletAddress:string) => request<any>('/api/jobs/'+encodeURIComponent(id)+'/claim',{method:'POST',body:JSON.stringify({walletAddress})}),
-  submitJob: (id:string,walletAddress:string,submission:string) => request<any>('/api/jobs/'+encodeURIComponent(id)+'/submit',{method:'POST',body:JSON.stringify({walletAddress,submission})}),
-  jobStatus: (id:string,walletAddress:string,status:string) => request<any>('/api/jobs/'+encodeURIComponent(id)+'/status',{method:'POST',body:JSON.stringify({walletAddress,status})}),
+const post = (body: unknown): RequestInit => ({ method: 'POST', body: JSON.stringify(body) });
+
+export type PortfolioResponse = {
+  generatedAt: string;
+  holdings: Holding[];
+  sources: SourceStatus[];
+  complete: boolean;
+  totalUsd: number;
+  unpricedCount: number;
+  wallets: { evm: string | null; solana: string | null };
+};
+
+export type XStock = { id: string; symbol: string; name: string; logo: string; underlyingSymbol: string; isin: string | null; tradingHalted: boolean; deployments: Array<{ chainId: number; network: string; address: string; decimals: number }> };
+
+export type Capability = { id: string; label: string; state: 'live' | 'needs-configuration' | 'not-available'; detail: string };
+
+export type Update = { id: string; title: string | null; body: string; xUrl: string | null; imageUrl: string | null; publishedAt: string };
+
+export type Job = {
+  id: string; title: string; description: string; rewardAmount: string | null; rewardAsset: string | null; rewardChainId: number | null;
+  status: string; creatorWallet: string; workerWallet: string | null; submission: string | null; payoutTxHash: string | null;
+  dueAt: string | null; createdAt: string; updatedAt: string; role: 'creator' | 'worker' | null;
+};
+
+export type Company = { id: string; legalName: string; registrationNumber: string | null; countryCode: string; jurisdictionCode: string | null; status: string; verificationStatus: string; verificationUrl: string | null; createdAt: string };
+
+export type AgentAction =
+  | { type: 'none' }
+  | { type: 'navigate'; path: string; label: string }
+  | { type: 'prepare-transfer'; path: string; label: string; summary: { asset: string; amount: string; chainId: number; to: string } };
+
+export const api = {
+  status: () => request<{ capabilities: Capability[]; generatedAt: string }>('/api/status'),
+  portfolio: (fresh = false) => request<PortfolioResponse>('/api/portfolio' + (fresh ? '?fresh=1' : ''), { auth: true, timeoutMs: 45_000 }),
+  xstocks: () => request<{ generatedAt: string; count: number; assets: XStock[] }>('/api/xstocks', { timeoutMs: 45_000 }),
+  stocks: () => request<{ generatedAt: string; count: number; networks: Record<string, number>; stocks: any[] }>('/api/stocks'),
+  markets: () => request<any>('/api/markets'),
   agentMarket: (query = '') => request<any>('/api/agent-market' + (query ? `?${query}` : '')),
   borrowMarkets: () => request<{ generatedAt: string; networks: any[] }>('/api/borrow'),
-  stocks: () => request<{ generatedAt: string; provider: string; networks: { base: number; solana: number; robinhood: number }; count: number; stocks: any[] }>('/api/stocks'),
-  xstocks: () => request<{ generatedAt: string; count: number; assets: Array<{ id: string; symbol: string; name: string; logo: string; underlyingSymbol: string; deployments: Array<{ chainId: number; network: string; address: string; decimals: number }> }> }>('/api/xstocks'),
-  portfolio: (evmAddress?: string, solanaAddress?: string) => request<{ generatedAt: string; supportedAssets: string[]; assets: Array<{ symbol: string; name: string; logo: string; quantity: number; valueUsd: number; assetType?: 'stablecoin' | 'xstock'; network?: string; chainId?: number; contractAddress?: string; decimals?: number }>; totalUsd: number }>(`/api/portfolio?evmAddress=${encodeURIComponent(evmAddress || '')}&solanaAddress=${encodeURIComponent(solanaAddress || '')}`),
-  lifiChains: () => request<{ chains: any[] }>('/api/lifi/chains'),
-  lifiTokens: () => request<{ tokens: any[] }>('/api/lifi/tokens'),
-  lifiQuote: (body: {
-    fromChain: string | number;
-    toChain: string | number;
-    fromToken: string;
-    toToken: string;
-    fromAddress: string;
-    toAddress: string;
-    amount: string;
-    mode: 'fromAmount' | 'toAmount';
-  }) => request<{ quote: any }>('/api/lifi/quote', { method: 'POST', body: JSON.stringify(body) }),
-  updates: () => request<{ updates: any[]; provider: string }>('/api/updates'),
-  createUpdate: (body: { walletAddress: string; body: string; title?: string; xUrl?: string; imageUrl?: string }) => request<any>('/api/updates', { method:'POST', body: JSON.stringify(body) }),
-  deleteUpdate: (id: string, walletAddress: string) => request<any>('/api/updates/' + encodeURIComponent(id), { method:'DELETE', body: JSON.stringify({ walletAddress }) }),
-  kycSession: (walletAddress: string) => request<{ provider:string; sessionId:string; url:string }>('/api/kyc/session', { method:'POST', body: JSON.stringify({ walletAddress }) }),
-  assetQuote: (symbol: string) =>
-    request<{
-      symbol: string;
-      provider: string;
-      network: string;
-      price: number | null;
-      quoteAsset: string;
-      oracle: string | null;
-      feedId: string | null;
-      generatedAt: string;
-    }>('/api/assets/quote/' + encodeURIComponent(symbol))
+  lifiTokens: () => request<{ tokens: Array<{ chainId: number; address: string; symbol: string; decimals: number }> }>('/api/lifi/tokens'),
+  lifiQuote: (body: { fromChain: number; toChain: number; fromToken: string; toToken: string; toAddress: string; amount: string; mode: 'fromAmount' | 'toAmount' }) =>
+    request<{ quote: any }>('/api/lifi/quote', { ...post(body), auth: true }),
+  agent: (body: { message: string; history: Array<{ role: 'user' | 'assistant'; content: string }> }) =>
+    request<{ response: string; action: AgentAction }>('/api/agent/chat', { ...post(body), auth: true, timeoutMs: 45_000 }),
+  updates: () => request<{ updates: Update[]; canPublish: boolean }>('/api/updates'),
+  updatesAsViewer: () => request<{ updates: Update[]; canPublish: boolean }>('/api/updates', { auth: true }),
+  createUpdate: (body: { title?: string; body: string; xUrl?: string; imageUrl?: string }) => request<{ update: Update }>('/api/updates', { ...post(body), auth: true }),
+  deleteUpdate: (id: string) => request<{ ok: true }>('/api/updates/' + encodeURIComponent(id), { method: 'DELETE', auth: true }),
+  jobs: (scope: 'open' | 'mine' = 'open') => request<{ jobs: Job[] }>('/api/jobs?scope=' + scope, { auth: true }),
+  createJob: (body: { title: string; description: string; rewardAmount?: string; rewardAsset?: string; rewardChainId?: number; dueAt?: string }) => request<{ job: Job }>('/api/jobs', { ...post(body), auth: true }),
+  jobAction: (id: string, body: { action: 'claim' | 'submit' | 'approve' | 'reject' | 'cancel' | 'record-payout'; submission?: string; txHash?: string }) =>
+    request<{ job: Job }>('/api/jobs/' + encodeURIComponent(id), { ...post(body), auth: true, timeoutMs: 45_000 }),
+  companies: () => request<{ companies: Company[] }>('/api/companies', { auth: true }),
+  createCompany: (body: { legalName: string; registrationNumber?: string; countryCode: string; jurisdictionCode?: string }) => request<{ company: Company }>('/api/companies', { ...post(body), auth: true }),
+  verifyCompany: (id: string) => request<{ company: Company; url: string }>('/api/companies/' + encodeURIComponent(id) + '/verify', { method: 'POST', auth: true }),
+  card: () => request<{ card: { state: Capability['state']; provider: string; detail: string } }>('/api/card', { auth: true }),
+  kycSession: () => request<{ url: string }>('/api/kyc', { method: 'POST', auth: true }),
+  keys: () => request<{ keys: Array<{ id: string; name: string; prefix: string; createdAt: string; lastUsedAt: string | null }> }>('/api/keys', { auth: true }),
+  createKey: (name: string) => request<{ key: string; record: { id: string; name: string; prefix: string; createdAt: string; lastUsedAt: string | null } }>('/api/keys', { ...post({ name }), auth: true }),
+  revokeKey: (id: string) => request<{ ok: true }>('/api/keys/' + encodeURIComponent(id), { method: 'DELETE', auth: true }),
+  onrampUrl: (body: { chainId: number; asset: string; amount?: string }) => request<{ url: string }>('/api/onramp', { ...post(body), auth: true })
 };

@@ -2,51 +2,40 @@
 
 import { useState } from 'react';
 
-type Props = {
-  value: string;
-  label?: string;
-  className?: string;
-  disabled?: boolean;
-};
+async function writeClipboard(value: string) {
+  if (navigator.clipboard?.writeText && window.isSecureContext) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+  const textarea = document.createElement('textarea');
+  textarea.value = value;
+  textarea.setAttribute('readonly', '');
+  textarea.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+  document.body.appendChild(textarea);
+  textarea.select();
+  const ok = document.execCommand('copy');
+  textarea.remove();
+  if (!ok) throw new Error('copy failed');
+}
 
-export default function CopyButton({ value, label = 'Copy', className = '', disabled = false }: Props) {
-  const [copied, setCopied] = useState(false);
+export default function CopyButton({ value, label = 'Copy', disabled = false, compact = false, className = '' }: { value: string; label?: string; disabled?: boolean; compact?: boolean; className?: string }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const copy = async () => {
     if (!value || disabled) return;
     try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(value);
-      } else {
-        throw new Error('Clipboard API unavailable');
-      }
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
+      await writeClipboard(value);
+      setState('copied');
     } catch {
-      try {
-        const textarea = document.createElement('textarea');
-        textarea.value = value;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        textarea.style.pointerEvents = 'none';
-        document.body.appendChild(textarea);
-        textarea.select();
-        textarea.setSelectionRange(0, textarea.value.length);
-        const ok = document.execCommand('copy');
-        textarea.remove();
-        if (!ok) throw new Error('Copy command failed');
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 1500);
-      } catch {
-        setCopied(false);
-      }
+      setState('failed');
     }
+    window.setTimeout(() => setState('idle'), 1600);
   };
-
+  const text = state === 'copied' ? 'Copied' : state === 'failed' ? 'Copy failed' : label;
   return (
-    <button type="button" onClick={copy} disabled={disabled || !value} className={"ro-copy-button " + (copied ? 'is-copied ' : '') + className}>
-      <span className="ro-copy-icon" aria-hidden="true">{copied ? '✓' : '⧉'}</span>
-      <span>{copied ? 'Copied' : label}</span>
+    <button type="button" onClick={copy} disabled={disabled || !value} className={`ui-btn ${compact ? 'ghost sm' : 'secondary'} ${className}`} aria-live="polite">
+      <span aria-hidden="true">{state === 'copied' ? '✓' : '⧉'}</span>
+      {!compact || state !== 'idle' ? <span>{text}</span> : null}
+      {compact && state === 'idle' && <span className="sr-only">{label}</span>}
     </button>
   );
 }
