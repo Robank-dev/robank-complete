@@ -21,7 +21,7 @@ function set(next: Partial<State>) {
 }
 
 function sourceOf(h: Holding) {
-  return h.chainId === 1151111081099710 ? 'solana' : `evm:${h.chainId}`;
+  return `evm:${h.chainId}`;
 }
 
 /**
@@ -31,7 +31,7 @@ function sourceOf(h: Holding) {
 function merge(previous: State['data'], next: PortfolioResponse): NonNullable<State['data']> {
   const failed = new Set(next.sources.filter((s) => !s.ok).map((s) => s.id));
   if (!previous || !failed.size) return { ...next, staleSources: [] };
-  const carried = previous.holdings.filter((h) => failed.has(sourceOf(h)) || (failed.has('xstocks') && h.kind === 'xstock') || (failed.has('robinhood-tokens') && h.kind === 'stock-token'));
+  const carried = previous.holdings.filter((h) => failed.has(sourceOf(h)) || (failed.has('robinhood-tokens') && h.kind === 'stock-token'));
   const keep = next.holdings.filter((h) => !carried.some((c) => c.id === h.id));
   const holdings = [...keep, ...carried].sort((a, b) => (b.valueUsd ?? -1) - (a.valueUsd ?? -1));
   return {
@@ -42,18 +42,48 @@ function merge(previous: State['data'], next: PortfolioResponse): NonNullable<St
   };
 }
 
+const CACHE = 'rb:portfolio:';
+
+/** Last confirmed balances from this device, so the dashboard paints instantly while a fresh read runs. */
+function cached(owner: string): State['data'] {
+  try {
+    const hit = JSON.parse(localStorage.getItem(CACHE + owner) || 'null');
+    return hit && Array.isArray(hit.holdings) ? { ...hit, staleSources: [] } : null;
+  } catch { return null; }
+}
+
+function store(owner: string, data: NonNullable<State['data']>) {
+  try { localStorage.setItem(CACHE + owner, JSON.stringify(data)); } catch {}
+}
+
+/** Removes cached balances from this device (on sign-out). */
+export function forgetPortfolio() {
+  try { Object.keys(localStorage).filter((k) => k.startsWith('rb:')).forEach((k) => localStorage.removeItem(k)); } catch {}
+  state = { data: null, loading: false, error: '', owner: '' };
+}
+
+let lastLoad = 0;
+
 async function load(owner: string, fresh = false) {
   if (inflight) return inflight;
-  if (state.owner !== owner) state = { data: null, loading: false, error: '', owner };
+  lastLoad = Date.now();
+  if (state.owner !== owner) state = { data: cached(owner), loading: false, error: '', owner };
   set({ loading: true, error: '' });
   inflight = api.portfolio(fresh)
-    .then((next) => set({ data: merge(state.data, next), loading: false, error: '' }))
+    .then((next) => { const data = merge(state.data, next); set({ data, loading: false, error: '' }); if (data.sources.every((s) => s.ok)) store(owner, data); })
     .catch((error) => set({ loading: false, error: error instanceof Error ? error.message : 'Portfolio unavailable.' }))
     .finally(() => { inflight = null; });
   return inflight;
 }
 
+/** Last known ETH price, used to show network fees in dollars. */
+export function ethPriceUsd() {
+  return state.data?.holdings.find((h) => h.kind === 'native')?.priceUsd ?? null;
+}
+
 export function usePortfolio(owner: string) {
+  // Switch to this account's cached balances before the first paint, not after an effect.
+  if (owner && state.owner !== owner && !inflight && typeof window !== 'undefined') state = { data: cached(owner), loading: true, error: '', owner };
   const snapshot = useSyncExternalStore(
     (listener) => { listeners.add(listener); return () => listeners.delete(listener); },
     () => state,
@@ -62,17 +92,12 @@ export function usePortfolio(owner: string) {
 
   useEffect(() => {
     if (!owner) return;
-    if (state.owner !== owner || (!state.data && !state.loading)) void load(owner);
-    // Refresh when the user comes back to the tab, at most once every 30s. No background polling.
-    let last = Date.now();
-    const onVisible = () => {
-      if (document.visibilityState === 'visible' && Date.now() - last > 30_000) {
-        last = Date.now();
-        void load(owner);
-      }
-    };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => document.removeEventListener('visibilitychange', onVisible);
+    if (!state.data || state.loading || state.owner !== owner) void load(owner);
+    // Keep balances current while the tab is visible (every 30s) and right after returning to it.
+    const tick = () => { if (document.visibilityState === 'visible' && Date.now() - lastLoad > 25_000) void load(owner); };
+    const timer = window.setInterval(tick, 30_000);
+    document.addEventListener('visibilitychange', tick);
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', tick); };
   }, [owner]);
 
   const refresh = useCallback(() => (owner ? load(owner, true) : Promise.resolve()), [owner]);

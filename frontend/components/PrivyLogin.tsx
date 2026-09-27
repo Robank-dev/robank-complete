@@ -27,7 +27,7 @@ function friendly(message?: string) {
 
 export default function PrivyLogin() {
   const { ready, authenticated } = usePrivy();
-  const { evmAddress, solanaAddress } = useRobankAccount();
+  const { evmAddress } = useRobankAccount();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code' | 'wallets'>('email');
@@ -41,13 +41,13 @@ export default function PrivyLogin() {
 
   useEffect(() => {
     if (step !== 'wallets') return;
-    if (evmAddress && solanaAddress) {
+    if (evmAddress) {
       const t = window.setTimeout(() => window.location.replace(safeNext()), 700);
       return () => window.clearTimeout(t);
     }
     const t = window.setTimeout(() => setSlow(true), 20_000);
     return () => window.clearTimeout(t);
-  }, [step, evmAddress, solanaAddress]);
+  }, [step, evmAddress]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -93,12 +93,11 @@ export default function PrivyLogin() {
         {step === 'wallets' ? (
           <div className="ui-grid" style={{ gap: 14 }}>
             <span className="ui-kicker">Almost there</span>
-            <h1>Preparing your wallets</h1>
+            <h1>Preparing your wallet</h1>
             <div className="ui-rows">
-              <div className="ui-row"><span className="ui-token"><img src="/token-icons/ethereum.png" alt="" /></span><div className="ui-row-main"><b>EVM wallet</b><span className="ui-mono">{evmAddress ? short(evmAddress) : 'Creating…'}</span></div>{evmAddress ? '✓' : <Spinner />}</div>
-              <div className="ui-row"><span className="ui-token"><img src="/chain-icons/solana.svg" alt="" /></span><div className="ui-row-main"><b>Solana wallet</b><span className="ui-mono">{solanaAddress ? short(solanaAddress) : 'Creating…'}</span></div>{solanaAddress ? '✓' : <Spinner />}</div>
+              <div className="ui-row"><span className="ui-token"><img src="/chain-icons/robinhood.svg" alt="" /></span><div className="ui-row-main"><b>Robinhood Chain wallet</b><span className="ui-mono">{evmAddress ? short(evmAddress) : 'Creating…'}</span></div>{evmAddress ? '✓' : <Spinner />}</div>
             </div>
-            {slow && <Alert tone="warn" action={<button type="button" className="ui-btn secondary sm" onClick={() => window.location.replace(safeNext())}>Continue</button>}>This is taking longer than usual. You can continue — the app will finish setting up your wallets.</Alert>}
+            {slow && <Alert tone="warn" action={<button type="button" className="ui-btn secondary sm" onClick={() => window.location.replace(safeNext())}>Continue</button>}>This is taking longer than usual. You can continue — the app will finish setting up your wallet.</Alert>}
           </div>
         ) : step === 'email' ? (
           <form className="ui-grid" style={{ gap: 14 }} onSubmit={requestCode} noValidate>

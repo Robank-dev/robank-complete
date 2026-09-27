@@ -1,5 +1,6 @@
 import { chainById, stablecoin } from '@/lib/chains';
 import { HttpError } from './http';
+import { serverRpcs } from './rpc';
 
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 const topicAddress = (topic: string) => ('0x' + topic.slice(-40)).toLowerCase();
@@ -14,7 +15,7 @@ export async function verifyStableTransfer({ chainId, asset, txHash, from, to, m
   const token = stablecoin(chainId, asset);
   if (!chain || chain.type !== 'evm' || !token) throw new HttpError(400, 'Unsupported payout network or asset.');
   let receipt: any = null;
-  for (const url of chain.rpcs) {
+  for (const url of serverRpcs()) {
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 8000);

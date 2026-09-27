@@ -18,7 +18,10 @@ export function toCompany(row: any) {
   return {
     id: row.id, legalName: row.legal_name, registrationNumber: row.registration_number ?? null, countryCode: row.country_code,
     jurisdictionCode: row.jurisdiction_code ?? null, status: row.status, verificationStatus: row.verification_status,
-    verificationUrl: row.verification_url ?? null, createdAt: row.created_at
+    verificationUrl: row.verification_url ?? null, createdAt: row.created_at,
+    entityType: row.entity_type ?? null, incorporationDate: row.incorporation_date ?? null, taxId: row.tax_id ?? null, website: row.website ?? null,
+    industry: row.industry ?? null, addressLine: row.address_line ?? null, city: row.city ?? null, postalCode: row.postal_code ?? null,
+    contactEmail: row.contact_email ?? null, verifiedAt: row.verified_at ?? null
   };
 }
 

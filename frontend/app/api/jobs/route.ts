@@ -1,5 +1,5 @@
 import { chainById, parseAmount, stablecoin } from '@/lib/chains';
-import { requireSession } from '@/lib/server/auth';
+import { canPostJobs, requireSession } from '@/lib/server/auth';
 import { HttpError, handle, ok, readJson, text } from '@/lib/server/http';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { newId, now, requireDb, toJob } from '@/lib/server/records';
@@ -13,11 +13,12 @@ export const GET = handle(async (request: Request) => {
   const { results } = scope === 'mine'
     ? await database.prepare('SELECT * FROM jobs WHERE creator_user_id = ?1 OR worker_user_id = ?1 ORDER BY updated_at DESC LIMIT 100').bind(session.userId).all()
     : await database.prepare("SELECT * FROM jobs WHERE status = 'open' ORDER BY created_at DESC LIMIT 100").all();
-  return ok({ jobs: results.map((row) => toJob(row, session.userId)) });
+  return ok({ jobs: results.map((row) => toJob(row, session.userId)), canPost: canPostJobs(session) });
 });
 
 export const POST = handle(async (request: Request) => {
   const session = await requireSession(request);
+  if (!canPostJobs(session)) throw new HttpError(403, 'Only the ROBANK jobs team can post jobs.');
   if (!session.evmAddress) throw new HttpError(409, 'Your wallet is still being prepared. Try again in a moment.');
   await rateLimit(`jobs:create:${session.userId}`, 10, 3600);
   const body = await readJson(request);

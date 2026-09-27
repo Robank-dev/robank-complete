@@ -17,7 +17,7 @@ The server always uses the wallets linked to the authenticated account. Addresse
 | GET | `/api/xstocks` | Raw xStocks catalog (supported networks only) |
 | GET | `/api/borrow` | Morpho markets on Base (8453) and Robinhood Chain (4663) |
 | GET | `/api/markets` | Reference quotes for a few public equities and BTC/ETH/SOL |
-| GET | `/api/agent-market?q=&category=` | x402 services (discovery only) and external bounties |
+| GET | `/api/agent-market?q=&category=` | x402 services and external bounties |
 | GET | `/api/lifi/tokens` | Supported stablecoin contracts per network |
 
 ## Authenticated endpoints

@@ -1,10 +1,10 @@
-import { STABLECOINS } from '@/lib/chains';
+import { ROBINHOOD_CHAIN_ID, STABLECOINS } from '@/lib/chains';
 import { HttpError, fetchJson, handle, ok } from '@/lib/server/http';
 
 export const dynamic = 'force-dynamic';
 
-const CHAINS = [8453, 4663];
-const MORPHO: Record<number, string> = { 8453: '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb', 4663: '0x9D53d5E3bd5E8d4Cbfa6DB1ca238AEA02E651010' };
+const CHAINS = [ROBINHOOD_CHAIN_ID];
+const MORPHO: Record<number, string> = { [ROBINHOOD_CHAIN_ID]: '0x9D53d5E3bd5E8d4Cbfa6DB1ca238AEA02E651010' };
 const LOAN_ASSETS = STABLECOINS.filter((t) => CHAINS.includes(t.chainId));
 
 export type BorrowMarket = {

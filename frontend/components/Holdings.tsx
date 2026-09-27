@@ -5,7 +5,7 @@ import { amount, usd } from '@/lib/format';
 import type { Holding } from '@/lib/server/portfolio';
 import { Alert, Empty, Skeleton, TokenIcon } from './ui';
 
-const KIND_LABEL: Record<Holding['kind'], string> = { stablecoin: 'Stablecoin', native: 'Gas token', xstock: 'xStock', 'stock-token': 'Stock Token' };
+const KIND_LABEL: Record<Holding['kind'], string> = { stablecoin: 'Stablecoin', native: 'Gas token', 'stock-token': 'Stock Token', token: 'ROBANK token' };
 
 export default function Holdings({ holdings, loading, error, onRetry, limit }: { holdings: Holding[]; loading: boolean; error: string; onRetry: () => void; limit?: number }) {
   if (loading && !holdings.length) {
@@ -15,7 +15,7 @@ export default function Holdings({ holdings, loading, error, onRetry, limit }: {
     return <Alert tone="bad" title="Balances unavailable." action={<button type="button" className="ui-btn secondary sm" onClick={onRetry}>Retry</button>}>{error}</Alert>;
   }
   if (!holdings.length) {
-    return <Empty title="No assets yet" action={<Link href="/receive" className="ui-btn secondary sm">Receive funds</Link>}>Deposit USDC, USDT, USDG or a supported token to your ROBANK address to get started.</Empty>;
+    return <Empty title="No assets yet" action={<Link href="/receive" className="ui-btn secondary sm">Receive funds</Link>}>Deposit USDG, ETH or any token on Robinhood Chain to your ROBANK address to get started.</Empty>;
   }
   const shown = limit ? holdings.slice(0, limit) : holdings;
   return (

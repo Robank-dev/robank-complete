@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import AppShell from '@/components/AppShell';
 import { Alert, Badge, Empty, Skeleton, Spinner } from '@/components/ui';
 import { api, type Job } from '@/lib/api';
-import { STABLECOINS, chainById, explorerTx, parseAmount } from '@/lib/chains';
+import { ROBINHOOD_CHAIN_ID, STABLECOINS, chainById, explorerTx, parseAmount } from '@/lib/chains';
 import { friendlyError } from '@/lib/errors';
 import { relativeTime, short } from '@/lib/format';
 
@@ -13,7 +13,6 @@ const STATUS: Record<string, { tone: 'ok' | 'pending' | 'bad' | 'off' | 'live'; 
   open: { tone: 'live', label: 'Open' }, claimed: { tone: 'pending', label: 'In progress' }, submitted: { tone: 'pending', label: 'Submitted' },
   approved: { tone: 'ok', label: 'Approved' }, paid: { tone: 'ok', label: 'Paid' }, cancelled: { tone: 'off', label: 'Cancelled' }
 };
-const REWARD_CHAINS = [...new Set(STABLECOINS.filter((t) => chainById(t.chainId)?.type === 'evm').map((t) => t.chainId))];
 
 function JobCard({ job, onChange }: { job: Job; onChange: (job: Job) => void }) {
   const [busy, setBusy] = useState('');
@@ -40,7 +39,7 @@ function JobCard({ job, onChange }: { job: Job; onChange: (job: Job) => void }) 
   }
 
   const reward = job.rewardAmount ? `${job.rewardAmount} ${job.rewardAsset} on ${chainById(job.rewardChainId)?.label}` : null;
-  const payLink = job.workerWallet && job.rewardAmount ? `/send?asset=${job.rewardAsset}&chain=${job.rewardChainId}&to=${job.workerWallet}&amount=${job.rewardAmount}` : '';
+  const payLink = job.workerWallet && job.rewardAmount ? `/send?asset=${job.rewardAsset}&to=${job.workerWallet}&amount=${job.rewardAmount}` : '';
 
   return (
     <article className="ui-panel">
@@ -90,7 +89,7 @@ function JobCard({ job, onChange }: { job: Job; onChange: (job: Job) => void }) 
 }
 
 function PostJob({ onCreated }: { onCreated: (job: Job) => void }) {
-  const [form, setForm] = useState({ title: '', description: '', rewardAmount: '', rewardAsset: 'USDC', rewardChainId: 8453, dueAt: '' });
+  const [form, setForm] = useState({ title: '', description: '', rewardAmount: '', rewardAsset: 'USDG', rewardChainId: ROBINHOOD_CHAIN_ID, dueAt: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const assets = STABLECOINS.filter((t) => t.chainId === form.rewardChainId).map((t) => t.symbol);
@@ -115,7 +114,7 @@ function PostJob({ onCreated }: { onCreated: (job: Job) => void }) {
     <section className="ui-panel" style={{ alignSelf: 'start' }}>
       <span className="ui-kicker">Post a job</span>
       <div className="ui-grid" style={{ gap: 12, marginTop: 12 }}>
-        <label className="ui-field"><span className="ui-label">Title</span><input className="ui-input" maxLength={120} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Translate our docs to Bahasa Indonesia" /></label>
+        <label className="ui-field"><span className="ui-label">Title</span><input className="ui-input" maxLength={120} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Translate our docs to Spanish" /></label>
         <label className="ui-field"><span className="ui-label">Task & acceptance criteria</span><textarea className="ui-textarea" maxLength={6000} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What needs to be done, and how you will judge it is done." /></label>
         <div className="ui-grid two" style={{ gap: 10 }}>
           <label className="ui-field"><span className="ui-label">Reward <em>optional</em></span><input className={`ui-input${rewardValid ? '' : ' invalid'}`} inputMode="decimal" value={form.rewardAmount} onChange={(e) => setForm({ ...form, rewardAmount: e.target.value.replace(/[^0-9.]/g, '').slice(0, 12) })} placeholder="50" /></label>
@@ -123,7 +122,7 @@ function PostJob({ onCreated }: { onCreated: (job: Job) => void }) {
         </div>
         {form.rewardAmount && (
           <div className="ui-grid two" style={{ gap: 10 }}>
-            <label className="ui-field"><span className="ui-label">Network</span><select className="ui-select" value={form.rewardChainId} onChange={(e) => { const id = Number(e.target.value); setForm({ ...form, rewardChainId: id, rewardAsset: STABLECOINS.find((t) => t.chainId === id)!.symbol }); }}>{REWARD_CHAINS.map((id) => <option key={id} value={id}>{chainById(id)!.label}</option>)}</select></label>
+            <label className="ui-field"><span className="ui-label">Network</span><input className="ui-input" value={chainById(ROBINHOOD_CHAIN_ID)!.label} readOnly /></label>
             <label className="ui-field"><span className="ui-label">Asset</span><select className="ui-select" value={form.rewardAsset} onChange={(e) => setForm({ ...form, rewardAsset: e.target.value })}>{assets.map((s) => <option key={s}>{s}</option>)}</select></label>
           </div>
         )}
@@ -139,16 +138,17 @@ function Jobs() {
   const [scope, setScope] = useState<'open' | 'mine'>('open');
   const [jobs, setJobs] = useState<Job[] | null>(null);
   const [error, setError] = useState('');
+  const [canPost, setCanPost] = useState(false);
   const load = useCallback(() => {
     setJobs(null);
     setError('');
-    api.jobs(scope).then((r) => setJobs(r.jobs)).catch((e) => setError(friendlyError(e, 'Jobs could not be loaded.')));
+    api.jobs(scope).then((r) => { setJobs(r.jobs); setCanPost(r.canPost); }).catch((e) => setError(friendlyError(e, 'Jobs could not be loaded.')));
   }, [scope]);
   useEffect(load, [load]);
   const replace = (job: Job) => setJobs((list) => (list || []).map((j) => (j.id === job.id ? job : j)));
 
   return (
-    <div className="ui-grid aside">
+    <div className={canPost ? 'ui-grid aside' : 'ui-grid'}>
       <div className="ui-grid" style={{ alignContent: 'start' }}>
         <div className="ui-seg" role="tablist" aria-label="Jobs">
           <button type="button" role="tab" aria-selected={scope === 'open'} className={scope === 'open' ? 'active' : ''} onClick={() => setScope('open')}>Open jobs</button>
@@ -156,10 +156,10 @@ function Jobs() {
         </div>
         {error ? <Alert tone="bad" action={<button className="ui-btn secondary sm" onClick={load}>Retry</button>}>{error}</Alert>
           : !jobs ? <Skeleton h={160} />
-            : !jobs.length ? <section className="ui-panel"><Empty title={scope === 'open' ? 'No open jobs right now' : 'You have no jobs yet'}>{scope === 'open' ? 'Post the first one — it takes a minute.' : 'Jobs you post or take appear here.'}</Empty></section>
+            : !jobs.length ? <section className="ui-panel"><Empty title={scope === 'open' ? 'No open jobs right now' : 'You have no jobs yet'}>{scope === 'open' ? 'New jobs from the ROBANK team appear here.' : 'Jobs you take appear here.'}</Empty></section>
               : jobs.map((job) => <JobCard key={job.id} job={job} onChange={replace} />)}
       </div>
-      <PostJob onCreated={(job) => { setScope('mine'); setJobs((list) => [job, ...(list || [])]); }} />
+      {canPost && <PostJob onCreated={(job) => { setScope('mine'); setJobs((list) => [job, ...(list || [])]); }} />}
     </div>
   );
 }
@@ -168,7 +168,7 @@ export default function JobsPage() {
   return (
     <AppShell>
       <div className="ui-page">
-        <header className="ui-head"><div><span className="ui-kicker">Jobs</span><h1>Jobs & bounties</h1><p>Post work, take work, and settle rewards in stablecoins — with the payment verified on-chain.</p></div></header>
+        <header className="ui-head"><div><span className="ui-kicker">Jobs</span><h1>Jobs & bounties</h1><p>Take jobs from the ROBANK team and get paid in USDG on Robinhood Chain — every payout is verified on-chain.</p></div></header>
         <Jobs />
       </div>
     </AppShell>

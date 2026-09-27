@@ -11,7 +11,7 @@ async function load(): Promise<RobinhoodToken[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 9000);
   try {
-    const response = await fetch('https://api.robinhood.com/rhj/assets', { signal: controller.signal, headers: { Accept: 'application/json', 'User-Agent': 'ROBANK/1.0' } });
+    const response = await fetch('https://api.robinhood.com/rhj/assets', { signal: controller.signal, headers: { Accept: 'application/json', 'User-Agent': 'ROBANK/1.0' }, cf: { cacheTtl: 900, cacheEverything: true } } as RequestInit);
     if (!response.ok) throw new Error(`Robinhood assets returned ${response.status}`);
     const body = await response.json() as any;
     const tokens: RobinhoodToken[] = [];

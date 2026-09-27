@@ -1,12 +1,12 @@
 import { decodeFunctionResult, encodeFunctionData } from 'viem';
-import { CHAINS, NATIVE_LOGOS, SOLANA_CHAIN_ID, SOLANA_TOKEN_PROGRAMS, STABLECOINS, STABLE_META, formatUnits, type Chain } from '@/lib/chains';
-import { getXStocksCatalog, type XStockAsset } from '@/lib/xstocksCatalog';
+import { NATIVE_LOGOS, ROBINHOOD, STABLECOINS, STABLE_META, formatUnits, type Chain } from '@/lib/chains';
 import { getRobinhoodTokens, type RobinhoodToken } from '@/lib/robinhoodCatalog';
-import { env } from './env';
+import { serverRpcs } from './rpc';
+import { ROBANK_TOKEN, tokenLive } from '@/lib/token';
 
 export type Holding = {
   id: string;
-  kind: 'stablecoin' | 'native' | 'xstock' | 'stock-token';
+  kind: 'stablecoin' | 'native' | 'stock-token' | 'token';
   symbol: string;
   name: string;
   logo: string;
@@ -39,7 +39,7 @@ const MULTICALL_ABI = [
 ] as const;
 const BALANCE_ABI = [{ type: 'function', name: 'balanceOf', stateMutability: 'view', inputs: [{ name: 'owner', type: 'address' }], outputs: [{ type: 'uint256' }] }] as const;
 
-type Target = { kind: Holding['kind']; symbol: string; name: string; logo: string; contract: string | null; decimals: number; xstock?: XStockAsset; rh?: RobinhoodToken };
+type Target = { kind: Holding['kind']; symbol: string; name: string; logo: string; contract: string | null; decimals: number; rh?: RobinhoodToken };
 const DECIMALS_ABI = [{ type: 'function', name: 'decimals', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint8' }] }] as const;
 
 async function rpc(url: string, body: unknown, timeoutMs: number) {
@@ -65,7 +65,7 @@ async function rpc(url: string, body: unknown, timeoutMs: number) {
 /** Tries each RPC in order; a result is only accepted when the whole read succeeds. */
 async function withFallback<T>(chain: Chain, read: (url: string) => Promise<T>): Promise<T> {
   let lastError: unknown;
-  for (const url of chain.rpcs) {
+  for (const url of chain.id === ROBINHOOD.id ? serverRpcs() : chain.rpcs) {
     try { return await read(url); } catch (error) { lastError = error; }
   }
   throw lastError instanceof Error ? lastError : new Error('All RPCs failed');
@@ -131,42 +131,6 @@ async function readDecimals(chain: Chain, contracts: `0x${string}`[]): Promise<n
   });
 }
 
-async function readSolana(owner: string, mints: Map<string, Target>) {
-  const base = CHAINS.find((c) => c.id === SOLANA_CHAIN_ID)!;
-  // A dedicated RPC (e.g. Helius) can be configured; public RPCs are the fallback.
-  const custom = env('SOLANA_RPC_URL');
-  const chain = custom.startsWith('https://') ? { ...base, rpcs: [custom, ...base.rpcs] } : base;
-  // Public Solana RPCs throttle batched and indexed calls, so each read is a single request with backoff.
-  const call = async (method: string, params: unknown[]) => {
-    let lastError: unknown;
-    for (const url of chain.rpcs) {
-      for (let attempt = 0; attempt < 3; attempt += 1) {
-        try {
-          const body = await rpc(url, { jsonrpc: '2.0', id: 1, method, params }, 8000);
-          return body.result;
-        } catch (error) {
-          lastError = error;
-          if (!/429|too many/i.test(String((error as Error)?.message))) break;
-          await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
-        }
-      }
-    }
-    throw lastError instanceof Error ? lastError : new Error('Solana read failed');
-  };
-  const balance = await call('getBalance', [owner, { commitment: 'confirmed' }]);
-  const tokens = new Map<string, bigint>();
-  for (const programId of SOLANA_TOKEN_PROGRAMS) {
-    const result = await call('getTokenAccountsByOwner', [owner, { programId }, { encoding: 'jsonParsed', commitment: 'confirmed' }]);
-    for (const account of result?.value || []) {
-      const info = account?.account?.data?.parsed?.info;
-      const mint = String(info?.mint || '');
-      if (!mints.has(mint)) continue;
-      try { tokens.set(mint, (tokens.get(mint) || BigInt(0)) + BigInt(String(info?.tokenAmount?.amount || '0'))); } catch {}
-    }
-  }
-  return { lamports: BigInt(Number(balance?.value ?? 0)), tokens };
-}
-
 const priceCache = new Map<string, { at: number; prices: Map<string, number> }>();
 
 async function cachedPrices(key: string, ttlMs: number, load: () => Promise<Map<string, number>>) {
@@ -181,18 +145,17 @@ async function cachedPrices(key: string, ttlMs: number, load: () => Promise<Map<
   }
 }
 
+// Robinhood Chain pays gas in ETH; the reference price comes from the ETH mainnet quote.
 const NATIVE_PRICE_SOURCES: Record<string, { lifi: string; coinbase: string }> = {
-  ETH: { lifi: 'chain=1&token=0x0000000000000000000000000000000000000000', coinbase: 'ETH' },
-  BNB: { lifi: 'chain=56&token=0x0000000000000000000000000000000000000000', coinbase: 'BNB' },
-  POL: { lifi: 'chain=137&token=0x0000000000000000000000000000000000000000', coinbase: 'POL' },
-  SOL: { lifi: 'chain=SOL&token=11111111111111111111111111111111', coinbase: 'SOL' }
+  ETH: { lifi: 'chain=1&token=0x0000000000000000000000000000000000000000', coinbase: 'ETH' }
 };
 
 async function priceFrom(url: string, pick: (body: any) => unknown) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4000);
   try {
-    const response = await fetch(url, { signal: controller.signal, headers: { Accept: 'application/json', 'User-Agent': 'ROBANK/1.0' } });
+    // Cached at Cloudflare's edge so a cold Worker isolate does not wait on the price API.
+    const response = await fetch(url, { signal: controller.signal, headers: { Accept: 'application/json', 'User-Agent': 'ROBANK/1.0' }, cf: { cacheTtl: 60, cacheEverything: true } } as RequestInit);
     if (!response.ok) return null;
     const price = Number(pick(await response.json()));
     return Number.isFinite(price) && price > 0 ? price : null;
@@ -220,7 +183,7 @@ export async function underlyingPrices() {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 7000);
     try {
-      const response = await fetch('https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=10000', { signal: controller.signal, headers: { Accept: 'application/json', 'User-Agent': 'Mozilla/5.0 ROBANK/1.0' } });
+      const response = await fetch('https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=10000', { signal: controller.signal, headers: { Accept: 'application/json', 'User-Agent': 'Mozilla/5.0 ROBANK/1.0' }, cf: { cacheTtl: 120, cacheEverything: true } } as RequestInit);
       const body = await response.json() as any;
       const out = new Map<string, number>();
       for (const row of body?.data?.table?.rows || []) {
@@ -256,26 +219,24 @@ function holding(target: Target, chain: Chain, raw: bigint, price: number | null
   };
 }
 
-export async function readPortfolio(evmAddress: string, solanaAddress: string): Promise<Portfolio> {
-  const [catalogResult, rhResult, natives, underlying] = await Promise.all([
-    getXStocksCatalog().then((assets) => ({ ok: true as const, assets })).catch(() => ({ ok: false as const, assets: [] as XStockAsset[] })),
+export async function readPortfolio(evmAddress: string): Promise<Portfolio> {
+  const [rhResult, natives, underlying] = await Promise.all([
     (evmAddress ? getRobinhoodTokens() : Promise.resolve([] as RobinhoodToken[])).then((tokens) => ({ ok: true as const, tokens })).catch(() => ({ ok: false as const, tokens: [] as RobinhoodToken[] })),
     nativePrices(),
     underlyingPrices()
   ]);
   const sources: SourceStatus[] = [];
-  if (!catalogResult.ok) sources.push({ id: 'xstocks', label: 'xStocks catalog', ok: false, error: 'xStocks holdings could not be checked.' });
   if (!rhResult.ok) sources.push({ id: 'robinhood-tokens', label: 'Robinhood Stock Tokens', ok: false, error: 'Robinhood Stock Token holdings could not be checked.' });
 
   const holdings: Holding[] = [];
-  const xstockPrice = (asset: XStockAsset) => underlying.get(asset.underlyingSymbol) ?? null;
+  const chain = ROBINHOOD;
 
-  const evmJobs = evmAddress ? CHAINS.filter((c) => c.type === 'evm').map(async (chain) => {
+  if (evmAddress) {
     const targets: Target[] = [
-      { kind: 'native', symbol: chain.native.symbol, name: chain.native.symbol === 'ETH' ? 'Ether' : chain.native.symbol, logo: NATIVE_LOGOS[chain.native.symbol] || chain.icon, contract: null, decimals: chain.native.decimals },
-      ...STABLECOINS.filter((t) => t.chainId === chain.id).map((t) => ({ kind: 'stablecoin' as const, symbol: t.symbol, name: STABLE_META[t.symbol].name, logo: STABLE_META[t.symbol].logo, contract: t.address, decimals: t.decimals })),
-      ...catalogResult.assets.flatMap((asset) => asset.deployments.filter((d) => d.chainId === chain.id).map((d) => ({ kind: 'xstock' as const, symbol: asset.symbol, name: asset.name, logo: asset.logo, contract: d.address, decimals: d.decimals, xstock: asset }))),
-      ...(chain.id === 4663 ? rhResult.tokens.map((t) => ({ kind: 'stock-token' as const, symbol: t.symbol, name: `${t.name} Stock Token`, logo: t.logo || chain.icon, contract: t.contract, decimals: -1, rh: t })) : [])
+      { kind: 'native', symbol: chain.native.symbol, name: 'Ether', logo: NATIVE_LOGOS[chain.native.symbol] || chain.icon, contract: null, decimals: chain.native.decimals },
+      ...STABLECOINS.map((t) => ({ kind: 'stablecoin' as const, symbol: t.symbol, name: STABLE_META[t.symbol].name, logo: STABLE_META[t.symbol].logo, contract: t.address, decimals: t.decimals })),
+      ...(tokenLive() ? [{ kind: 'token' as const, symbol: ROBANK_TOKEN.symbol, name: ROBANK_TOKEN.name, logo: ROBANK_TOKEN.logo, contract: ROBANK_TOKEN.address, decimals: -1 }] : []),
+      ...rhResult.tokens.map((t) => ({ kind: 'stock-token' as const, symbol: t.symbol, name: `${t.name} Stock Token`, logo: t.logo || chain.icon, contract: t.contract, decimals: -1, rh: t }))
     ];
     try {
       const balances = await readEvmChain(chain, evmAddress as `0x${string}`, targets);
@@ -290,41 +251,20 @@ export async function readPortfolio(evmAddress: string, solanaAddress: string): 
         const target = targets[index];
         if (target.decimals < 0) return;
         if (target.kind === 'stablecoin') holdings.push(holding(target, chain, raw, 1, 'Stablecoin par'));
+        else if (target.kind === 'token') holdings.push(holding(target, chain, raw, null, null));
         else if (target.kind === 'native') holdings.push(holding(target, chain, raw, natives.get(chain.native.priceKey) ?? null, 'LI.FI / Coinbase spot'));
-        else if (target.kind === 'stock-token') {
+        else {
           const base = target.rh ? underlying.get(target.rh.symbol) : undefined;
           holdings.push(holding(target, chain, raw, base != null ? base * target.rh!.multiplier : null, 'Underlying last sale × token multiplier'));
-        } else holdings.push(holding(target, chain, raw, target.xstock ? xstockPrice(target.xstock) : null, 'Underlying last sale (Nasdaq)'));
+        }
       });
       sources.push({ id: `evm:${chain.id}`, label: chain.label, ok: true });
     } catch {
       sources.push({ id: `evm:${chain.id}`, label: chain.label, ok: false, error: `${chain.label} balances could not be read right now.` });
     }
-  }) : [];
+  }
 
-  const solanaJob = solanaAddress ? (async () => {
-    const chain = CHAINS.find((c) => c.id === SOLANA_CHAIN_ID)!;
-    const mints = new Map<string, Target>();
-    for (const t of STABLECOINS.filter((s) => s.chainId === SOLANA_CHAIN_ID)) mints.set(t.address, { kind: 'stablecoin', symbol: t.symbol, name: STABLE_META[t.symbol].name, logo: STABLE_META[t.symbol].logo, contract: t.address, decimals: t.decimals });
-    for (const asset of catalogResult.assets) for (const d of asset.deployments) if (d.chainId === SOLANA_CHAIN_ID) mints.set(d.address, { kind: 'xstock', symbol: asset.symbol, name: asset.name, logo: asset.logo, contract: d.address, decimals: d.decimals, xstock: asset });
-    try {
-      const { lamports, tokens } = await readSolana(solanaAddress, mints);
-      if (lamports > BigInt(0)) holdings.push(holding({ kind: 'native', symbol: 'SOL', name: 'Solana', logo: NATIVE_LOGOS.SOL, contract: null, decimals: 9 }, chain, lamports, natives.get('SOL') ?? null, 'LI.FI / Coinbase spot'));
-      tokens.forEach((raw, mint) => {
-        const target = mints.get(mint)!;
-        if (raw <= BigInt(0)) return;
-        if (target.kind === 'stablecoin') holdings.push(holding(target, chain, raw, 1, 'Stablecoin par'));
-        else holdings.push(holding(target, chain, raw, target.xstock ? xstockPrice(target.xstock) : null, 'Underlying last sale (Nasdaq)'));
-      });
-      sources.push({ id: 'solana', label: 'Solana', ok: true });
-    } catch {
-      sources.push({ id: 'solana', label: 'Solana', ok: false, error: 'Solana balances could not be read right now.' });
-    }
-  })() : Promise.resolve();
-
-  await Promise.all([...evmJobs, solanaJob]);
-
-  holdings.sort((a, b) => (b.valueUsd ?? -1) - (a.valueUsd ?? -1) || a.symbol.localeCompare(b.symbol) || a.chainId - b.chainId);
+  holdings.sort((a, b) => (b.valueUsd ?? -1) - (a.valueUsd ?? -1) || a.symbol.localeCompare(b.symbol));
   const totalUsd = holdings.reduce((sum, h) => sum + (h.valueUsd ?? 0), 0);
   return {
     generatedAt: new Date().toISOString(),

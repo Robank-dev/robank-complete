@@ -22,20 +22,22 @@ Always confirm with `GET /api/status` (or `robank status`) — it is authoritati
 
 | Capability | State | Notes |
 |---|---|---|
-| Portfolio | Live | Stablecoins, native gas tokens, xStocks and Robinhood Stock Tokens, read on-chain |
-| Same-network transfers | Live | EVM and Solana, signed in the app |
-| Cross-network stablecoin transfers | Live | Routed by LI.FI, signed in the app |
-| Borrow | Live | Morpho markets on Base and Robinhood Chain |
-| AI agent | Live | Reads balances, explains, prepares transfers |
+| Portfolio | Live | USDG, ETH and Robinhood Stock Tokens on Robinhood Chain, read on-chain |
+| Transfers | Live | USDG, ETH and Stock Tokens on Robinhood Chain, confirmed by the user in the app |
+| Stock Tokens | Live | Buy and sell with USDG (KyberSwap route), confirmed by the user |
+| Borrow | Live | Morpho markets on Robinhood Chain |
+| AI agent | Live | Reads balances, explains, prepares transfers and orders in the chat |
+| Agent Market (x402) | Live | Pay-per-call services paid in USDG from the app |
+| ROBANK Card | Live | Virtual Visa card: identity check, then a card application reviewed by the issuer, then $5.50 once plus the starting balance, loaded from USDG |
+| Identity verification (Didit) | Live | Once, on the Card page; required for the card and for Cash out |
 | Jobs, companies, updates | Live | Account records |
-| Buy USDC with card/bank (MoonPay) | Provider-dependent | Only when `onramp` is `live` |
-| Identity / company verification (Didit) | Provider-dependent | Only when `kyc` / `kyb` is `live` |
-| ROBANK Card, bank payouts, Apple/Google Pay, QR pay | Not available | Do not offer or imply these exist |
+| Cash out to PayPal | Live | USD, EUR, GBP, AUD, CAD, JPY, MXN; 2% fee (min $1); one-time Didit identity check |
+| Bank accounts, bank transfers, Apple/Google Pay, QR pay | Not available | Do not offer or imply these exist |
 
 ## Rules for agents
 
 1. **Never claim an action happened unless it was confirmed on-chain.** A prepared transfer is not a sent transfer.
-2. **You cannot sign.** To move funds, prepare the transfer and give the user the review link (`https://robank.co/send?asset=…&chain=…&to=…&amount=…`). The user checks the fee and signs in the app.
+2. **You cannot sign.** To move funds, prepare the transfer; the user checks the fee and confirms it in the app (or opens `https://robank.co/send?asset=…&to=…&amount=…`).
 3. **Never ask for or accept** seed phrases, private keys, passwords, or Privy tokens. ROBANK API keys (`rbk_…`) grant read/prepare access only; treat them as secrets anyway.
 4. **Match asset and network.** A USDC address on Base is the same hex string as on Ethereum, but they are different balances. Sending on the wrong network can lose funds.
 5. **Do not invent** balances, prices, APYs, fees, quotes, card details or confirmations. Read them from the API.

@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 
 const slides = [
-  { eyebrow: 'ROBANK / ONE ACCOUNT', title: 'Your money, on every network.', detail: 'Stablecoins, gas tokens and tokenized stocks in one view.', image: '/banners/robank-hero-wide.jpg', mode: 'full' },
-  { eyebrow: 'ROBANK / GLOBAL TRANSFERS', title: 'Move value across networks.', detail: 'Same-network sends and LI.FI cross-chain routes.', image: '/banners/robank-global-wide.jpg', mode: 'focus' },
+  { eyebrow: 'ROBANK / ONE ACCOUNT', title: 'Your money, on Robinhood Chain.', detail: 'USDG, ETH and Stock Tokens in one view.', image: '/banners/robank-hero-wide.jpg', mode: 'full' },
+  { eyebrow: 'ROBANK / TRANSFERS', title: 'Send in seconds.', detail: 'Reviewed and signed by you, settled on Robinhood Chain.', image: '/banners/robank-global-wide.jpg', mode: 'focus' },
   { eyebrow: 'ROBANK / AI OPERATIONS', title: 'Intent in. Controlled execution out.', detail: 'The agent prepares. You review and sign.', image: '/banners/robank-ai-wide.jpg', mode: 'focus' },
 ];
 

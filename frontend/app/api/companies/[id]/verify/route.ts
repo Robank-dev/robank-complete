@@ -15,7 +15,9 @@ export const POST = handle(async (request: Request, context: { params: Promise<{
   const company: any = await database.prepare('SELECT * FROM companies WHERE id = ?1 AND owner_user_id = ?2').bind(id, session.userId).first();
   if (!company) throw new HttpError(404, 'Company not found.');
   if (company.verification_status === 'approved') throw new HttpError(409, 'This company is already verified.');
-  const { sessionId, url } = await createDiditSession('DIDIT_KYB_WORKFLOW_ID', `robank-company-${company.id}`);
+  // Continue an unfinished verification instead of opening (and paying for) a new session.
+  if (company.verification_status === 'pending' && company.verification_url) return ok({ company: toCompany(company), url: company.verification_url });
+  const { sessionId, url } = await createDiditSession('kyb', `robank-company-${company.id}`);
   await database.prepare("UPDATE companies SET status = 'verification_pending', verification_status = 'pending', verification_session_id = ?2, verification_url = ?3, updated_at = ?4 WHERE id = ?1")
     .bind(id, sessionId, url, now()).run();
   const row = await database.prepare('SELECT * FROM companies WHERE id = ?1').bind(id).first();

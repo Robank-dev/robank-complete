@@ -16,7 +16,7 @@ robank login`;
 
 const EXAMPLES = `robank balance
 robank ask "what can I borrow against?"
-robank send 25 USDC 0xRecipient… --chain base   # prints a review link, sends nothing
+robank send 25 USDG 0xRecipient… --chain robinhood   # prints a review link, sends nothing
 robank stocks tesla --json`;
 
 function Keys() {

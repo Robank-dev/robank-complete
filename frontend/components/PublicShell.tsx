@@ -26,7 +26,7 @@ export default function PublicShell({ children }: { children: React.ReactNode })
       <main className="pub-main">{children}</main>
       <footer className="pub-foot">
         <span>© {new Date().getFullYear()} ROBANK · Self-custodial software, not a bank.</span>
-        <span><a href="mailto:contact@robank.co">contact@robank.co</a> · <a href="https://x.com/robankdev" target="_blank" rel="noreferrer">X</a></span>
+        <span><a href="mailto:contact@robank.co">contact@robank.co</a> · <a href="https://x.com/robank_co" target="_blank" rel="noreferrer">X</a></span>
       </footer>
     </div>
   );

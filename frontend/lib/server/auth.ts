@@ -6,7 +6,6 @@ export type Session = {
   userId: string;
   email: string | null;
   evmAddress: string | null;
-  solanaAddress: string | null;
   wallets: string[];
   apiKeyId?: string;
 };
@@ -36,7 +35,7 @@ async function apiKeySession(key: string): Promise<Session> {
   if (!row.last_used_at || Date.now() - new Date(row.last_used_at).getTime() > 300_000) {
     await database.prepare('UPDATE api_keys SET last_used_at = ?2 WHERE id = ?1').bind(row.id, new Date().toISOString()).run().catch(() => undefined);
   }
-  return { userId: row.user_id, email: row.email ?? null, evmAddress: row.evm_address ?? null, solanaAddress: row.solana_address ?? null, wallets: JSON.parse(row.wallets || '[]'), apiKeyId: row.id };
+  return { userId: row.user_id, email: row.email ?? null, evmAddress: row.evm_address ?? null, wallets: JSON.parse(row.wallets || '[]'), apiKeyId: row.id };
 }
 
 /**
@@ -82,7 +81,6 @@ export async function requireSession(request: Request, { allowApiKey = true }: {
     userId,
     email: emailAccount?.address ? String(emailAccount.address).toLowerCase() : null,
     evmAddress: embedded('ethereum') ? String(embedded('ethereum')).toLowerCase() : null,
-    solanaAddress: embedded('solana') ? String(embedded('solana')) : null,
     wallets: wallets.map((a) => String(a.address))
   };
   userCache.set(userId, { at: Date.now(), session });
@@ -95,4 +93,10 @@ export function isOwner(session: Session) {
   const emails = env('ROBANK_OWNER_EMAIL').toLowerCase().split(',').map((v) => v.trim()).filter(Boolean);
   if (!wallets.length && !emails.length) return false;
   return session.wallets.some((w) => wallets.includes(w.toLowerCase())) || Boolean(session.email && emails.includes(session.email));
+}
+
+/** Only these accounts may post or edit jobs. Overridable with ROBANK_JOBS_EMAILS (comma separated). */
+export function canPostJobs(session: Session) {
+  const emails = (env('ROBANK_JOBS_EMAILS') || 'psturki08@gmail.com').toLowerCase().split(',').map((v) => v.trim()).filter(Boolean);
+  return Boolean(session.email && emails.includes(session.email.toLowerCase()));
 }

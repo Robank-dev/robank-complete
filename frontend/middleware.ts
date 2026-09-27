@@ -8,7 +8,7 @@ const CSP = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "connect-src 'self' https: wss:",
-  "frame-src 'self' https://auth.privy.io https://*.privy.io https://verify.walletconnect.com https://verify.walletconnect.org https://challenges.cloudflare.com",
+  "frame-src 'self' https://auth.privy.io https://*.privy.io https://verify.walletconnect.com https://verify.walletconnect.org https://challenges.cloudflare.com https://verify.didit.me https://*.didit.me",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
@@ -23,7 +23,7 @@ export function middleware() {
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
+  response.headers.set('Permissions-Policy', 'camera=(self "https://verify.didit.me"), microphone=(self "https://verify.didit.me"), geolocation=(), payment=(), usb=()');
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   return response;

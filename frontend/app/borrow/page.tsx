@@ -1,15 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createPublicClient, createWalletClient, custom, fallback, http, parseAbi, type Address, type Hex } from 'viem';
+import { encodeFunctionData, parseAbi, type Address, type Hex } from 'viem';
 import AppShell from '@/components/AppShell';
 import { Alert, Badge, Empty, Skeleton, Spinner, TokenIcon } from '@/components/ui';
 import { api } from '@/lib/api';
-import { chainById, explorerTx, formatUnits, parseAmount } from '@/lib/chains';
+import { ROBINHOOD_CHAIN_ID, chainById, explorerTx, formatUnits, parseAmount } from '@/lib/chains';
 import { friendlyError } from '@/lib/errors';
 import { amount as fmtAmount, percent, short, usd } from '@/lib/format';
 import { useRobankAccount } from '@/lib/hooks/useRobankAccount';
-import { roBankEvmChains } from '@/lib/wagmi';
+import { rpc as client, sendTx, waitTx } from '@/lib/tx';
 import type { BorrowMarket } from '@/app/api/borrow/route';
 
 const ERC20 = parseAbi(['function approve(address spender, uint256 amount) returns (bool)', 'function allowance(address owner, address spender) view returns (uint256)', 'function balanceOf(address owner) view returns (uint256)']);
@@ -37,7 +37,7 @@ function BorrowWorkspace() {
   const account = useRobankAccount();
   const [chains, setChains] = useState<Chain[] | null>(null);
   const [loadError, setLoadError] = useState('');
-  const [chainId, setChainId] = useState(8453);
+  const chainId = ROBINHOOD_CHAIN_ID;
   const [marketId, setMarketId] = useState('');
   const [query, setQuery] = useState('');
   const [state, setState] = useState<OnChain | null>(null);
@@ -59,8 +59,6 @@ function BorrowWorkspace() {
   const chain = chains?.find((c) => c.chainId === chainId);
   const markets = useMemo(() => (chain?.markets || []).filter((m) => !query || `${m.collateral.symbol} ${m.collateral.name} ${m.loan.symbol}`.toLowerCase().includes(query.toLowerCase())), [chain, query]);
   const market = chain?.markets.find((m) => m.marketId === marketId);
-  const viemChain = roBankEvmChains.find((c) => c.id === chainId)!;
-  const client = useMemo(() => createPublicClient({ chain: viemChain, transport: fallback(chainById(chainId)!.rpcs.map((url) => http(url))) }), [chainId, viemChain]);
   const owner = account.evmAddress as Address | '';
 
   const readState = useCallback(async () => {
@@ -142,32 +140,34 @@ function BorrowWorkspace() {
     const push = (tx: Tx) => { list.push(tx); setTxs([...list]); return list.length - 1; };
     const update = (i: number, patch: Partial<Tx>) => { list[i] = { ...list[i], ...patch }; setTxs([...list]); };
     try {
-      await wallet.switchChain(chainId);
-      const walletClient = createWalletClient({ account: owner as Address, chain: viemChain, transport: custom(await wallet.getEthereumProvider()) });
-      const send = async (label: string, request: Parameters<typeof walletClient.writeContract>[0]) => {
-        const i = push({ label, state: 'pending' });
-        const hash = await walletClient.writeContract(request);
-        update(i, { hash });
-        const receipt = await client.waitForTransactionReceipt({ hash, timeout: 150_000 });
-        if (receipt.status !== 'success') { update(i, { state: 'failed' }); throw new Error(`${label} failed on-chain.`); }
+      const send = async (label: string, call: { address: Address; abi: any; functionName: string; args: readonly unknown[] }, amount: string) => {
+        const hash = await sendTx(wallet, { to: call.address, data: encodeFunctionData(call as any) }, {
+          title: label,
+          rows: [{ label: label.startsWith('Approve') ? 'Exact amount' : 'Amount', value: amount }, { label: 'Market', value: `${C!.symbol} / ${L!.symbol}` }],
+          note: label.startsWith('Approve') ? 'A one-time approval for exactly this amount so Morpho can move it.' : undefined,
+          action: label.split(' ')[0]
+        });
+        const i = push({ label, state: 'pending', hash });
+        if (!(await waitTx(hash))) { update(i, { state: 'failed' }); throw new Error(`${label} failed on-chain.`); }
         update(i, { state: 'done' });
       };
+      const shown = (value: bigint, token: { decimals: number; symbol: string }) => `${fmtAmount(formatUnits(value, token.decimals))} ${token.symbol}`;
       const approve = async (token: Address, needed: bigint, symbol: string) => {
         const allowance = await client.readContract({ address: token, abi: ERC20, functionName: 'allowance', args: [owner as Address, market.morpho as Address] });
-        if (allowance < needed) await send(`Approve ${symbol}`, { account: owner as Address, chain: viemChain, address: token, abi: ERC20, functionName: 'approve', args: [market.morpho as Address, needed] });
+        if (allowance < needed) await send(`Approve ${symbol}`, { address: token, abi: ERC20, functionName: 'approve', args: [market.morpho as Address, needed] }, shown(needed, token === params.loanToken ? L! : C!));
       };
       if (action === 'supply') {
         await approve(params.collateralToken, units, C!.symbol);
-        await send(`Supply ${C!.symbol}`, { account: owner as Address, chain: viemChain, address: market.morpho as Address, abi: MORPHO, functionName: 'supplyCollateral', args: [params, units, owner as Address, '0x'] });
+        await send(`Supply ${C!.symbol}`, { address: market.morpho as Address, abi: MORPHO, functionName: 'supplyCollateral', args: [params, units, owner as Address, '0x'] }, shown(units, C!));
       } else if (action === 'borrow') {
-        await send(`Borrow ${L!.symbol}`, { account: owner as Address, chain: viemChain, address: market.morpho as Address, abi: MORPHO, functionName: 'borrow', args: [params, units, ZERO, owner as Address, owner as Address] });
+        await send(`Borrow ${L!.symbol}`, { address: market.morpho as Address, abi: MORPHO, functionName: 'borrow', args: [params, units, ZERO, owner as Address, owner as Address] }, shown(units, L!));
       } else if (action === 'repay') {
         // Repaying everything uses shares so accrued interest is covered exactly and no dust debt remains.
         const needed = repayAll ? state.debt + state.debt / BigInt(1000) + BigInt(1) : units;
         await approve(params.loanToken, needed, L!.symbol);
-        await send(`Repay ${L!.symbol}`, { account: owner as Address, chain: viemChain, address: market.morpho as Address, abi: MORPHO, functionName: 'repay', args: repayAll ? [params, ZERO, state.borrowShares, owner as Address, '0x'] : [params, units, ZERO, owner as Address, '0x'] });
+        await send(`Repay ${L!.symbol}`, { address: market.morpho as Address, abi: MORPHO, functionName: 'repay', args: repayAll ? [params, ZERO, state.borrowShares, owner as Address, '0x'] : [params, units, ZERO, owner as Address, '0x'] }, repayAll ? `All debt (${shown(state.debt, L!)})` : shown(units, L!));
       } else {
-        await send(`Withdraw ${C!.symbol}`, { account: owner as Address, chain: viemChain, address: market.morpho as Address, abi: MORPHO, functionName: 'withdrawCollateral', args: [params, units, owner as Address, owner as Address] });
+        await send(`Withdraw ${C!.symbol}`, { address: market.morpho as Address, abi: MORPHO, functionName: 'withdrawCollateral', args: [params, units, owner as Address, owner as Address] }, shown(units, C!));
       }
       setResult({ tone: 'ok', text: 'Confirmed on-chain. Your position has been refreshed.' });
       setInput('');
@@ -185,9 +185,7 @@ function BorrowWorkspace() {
   return (
     <div className="ui-grid" style={{ gap: 14 }}>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div className="ui-seg" role="tablist" aria-label="Network">
-          {[8453, 4663].map((id) => <button key={id} type="button" role="tab" aria-selected={chainId === id} className={chainId === id ? 'active' : ''} onClick={() => { setChainId(id); setMarketId(''); }}>{chainById(id)!.label}</button>)}
-        </div>
+        <span className="ui-muted" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><img src="/chain-icons/robinhood.svg" alt="" width={16} height={16} />Morpho markets on {chainById(chainId)!.label}</span>
         <input className="ui-input" style={{ maxWidth: 260, minHeight: 40 }} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search collateral…" aria-label="Search markets" />
       </div>
 
@@ -217,7 +215,7 @@ function BorrowWorkspace() {
             <div className="ui-grid" style={{ gap: 14 }}>
               <div className="ui-panel-head" style={{ marginBottom: 0 }}>
                 <div><span className="ui-kicker">{chainById(chainId)!.label} · Morpho</span><h2>{C!.symbol} → {L!.symbol}</h2><p className="ui-muted">{C!.name}</p></div>
-                <a className="ui-link" href={`https://app.morpho.org/${chainId === 8453 ? 'base' : 'robinhood'}/market/${market.marketId}`} target="_blank" rel="noreferrer">Morpho ↗</a>
+                <a className="ui-link" href={`https://app.morpho.org/robinhood/market/${market.marketId}`} target="_blank" rel="noreferrer">Morpho ↗</a>
               </div>
               {!owner ? <Alert tone="warn">Your wallet is still being prepared.</Alert> : stateError ? <Alert tone="bad" action={<button className="ui-btn secondary sm" onClick={() => void readState()}>Retry</button>}>{stateError}</Alert> : !state ? <Skeleton h={120} /> : (
                 <>
@@ -264,7 +262,6 @@ function BorrowWorkspace() {
         </section>
       </div>
       <Alert tone="info" title="How borrowing works.">You keep custody: collateral sits in the Morpho protocol contract, not with ROBANK. If your loan-to-value reaches the market&apos;s liquidation threshold, part of your collateral can be sold to repay the debt. Rates are variable and set by the market.</Alert>
-      <p className="ui-muted">Solana lending (Kamino) is not integrated in ROBANK. <a className="ui-link" href="https://app.kamino.finance/" target="_blank" rel="noreferrer">Open Kamino ↗</a> to use it directly with your own wallet.</p>
     </div>
   );
 }
@@ -273,7 +270,7 @@ export default function BorrowPage() {
   return (
     <AppShell>
       <div className="ui-page">
-        <header className="ui-head"><div><span className="ui-kicker">Borrow</span><h1>Borrow against your assets</h1><p>Use crypto collateral to borrow USDC or USDG through Morpho on Base and Robinhood Chain. Every step is signed in your own wallet.</p></div><Badge tone="live">Live · Morpho</Badge></header>
+        <header className="ui-head"><div><span className="ui-kicker">Borrow</span><h1>Borrow against your assets</h1><p>Use your assets as collateral to borrow USDG through Morpho on Robinhood Chain. Every step is signed in your own wallet.</p></div><Badge tone="live">Live · Morpho</Badge></header>
         <BorrowWorkspace />
       </div>
     </AppShell>

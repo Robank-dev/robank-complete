@@ -12,16 +12,16 @@ const recent = new Map<string, { at: number; value: Promise<Portfolio> }>();
 export const GET = handle(async (request: Request) => {
   const session = await requireSession(request);
   await rateLimit(`portfolio:${session.userId}`, 30, 60);
-  const key = `${session.evmAddress}|${session.solanaAddress}`;
+  const key = session.evmAddress || session.userId;
   const fresh = new URL(request.url).searchParams.get('fresh') === '1';
   const hit = recent.get(key);
   let pending = hit && !fresh && Date.now() - hit.at < 15_000 ? hit.value : null;
   if (!pending) {
-    pending = readPortfolio(session.evmAddress || '', session.solanaAddress || '');
+    pending = readPortfolio(session.evmAddress || '');
     recent.set(key, { at: Date.now(), value: pending });
     pending.catch(() => recent.delete(key));
     if (recent.size > 200) recent.delete(recent.keys().next().value as string);
   }
   const portfolio = await pending;
-  return ok({ ...portfolio, wallets: { evm: session.evmAddress, solana: session.solanaAddress } });
+  return ok({ ...portfolio, wallets: { evm: session.evmAddress } });
 });

@@ -4,16 +4,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-import { useExportWallet as useExportSolanaWallet } from '@privy-io/react-auth/solana';
 import { useRobankAccount } from '@/lib/hooks/useRobankAccount';
+import { forgetPortfolio } from '@/lib/hooks/usePortfolio';
+import { STATUS_COPY, STATUS_SHORT, forgetAccountStatus, useAccountStatus } from '@/lib/hooks/useAccountStatus';
+import { Badge } from './ui';
+import { isQa } from '@/lib/qa';
 import { short } from '@/lib/format';
 import CopyButton from './CopyButton';
+import TokenPill from './TokenPill';
 
 type NavItem = { href: string; label: string; icon: string };
 
 const NAV: Array<{ label: string; items: NavItem[] }> = [
-  { label: 'Money', items: [{ href: '/dashboard', label: 'Overview', icon: 'grid' }, { href: '/send', label: 'Send', icon: 'up' }, { href: '/receive', label: 'Receive', icon: 'down' }, { href: '/top-up', label: 'Top up', icon: 'plus' }] },
-  { label: 'Capital', items: [{ href: '/borrow', label: 'Borrow', icon: 'credit' }, { href: '/xstocks', label: 'Stocks', icon: 'stocks' }] },
+  { label: 'Money', items: [{ href: '/dashboard', label: 'Overview', icon: 'grid' }, { href: '/send', label: 'Send', icon: 'up' }, { href: '/receive', label: 'Receive', icon: 'down' }, { href: '/cashout', label: 'Cash out', icon: 'out' }] },
+  { label: 'Capital', items: [{ href: '/borrow', label: 'Borrow', icon: 'credit' }, { href: '/stocks', label: 'Stocks', icon: 'stocks' }] },
   { label: 'Agent', items: [{ href: '/agent', label: 'AI Agent', icon: 'spark' }, { href: '/markets', label: 'Agent Market', icon: 'chart' }, { href: '/cli', label: 'CLI & API', icon: 'code' }] },
   { label: 'More', items: [{ href: '/card', label: 'Card', icon: 'card' }, { href: '/company', label: 'Company', icon: 'building' }, { href: '/jobs', label: 'Jobs', icon: 'briefcase' }, { href: '/updates', label: 'Updates', icon: 'feed' }, { href: '/docs', label: 'Docs', icon: 'book' }] }
 ];
@@ -38,6 +42,7 @@ export function Icon({ name, size = 18 }: { name: string; size?: number }) {
     book: <><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z" /><path d="M4 19a2 2 0 0 1 2-2h13" /></>,
     menu: <><path d="M4 7h16M4 12h16M4 17h16" /></>,
     close: <><path d="m6 6 12 12M18 6 6 18" /></>,
+    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
     out: <><path d="M15 12H3M11 8l4 4-4 4" /><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5" /></>
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{p[name]}</svg>;
@@ -49,33 +54,30 @@ function isActive(pathname: string, href: string) {
 
 function AccountPanel({ onNavigate }: { onNavigate?: () => void }) {
   const { logout, exportWallet } = usePrivy();
-  const { exportWallet: exportSolana } = useExportSolanaWallet();
-  const { email, evmAddress, solanaAddress } = useRobankAccount();
+  const { email, evmAddress } = useRobankAccount();
+  const status = useAccountStatus();
   const [signingOut, setSigningOut] = useState(false);
   const [exportError, setExportError] = useState('');
-  const doExport = async (kind: 'evm' | 'sol') => {
+  const doExport = async () => {
     setExportError('');
     try {
-      if (kind === 'evm') await exportWallet({ address: evmAddress });
-      else await exportSolana({ address: solanaAddress });
+      await exportWallet({ address: evmAddress });
     } catch {
       setExportError('Export is not available right now.');
     }
   };
   return (
     <div className="shell-account">
-      <div className="shell-account-id"><span className="shell-avatar">{(email || 'R').slice(0, 1).toUpperCase()}</span><div><b>{email || 'ROBANK account'}</b><small>Self-custodial wallets</small></div></div>
-      <div className="shell-wallet"><span>EVM</span><b className="ui-mono">{evmAddress ? short(evmAddress) : 'Preparing…'}</b>{evmAddress && <CopyButton value={evmAddress} label="Copy" compact />}</div>
-      <div className="shell-wallet"><span>SOL</span><b className="ui-mono">{solanaAddress ? short(solanaAddress) : 'Preparing…'}</b>{solanaAddress && <CopyButton value={solanaAddress} label="Copy" compact />}</div>
-      <details className="shell-export"><summary>Export wallet keys</summary>
+      <div className="shell-account-id"><span className="shell-avatar">{(email || 'R').slice(0, 1).toUpperCase()}</span><div><b>{email || 'ROBANK account'}</b><small>Self-custodial · Robinhood Chain</small>{status && <Link href="/card" className="shell-verify" onClick={onNavigate}><Badge tone={STATUS_COPY[status.level].tone}>{STATUS_SHORT[status.level]}</Badge></Link>}</div></div>
+      <div className="shell-wallet"><span><img src="/chain-icons/robinhood.svg" alt="" width={12} height={12} /></span><b className="ui-mono">{evmAddress ? short(evmAddress) : 'Preparing…'}</b>{evmAddress && <CopyButton value={evmAddress} label="Copy" compact />}</div>
+      <details className="shell-export"><summary>Export wallet key</summary>
         <p className="ui-muted" style={{ fontSize: 11 }}>Opens Privy&apos;s secure window. Never share an exported key with anyone.</p>
         <div style={{ display: 'flex', gap: 6 }}>
-          <button type="button" className="ui-btn ghost sm" disabled={!evmAddress} onClick={() => void doExport('evm')}>EVM</button>
-          <button type="button" className="ui-btn ghost sm" disabled={!solanaAddress} onClick={() => void doExport('sol')}>Solana</button>
+          <button type="button" className="ui-btn ghost sm" disabled={!evmAddress} onClick={() => void doExport()}>Export key</button>
         </div>
         {exportError && <p className="ui-hint bad">{exportError}</p>}
       </details>
-      <button type="button" className="ui-btn ghost sm block" disabled={signingOut} onClick={async () => { setSigningOut(true); onNavigate?.(); await logout().catch(() => undefined); window.location.replace('/login'); }}>
+      <button type="button" className="ui-btn ghost sm block" disabled={signingOut} onClick={async () => { setSigningOut(true); onNavigate?.(); forgetPortfolio(); forgetAccountStatus(); await logout().catch(() => undefined); window.location.replace('/login'); }}>
         <Icon name="out" size={15} /> {signingOut ? 'Signing out…' : 'Sign out'}
       </button>
     </div>
@@ -84,7 +86,9 @@ function AccountPanel({ onNavigate }: { onNavigate?: () => void }) {
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '/dashboard';
-  const { ready, authenticated } = usePrivy();
+  const privy = usePrivy();
+  const ready = privy.ready || isQa();
+  const authenticated = privy.authenticated || isQa();
   const [menuOpen, setMenuOpen] = useState(false);
   const [slow, setSlow] = useState(false);
 
@@ -126,6 +130,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </nav>
+        <TokenPill variant="side" />
         <AccountPanel />
       </aside>
 
@@ -134,7 +139,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <button type="button" className="shell-icon-btn" aria-label="Open menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}><Icon name="menu" /></button>
       </header>
 
-      <main className="shell-main" id="main">{children}</main>
+      <main className="shell-main" id="main" data-page={pathname.split('/')[1] || 'dashboard'}>{children}</main>
 
       <nav className="shell-tabs" aria-label="Quick navigation">
         {TABS.map((item) => (
@@ -152,6 +157,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Link key={item.href} href={item.href as any} className={isActive(pathname, item.href) ? 'active' : ''}><Icon name={item.icon} /><span>{item.label}</span></Link>
               ))}
             </nav>
+            <TokenPill variant="side" />
             <AccountPanel onNavigate={() => setMenuOpen(false)} />
           </div>
         </div>

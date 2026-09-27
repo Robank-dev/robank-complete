@@ -30,6 +30,6 @@ export const POST = handle(async (request: Request) => {
   const key = randomKey();
   const row = { id: newId(), name, prefix: key.slice(0, 10), created_at: now() };
   await database.prepare('INSERT INTO api_keys (id, user_id, name, prefix, key_hash, email, evm_address, solana_address, wallets, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)')
-    .bind(row.id, session.userId, name, row.prefix, await sha256Hex(key), session.email, session.evmAddress, session.solanaAddress, JSON.stringify(session.wallets), row.created_at).run();
+    .bind(row.id, session.userId, name, row.prefix, await sha256Hex(key), session.email, session.evmAddress, null, JSON.stringify(session.wallets), row.created_at).run();
   return ok({ key, record: view(row) }, { status: 201 });
 });

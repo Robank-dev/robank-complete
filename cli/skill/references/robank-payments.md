@@ -18,4 +18,4 @@ Cross-network transfers exist for stablecoins only and use LI.FI. The quote show
 Network fees are paid in the source network's gas token (ETH, POL, BNB, SOL). LI.FI routes include bridge/relayer fees shown in the review. ROBANK may add an integrator fee only if configured, and it is included in the quote.
 
 ## Not available
-Bank payouts, card payments, Apple/Google Pay and QR payments.
+Bank accounts, bank transfers, Apple/Google Pay and QR payments. Card spending works through the ROBANK Card, and balances can be cashed out to PayPal.
